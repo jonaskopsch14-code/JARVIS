@@ -145,16 +145,61 @@ def load_products(products_file: Optional[Path]) -> List[dict]:
         return []
 
 
-def _publish_to_shopify(drafts: List[dict], *, api_key: str) -> int:  # pragma: no cover
-    """Remaining INTEGRATION POINT — only ever reached in live mode.
+def build_shopify_product_payload(product: dict, seo: dict) -> dict:
+    """Build the JSON body for a Shopify Admin API product update.
 
-    Wire the Shopify Admin API here (ShopifyAPI extra). Returns the number of
-    successfully published items. Left unimplemented on purpose so nothing can
-    be pushed to the live store by accident.
+    SEO title/description map to Shopify's global metafields
+    (`global.title_tag` / `global.description_tag`); tags update the product
+    tag list. Pure & offline-testable.
     """
-    raise NotImplementedError(
-        "Shopify publish nicht implementiert — Admin-API hier anbinden, "
-        "dann published-Zähler zurückgeben.")
+    payload = {
+        "product": {
+            "id": product.get("id"),
+            "tags": ", ".join(seo.get("tags", [])),
+            "metafields": [
+                {"namespace": "global", "key": "title_tag",
+                 "type": "single_line_text_field", "value": seo.get("seo_title", "")},
+                {"namespace": "global", "key": "description_tag",
+                 "type": "multi_line_text_field", "value": seo.get("meta_description", "")},
+            ],
+        }
+    }
+    return payload
+
+
+def _publish_to_shopify(
+    drafts: List[dict],
+    *,
+    shop_domain: str,
+    access_token: str,
+    api_version: str = "2024-01",
+    timeout: float = 15.0,
+) -> int:
+    """Publish SEO fields for each draft that carries a product id, via the
+    Shopify Admin REST API. Only ever reached in confirmed live mode.
+
+    Returns the number of products successfully updated. Campaign drafts are
+    NOT published here — launching paid ads stays a manual decision.
+    """
+    try:
+        import httpx  # type: ignore
+    except Exception as exc:  # noqa: BLE001
+        raise RuntimeError(f"httpx nicht installiert ({exc}); pip install -e '.[crawl]'")
+
+    base = f"https://{shop_domain}/admin/api/{api_version}"
+    headers = {"X-Shopify-Access-Token": access_token,
+               "Content-Type": "application/json"}
+    published = 0
+    with httpx.Client(timeout=timeout, headers=headers) as client:
+        for draft in drafts:
+            pid = draft.get("product_id")
+            if not pid:
+                continue
+            body = build_shopify_product_payload({"id": pid}, draft.get("seo", {}))
+            resp = client.put(f"{base}/products/{pid}.json", json=body)
+            if resp.status_code < 300:
+                published += 1
+    return published
 
 
 def optimize_store(
@@ -164,8 +209,15 @@ def optimize_store(
     out_file: Optional[Path] = None,
     dry_run: bool = True,
     shopify_api_key: str = "",
+    shop_domain: str = "",
+    confirm_live: bool = False,
 ) -> StoreReport:
-    """Generate SEO + campaign drafts for the catalogue; publish only if live."""
+    """Generate SEO + campaign drafts for the catalogue; publish only if live.
+
+    Live publishing requires ALL of: dry_run=False, a Shopify access token, a
+    shop domain, AND confirm_live=True (the deliberate second gate). Campaign
+    drafts are never auto-launched.
+    """
     report = StoreReport(dry_run=dry_run)
     if not products:
         return report
@@ -180,7 +232,12 @@ def optimize_store(
         campaign = build_campaign(product, trend_score=score)
         report.products_seo += 1
         report.campaigns += 1
-        report.drafts.append({"product": product.get("title"), "seo": seo, "campaign": campaign})
+        report.drafts.append({
+            "product": product.get("title"),
+            "product_id": product.get("id"),
+            "seo": seo,
+            "campaign": campaign,
+        })
 
     if out_file and report.drafts:
         try:
@@ -191,11 +248,15 @@ def optimize_store(
             pass
 
     if not dry_run:
-        if not shopify_api_key:
-            report.error = "Live-Modus, aber keine Shopify-Zugangsdaten — nichts veröffentlicht."
+        if not (shopify_api_key and shop_domain):
+            report.error = "Live-Modus, aber Shopify-Domain/-Token fehlt — nichts veröffentlicht."
+        elif not confirm_live:
+            report.error = ("Live-Modus nicht bestätigt — setze JARVIS_STORE_CONFIRM_LIVE=1, "
+                            "um Produkttexte tatsächlich zu veröffentlichen.")
         else:
             try:
-                report.published = _publish_to_shopify(report.drafts, api_key=shopify_api_key)
-            except NotImplementedError as exc:
-                report.error = str(exc)
+                report.published = _publish_to_shopify(
+                    report.drafts, shop_domain=shop_domain, access_token=shopify_api_key)
+            except Exception as exc:  # noqa: BLE001
+                report.error = f"Shopify-Publish fehlgeschlagen: {exc}"
     return report

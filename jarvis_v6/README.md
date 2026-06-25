@@ -22,7 +22,19 @@ cue, and delivers a spoken German executive briefing.
 pip install -e .            # baseline boots on the standard library alone
 jarvis-v6                   # GUI (falls back to headless if no display)
 jarvis-v6-headless          # scheduler only, e.g. on a server
+jarvis-v6-preflight         # check live-readiness without running the night
 ```
+
+## Going live (turnkey activation)
+
+1. `cp jarvis_v6/.env.example jarvis_v6/.env` and fill in real values. `.env`
+   is git-ignored and is loaded automatically at startup; real environment
+   variables always override it.
+2. Keep `JARVIS_DRY_RUN=1` and run **`jarvis-v6-preflight`**. It validates each
+   capability — including a real IMAP login — and prints `READY / DRY-RUN /
+   SKIP / FAIL` per task, without changing anything.
+3. Flip the relevant gate (`JARVIS_DRY_RUN=0`, and for the store also
+   `JARVIS_STORE_CONFIRM_LIVE=1`) once preflight is clean.
 
 ## How it actually works (and honest deviations from the spec)
 
@@ -113,10 +125,15 @@ live trends/ads API when you have one — the scoring stays the same.
 `integrations/store.py`. Point `JARVIS_STORE_PRODUCTS` at a catalogue JSON.
 Generates deterministic SEO copy (title ≤60, meta ≤160, slug, tags) and Meta ad
 **campaign drafts** (budget scales with the product's trend score) into
-`.jarvis_dashboard/store_drafts.json`. It **publishes nothing** unless
-`JARVIS_DRY_RUN=0` *and* `JARVIS_STORE_API_KEY` is set — and the actual Shopify
-publish call is intentionally left as a marked `NotImplementedError`, so live
-publishing is a conscious, explicit step you implement and accept.
+`.jarvis_dashboard/store_drafts.json`.
+
+**Live publishing** (SEO fields → Shopify Admin REST API) is implemented but
+triple-gated: it runs only when `JARVIS_DRY_RUN=0` **and**
+`JARVIS_STORE_DOMAIN` + `JARVIS_STORE_API_KEY` are set **and**
+`JARVIS_STORE_CONFIRM_LIVE=1`. SEO title/description map to Shopify's
+`global.title_tag` / `global.description_tag` metafields; tags update the
+product. **Ad campaigns are never auto-launched** — launching paid ads spends
+real money, so the drafts wait for you to start them by hand.
 
 ## Tests
 
@@ -133,7 +150,16 @@ python jarvis_v6/tests/test_integrations.py   # 8 supplier/trends/store + e2e te
 | `JARVIS_TRENDS_FEED`      | —       | Path to the trends JSON feed.             |
 | `JARVIS_WINNERS_TOP_N`    | `2`     | Number of winning products to pick.       |
 | `JARVIS_STORE_PRODUCTS`   | —       | Path to the product catalogue JSON.       |
-| `JARVIS_STORE_API_KEY`    | —       | Shopify key; required to publish (live).  |
+| `JARVIS_STORE_API_KEY`    | —       | Shopify Admin access token (live).        |
+| `JARVIS_STORE_DOMAIN`     | —       | `your-shop.myshopify.com` (live).         |
+| `JARVIS_STORE_CONFIRM_LIVE`| `0`    | `1` = second gate; required to publish.   |
+
+## Dashboard panel (GUI)
+
+`integrations/dashboard.py` loads the artefacts (`leads`, `winners`,
+`suppliers`, `drafts`) and the GUI renders a live summary panel beneath the
+briefing, auto-refreshing on wake/idle plus a manual **"Dashboard
+aktualisieren"** button. The loader is pure file I/O and tested offline.
 
 ## Extending
 

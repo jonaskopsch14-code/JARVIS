@@ -168,3 +168,4 @@ dmypy.json
 # JARVIS V6 runtime output
 jarvis_v6/.jarvis_dashboard/
 jarvis_v6/.jarvis_cache/
+jarvis_v6/.env

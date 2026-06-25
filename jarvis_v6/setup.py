@@ -82,6 +82,7 @@ setup(
         "console_scripts": [
             "jarvis-v6=main:main",
             "jarvis-v6-headless=main:run_headless",
+            "jarvis-v6-preflight=main:run_preflight",
         ],
     },
     classifiers=[

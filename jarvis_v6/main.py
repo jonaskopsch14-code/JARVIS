@@ -47,6 +47,36 @@ LOG = logging.getLogger("jarvis_v6")
 
 
 # ---------------------------------------------------------------------------
+# .env loading — dependency-free. Runs at import time so NightShiftConfig's
+# os.getenv() defaults (evaluated when the class is defined) see the values.
+# Real process env always wins; .env only fills what is not already set.
+# ---------------------------------------------------------------------------
+def _load_dotenv() -> None:
+    candidates = [
+        Path.cwd() / ".env",
+        Path(__file__).resolve().parent / ".env",
+    ]
+    for path in candidates:
+        if not path.is_file():
+            continue
+        try:
+            for raw in path.read_text(encoding="utf-8").splitlines():
+                line = raw.strip()
+                if not line or line.startswith("#") or "=" not in line:
+                    continue
+                key, _, value = line.partition("=")
+                key = key.strip()
+                value = value.strip().strip('"').strip("'")
+                if key and key not in os.environ:
+                    os.environ[key] = value
+        except OSError:
+            pass
+
+
+_load_dotenv()
+
+
+# ---------------------------------------------------------------------------
 # System state — broadcast to the GUI so the Arc Reactor can react.
 # ---------------------------------------------------------------------------
 class SystemState(str, Enum):
@@ -110,6 +140,9 @@ class NightShiftConfig:
     # Fashion Aura store: local catalogue JSON + Shopify key (empty => skipped).
     store_products_file: str = os.getenv("JARVIS_STORE_PRODUCTS", "")
     store_api_key: str = os.getenv("JARVIS_STORE_API_KEY", "")
+    store_domain: str = os.getenv("JARVIS_STORE_DOMAIN", "")
+    # Second live gate: SEO is only pushed to the real store when this is set.
+    store_confirm_live: bool = os.getenv("JARVIS_STORE_CONFIRM_LIVE", "0") == "1"
 
     # Dashboard output directory (leads, suppliers, winners, store drafts).
     dashboard_dir: Path = field(default_factory=lambda: (
@@ -352,6 +385,7 @@ class StoreOptimizerTask(NightShiftTask):
             products, winners=winners,
             out_file=cfg.dashboard_dir / "store_drafts.json",
             dry_run=self.dry_run, shopify_api_key=cfg.store_api_key,
+            shop_domain=cfg.store_domain, confirm_live=cfg.store_confirm_live,
         )
         # ------------------------------------------------------------------
         if report.error and not self.dry_run:
@@ -556,6 +590,75 @@ def run_headless() -> None:
     _configure_logging()
     LOG.info("JARVIS V6 — Night-Shift Protocol (headless)")
     NightShiftSupervisor().run_cycle()
+
+
+def preflight(config: Optional[NightShiftConfig] = None) -> List[tuple]:
+    """Check live-readiness of each capability WITHOUT running the night shift.
+
+    Returns a list of (capability, status, detail) tuples, where status is one
+    of 'READY', 'DRY-RUN', 'SKIP' or 'FAIL'. Safe to run any time: the only
+    side effect is an IMAP login attempt when mail credentials are present.
+    """
+    cfg = config or NightShiftConfig()
+    rows: List[tuple] = []
+
+    # Master mode.
+    rows.append(("mode", "DRY-RUN" if cfg.dry_run else "LIVE",
+                 "JARVIS_DRY_RUN=1 → keine externen Änderungen"
+                 if cfg.dry_run else "externe Änderungen ERLAUBT"))
+
+    # Mailbox: actually try to log in if credentials are present.
+    if not cfg.imap_host:
+        rows.append(("mailbox", "SKIP", "kein JARVIS_IMAP_HOST"))
+    else:
+        try:
+            from imap_tools import MailBox  # type: ignore
+            with MailBox(cfg.imap_host, port=cfg.imap_port).login(
+                    cfg.imap_user, cfg.imap_password, initial_folder=cfg.imap_inbox):
+                pass
+            status = "READY" if not cfg.dry_run else "DRY-RUN"
+            rows.append(("mailbox", status, f"IMAP-Login OK @ {cfg.imap_host}"))
+        except Exception as exc:  # noqa: BLE001
+            rows.append(("mailbox", "FAIL", f"IMAP-Login fehlgeschlagen: {exc}"))
+
+    # Suppliers.
+    rows.append(("suppliers",
+                 "READY" if cfg.supplier_sources else "SKIP",
+                 f"{len(cfg.supplier_sources)} Quelle(n)"))
+
+    # Trends.
+    feed_ok = bool(cfg.trends_feed) and Path(cfg.trends_feed).is_file()
+    rows.append(("trends",
+                 "READY" if feed_ok else "SKIP",
+                 cfg.trends_feed or "kein JARVIS_TRENDS_FEED"))
+
+    # Store.
+    prod_ok = bool(cfg.store_products_file) and Path(cfg.store_products_file).is_file()
+    if not prod_ok:
+        rows.append(("store", "SKIP", "kein JARVIS_STORE_PRODUCTS"))
+    elif cfg.dry_run:
+        rows.append(("store", "DRY-RUN", "Entwürfe werden erzeugt, nichts veröffentlicht"))
+    elif not (cfg.store_api_key and cfg.store_domain):
+        rows.append(("store", "FAIL", "LIVE, aber Domain/Token fehlt"))
+    elif not cfg.store_confirm_live:
+        rows.append(("store", "FAIL", "LIVE, aber JARVIS_STORE_CONFIRM_LIVE!=1"))
+    else:
+        rows.append(("store", "READY", f"Publish nach {cfg.store_domain} bestätigt"))
+
+    return rows
+
+
+def run_preflight() -> None:
+    """CLI: print the readiness report and exit non-zero on any FAIL."""
+    _configure_logging()
+    rows = preflight()
+    print("\nJARVIS V6 — Preflight (Live-Bereitschaft)\n" + "-" * 48)
+    for cap, status, detail in rows:
+        print(f"  {cap:<10} {status:<8} {detail}")
+    print("-" * 48)
+    failed = [r for r in rows if r[1] == "FAIL"]
+    print(f"{len(failed)} Problem(e).\n" if failed else "Alles in Ordnung.\n")
+    raise SystemExit(1 if failed else 0)
 
 
 def main() -> None:

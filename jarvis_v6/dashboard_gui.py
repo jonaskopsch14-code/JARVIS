@@ -176,7 +176,21 @@ class Dashboard:
             activebackground="#0f3d52", activeforeground="#ffffff",
             relief="flat", padx=14, pady=8,
         )
-        self.start_btn.pack(pady=(4, 18))
+        self.start_btn.pack(pady=(4, 8))
+
+        # -- Dashboard panel: leads / winners / suppliers / drafts ----------
+        self.dash_btn = tk.Button(
+            self.root, text="Dashboard aktualisieren", command=self.refresh_dashboard,
+            bg="#0a2030", fg="#7fe8ff", activebackground="#0f3d52",
+            activeforeground="#ffffff", relief="flat", padx=10, pady=4,
+        )
+        self.dash_btn.pack(pady=(0, 6))
+        self.dashboard = tk.Label(
+            self.root, text="Dashboard: noch keine Daten.", fg="#9fd8e8", bg=BG,
+            justify="left", anchor="w", wraplength=420,
+            font=tkfont.Font(family="Courier", size=9),
+        )
+        self.dashboard.pack(pady=(0, 16), padx=18, fill="x")
 
         self._dimmed = False
         self.root.protocol("WM_DELETE_WINDOW", self._on_close)
@@ -218,8 +232,10 @@ class Dashboard:
             text = info.get("text", "")
             self.briefing.config(text=text)
             self._speak_async(text)
+            self.refresh_dashboard()
         elif state == SystemState.IDLE:
             self.reactor.set_brightness(1.0)
+            self.refresh_dashboard()
 
     # -- night / wake visual transitions ------------------------------------
     def _enter_night_mode(self) -> None:
@@ -290,6 +306,16 @@ class Dashboard:
         # The supervisor delivers the briefing via the WAKING/BRIEFING states,
         # so we pass a no-op wake_callback (the GUI owns presentation).
         self.supervisor.start_async(wake_callback=lambda _text: None)
+
+    def refresh_dashboard(self) -> None:
+        """Reload the dashboard artefacts and render the summary panel."""
+        try:
+            from integrations.dashboard import format_summary, load_dashboard
+            data = load_dashboard(self.config.dashboard_dir)
+            text = format_summary(data)
+            self.dashboard.config(text=text or "Dashboard: noch keine Daten.")
+        except Exception as exc:  # noqa: BLE001 - panel must never crash the GUI
+            self.dashboard.config(text=f"Dashboard nicht ladbar: {exc}")
 
     def _on_close(self) -> None:
         self.supervisor.stop()

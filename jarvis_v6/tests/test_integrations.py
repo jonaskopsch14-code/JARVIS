@@ -12,7 +12,12 @@ from integrations.suppliers import extract_links, filter_suppliers  # noqa: E402
 from integrations.trends import (  # noqa: E402
     analyse_trends, pick_winning_products, score_record,
 )
-from integrations.store import build_campaign, build_seo, optimize_store  # noqa: E402
+from integrations.store import (  # noqa: E402
+    build_campaign, build_seo, build_shopify_product_payload, optimize_store,
+)
+from integrations.dashboard import (  # noqa: E402
+    DashboardData, format_summary, load_dashboard,
+)
 
 FIXTURES = Path(__file__).resolve().parent / "fixtures"
 
@@ -85,6 +90,55 @@ def test_optimize_store_dryrun_publishes_nothing():
     rep = optimize_store(products, dry_run=True)
     assert rep.products_seo == 2 and rep.campaigns == 2 and rep.published == 0
     assert rep.error is None
+
+
+def test_live_without_confirm_is_blocked():
+    products = json.loads((FIXTURES / "products.json").read_text(encoding="utf-8"))
+    rep = optimize_store(products, dry_run=False, shopify_api_key="tok",
+                         shop_domain="x.myshopify.com", confirm_live=False)
+    assert rep.published == 0 and "nicht bestätigt" in (rep.error or "")
+
+
+def test_shopify_payload_maps_seo_to_metafields():
+    payload = build_shopify_product_payload(
+        {"id": 123},
+        {"seo_title": "T", "meta_description": "D", "tags": ["a", "b"]})
+    p = payload["product"]
+    assert p["id"] == 123 and p["tags"] == "a, b"
+    keys = {m["key"]: m["value"] for m in p["metafields"]}
+    assert keys["title_tag"] == "T" and keys["description_tag"] == "D"
+
+
+# --- dashboard loader -------------------------------------------------------
+def test_load_dashboard_and_summary():
+    with tempfile.TemporaryDirectory() as tmp:
+        d = Path(tmp)
+        (d / "leads.json").write_text(json.dumps(
+            [{"from": "a@b.de", "subject": "Anfrage"}]), encoding="utf-8")
+        (d / "winning_products.json").write_text(json.dumps(
+            [{"title": "Cargo Jeans", "score": 88.0}]), encoding="utf-8")
+        data = load_dashboard(d)
+        assert isinstance(data, DashboardData)
+        assert data.counts == {"leads": 1, "winners": 1, "suppliers": 0, "drafts": 0}
+        summary = format_summary(data)
+        assert "Cargo Jeans" in summary and "Anfrage" in summary
+
+
+def test_load_dashboard_missing_dir_is_empty():
+    data = load_dashboard("/nonexistent/path/xyz")
+    assert data.counts == {"leads": 0, "winners": 0, "suppliers": 0, "drafts": 0}
+
+
+# --- preflight --------------------------------------------------------------
+def test_preflight_reports_skips_when_unconfigured():
+    from main import NightShiftConfig, preflight
+    cfg = NightShiftConfig()
+    cfg.imap_host = ""; cfg.supplier_sources = []; cfg.trends_feed = ""
+    cfg.store_products_file = ""
+    rows = preflight(cfg)
+    status = {cap: st for cap, st, _ in rows}
+    assert status["mailbox"] == "SKIP" and status["suppliers"] == "SKIP"
+    assert status["store"] == "SKIP"
 
 
 # --- end-to-end through the supervisor (dry-run) ----------------------------
