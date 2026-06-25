@@ -437,3 +437,7 @@ loadCfg(); loadDash(); tick(); setInterval(tick, 2000);
 </script>
 </body>
 </html>"""
+
+
+if __name__ == "__main__":
+    run_web()
