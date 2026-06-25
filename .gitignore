@@ -164,3 +164,7 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
+
+# JARVIS V6 runtime output
+jarvis_v6/.jarvis_dashboard/
+jarvis_v6/.jarvis_cache/

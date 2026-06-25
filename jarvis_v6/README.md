@@ -89,6 +89,52 @@ First-run recommendation: leave `JARVIS_DRY_RUN=1` for a night, read the
 briefing's scan/spam/lead counts and `leads.json`, tune the phrase lists if
 needed, then go live.
 
+## Supplier crawl (implemented integration)
+
+`integrations/suppliers.py`. Set `JARVIS_SUPPLIER_SOURCES` to a comma-separated
+list of listing URLs. Link extraction + supplier filtering use the standard
+library (testable offline); fetching needs the `crawl` extra
+(`pip install -e ".[crawl]"`). Read-only and polite (timeout, User-Agent,
+bounded link count). New finds are deduplicated against
+`.jarvis_dashboard/suppliers_seen.json` and written to
+`.jarvis_dashboard/suppliers.json`.
+
+## Market trends & winning products (implemented integration)
+
+`integrations/trends.py`. Point `JARVIS_TRENDS_FEED` at a JSON feed of records
+(`search_volume`, `growth`, `competition`, `margin`). A transparent weighted
+score (demand + growth + margin − competition) ranks them; the top
+`JARVIS_WINNERS_TOP_N` (default 2) above the threshold become winning products,
+written to `.jarvis_dashboard/winning_products.json`. Swap `load_feed()` for a
+live trends/ads API when you have one — the scoring stays the same.
+
+## Fashion Aura store optimizer (implemented integration)
+
+`integrations/store.py`. Point `JARVIS_STORE_PRODUCTS` at a catalogue JSON.
+Generates deterministic SEO copy (title ≤60, meta ≤160, slug, tags) and Meta ad
+**campaign drafts** (budget scales with the product's trend score) into
+`.jarvis_dashboard/store_drafts.json`. It **publishes nothing** unless
+`JARVIS_DRY_RUN=0` *and* `JARVIS_STORE_API_KEY` is set — and the actual Shopify
+publish call is intentionally left as a marked `NotImplementedError`, so live
+publishing is a conscious, explicit step you implement and accept.
+
+## Tests
+
+```bash
+python jarvis_v6/tests/test_mailbox.py        # 5 classifier tests
+python jarvis_v6/tests/test_integrations.py   # 8 supplier/trends/store + e2e tests
+```
+
+## Config (additional integration variables)
+
+| Variable                  | Default | Meaning                                   |
+|---------------------------|---------|-------------------------------------------|
+| `JARVIS_SUPPLIER_SOURCES` | —       | Comma-separated supplier listing URLs.    |
+| `JARVIS_TRENDS_FEED`      | —       | Path to the trends JSON feed.             |
+| `JARVIS_WINNERS_TOP_N`    | `2`     | Number of winning products to pick.       |
+| `JARVIS_STORE_PRODUCTS`   | —       | Path to the product catalogue JSON.       |
+| `JARVIS_STORE_API_KEY`    | —       | Shopify key; required to publish (live).  |
+
 ## Extending
 
 Add a task by subclassing `NightShiftTask` (in `main.py`), implementing `run()`

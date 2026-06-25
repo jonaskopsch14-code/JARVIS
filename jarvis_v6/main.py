@@ -98,6 +98,24 @@ class NightShiftConfig:
     imap_inbox: str = os.getenv("JARVIS_IMAP_INBOX", "INBOX")
     imap_trash: str = os.getenv("JARVIS_IMAP_TRASH", "Trash")
 
+    # Supplier crawl: comma-separated source URLs.
+    supplier_sources: List[str] = field(default_factory=lambda: [
+        s.strip() for s in os.getenv("JARVIS_SUPPLIER_SOURCES", "").split(",") if s.strip()
+    ])
+
+    # Market trends: local JSON feed (until a live trends/ads API is wired in).
+    trends_feed: str = os.getenv("JARVIS_TRENDS_FEED", "")
+    winners_top_n: int = int(os.getenv("JARVIS_WINNERS_TOP_N", "2"))
+
+    # Fashion Aura store: local catalogue JSON + Shopify key (empty => skipped).
+    store_products_file: str = os.getenv("JARVIS_STORE_PRODUCTS", "")
+    store_api_key: str = os.getenv("JARVIS_STORE_API_KEY", "")
+
+    # Dashboard output directory (leads, suppliers, winners, store drafts).
+    dashboard_dir: Path = field(default_factory=lambda: (
+        Path(__file__).resolve().parent / ".jarvis_dashboard"
+    ))
+
     # Where qualified leads are written for the dashboard to surface.
     leads_file: Path = field(default_factory=lambda: (
         Path(__file__).resolve().parent / ".jarvis_dashboard" / "leads.json"
@@ -210,25 +228,34 @@ class SupplierCrawlTask(NightShiftTask):
 
     name = "supplier_crawl"
 
-    #: Wire real source URLs / APIs here.
-    SOURCES: List[str] = []
-
     def run(self) -> TaskResult:
-        if not self.SOURCES:
+        cfg = self.config
+        if not cfg.supplier_sources:
             return TaskResult(
                 name=self.name, ok=True,
                 summary="Lieferanten-Crawl: keine Quellen konfiguriert (übersprungen).",
                 metrics={"suppliers_found": 0}, dry_run=self.dry_run,
             )
-        # --- INTEGRATION POINT --------------------------------------------
-        # from .integrations.suppliers import crawl
-        # suppliers = crawl(self.SOURCES, cancel=self.cancel)
+        # --- INTEGRATION POINT (implemented) ------------------------------
+        from integrations.suppliers import crawl  # lazy: optional 'crawl' extra
+        report = crawl(
+            cfg.supplier_sources,
+            seen_file=cfg.dashboard_dir / "suppliers_seen.json",
+            out_file=cfg.dashboard_dir / "suppliers.json",
+            cancel=self.cancel,
+        )
         # ------------------------------------------------------------------
-        suppliers: List[dict] = []  # replace with real crawl output
+        if report.error:
+            return TaskResult(
+                name=self.name, ok=False,
+                summary=f"Lieferanten-Crawl fehlgeschlagen: {report.error}",
+                metrics=report.as_metrics(), dry_run=self.dry_run, error=report.error,
+            )
         return TaskResult(
             name=self.name, ok=True,
-            summary=f"Lieferanten-Crawl: {len(suppliers)} neue Lieferanten gefunden.",
-            metrics={"suppliers_found": len(suppliers)}, dry_run=self.dry_run,
+            summary=(f"Lieferanten-Crawl: {report.new} neue Lieferanten gefunden "
+                     f"({report.found} geprüft, {report.sources_ok} Quellen)."),
+            metrics=report.as_metrics(), dry_run=self.dry_run,
         )
 
 
@@ -239,15 +266,26 @@ class MarketTrendTask(NightShiftTask):
     name = "market_trends"
 
     def run(self) -> TaskResult:
-        # --- INTEGRATION POINT --------------------------------------------
-        # trends = analyse_trends(...); winners = pick_winning_products(trends)
+        cfg = self.config
+        if not cfg.trends_feed:
+            return TaskResult(
+                name=self.name, ok=True,
+                summary="Markttrends: kein Daten-Feed konfiguriert (übersprungen).",
+                metrics={"winning_products": 0, "trends_logged": 0}, dry_run=self.dry_run,
+            )
+        # --- INTEGRATION POINT (implemented) ------------------------------
+        from integrations.trends import run_analysis
+        report = run_analysis(
+            feed_file=Path(cfg.trends_feed),
+            out_file=cfg.dashboard_dir / "winning_products.json",
+            top_n=cfg.winners_top_n,
+        )
         # ------------------------------------------------------------------
-        winners: List[dict] = []
         return TaskResult(
             name=self.name, ok=True,
-            summary=f"Markttrends analysiert: {len(winners)} Winning Products identifiziert.",
-            metrics={"winning_products": len(winners), "trends_logged": 0},
-            dry_run=self.dry_run,
+            summary=(f"Markttrends analysiert: {report.analysed} Datensätze, "
+                     f"{len(report.winners)} Winning Products identifiziert."),
+            metrics=report.as_metrics(), dry_run=self.dry_run,
         )
 
 
@@ -297,24 +335,40 @@ class StoreOptimizerTask(NightShiftTask):
     name = "store_optimizer"
 
     def run(self) -> TaskResult:
-        if not os.getenv("JARVIS_STORE_API_KEY"):
+        cfg = self.config
+        if not cfg.store_products_file:
             return TaskResult(
                 name=self.name, ok=True,
-                summary="Fashion Aura: keine Store-Zugangsdaten konfiguriert (übersprungen).",
+                summary="Fashion Aura: kein Produktkatalog konfiguriert (übersprungen).",
                 metrics={"products_seo": 0, "campaigns": 0}, dry_run=self.dry_run,
             )
-        # --- INTEGRATION POINT --------------------------------------------
-        # Generate SEO copy + campaign drafts; PUBLISH only when not dry_run.
+        # --- INTEGRATION POINT (implemented) ------------------------------
+        from integrations.store import load_products, optimize_store
+        from integrations.trends import load_feed, pick_winning_products
+        products = load_products(Path(cfg.store_products_file))
+        winners = (pick_winning_products(load_feed(Path(cfg.trends_feed)), top_n=cfg.winners_top_n)
+                   if cfg.trends_feed else [])
+        report = optimize_store(
+            products, winners=winners,
+            out_file=cfg.dashboard_dir / "store_drafts.json",
+            dry_run=self.dry_run, shopify_api_key=cfg.store_api_key,
+        )
         # ------------------------------------------------------------------
-        products_seo = 0
-        campaigns = 0
-        state = "vorbereitet (Dry-Run, nicht veröffentlicht)" if self.dry_run else "hochgeladen"
+        if report.error and not self.dry_run:
+            return TaskResult(
+                name=self.name, ok=False,
+                summary=f"Fashion Aura: {report.error}",
+                metrics=report.as_metrics(), dry_run=self.dry_run, error=report.error,
+            )
+        if self.dry_run:
+            state = "als Entwurf vorbereitet (Dry-Run, nicht veröffentlicht)"
+        else:
+            state = f"hochgeladen ({report.published} veröffentlicht)"
         return TaskResult(
             name=self.name, ok=True,
-            summary=(f"Fashion Aura: {products_seo} Produkttexte SEO-optimiert {state}, "
-                     f"{campaigns} Werbekampagnen erstellt."),
-            metrics={"products_seo": products_seo, "campaigns": campaigns},
-            dry_run=self.dry_run,
+            summary=(f"Fashion Aura: {report.products_seo} Produkttexte SEO-optimiert {state}, "
+                     f"{report.campaigns} Werbekampagnen erstellt."),
+            metrics=report.as_metrics(), dry_run=self.dry_run,
         )
 
 
