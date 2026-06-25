@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<meta name="theme-color" content="#05080d">
+<!-- Als App zum Startbildschirm hinzufügbar (Vollbild) -->
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="JARVIS V6">
+<title>JARVIS V6</title>
+<style>
+  :root { --glow:#00c8ff; --core:#d2f5ff; --bg:#05080d; }
+  * { box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  html,body { height:100%; }
+  body { margin:0; background:radial-gradient(circle at 50% 30%, #0a141d 0%, var(--bg) 70%);
+         color:#bfefff; font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+         text-align:center; padding:16px 14px 48px; min-height:100%; }
+  h1 { font-size:15px; letter-spacing:4px; color:#7fe8ff; font-weight:600; margin:6px 0 2px; }
+  .mode { font-size:11px; letter-spacing:1px; color:#5d8ea0; margin-bottom:10px; }
+  .mode b { color:#7CFC9A; }
+  /* ---- Arc Reactor ---- */
+  .reactor { width:min(68vw,250px); height:min(68vw,250px); margin:8px auto 8px;
+             border-radius:50%; position:relative; transition:filter .8s, opacity .8s; }
+  .reactor.dim { filter:brightness(.22); opacity:.45; }
+  .ring { position:absolute; inset:0; border-radius:50%; }
+  .ring.outer { background:conic-gradient(from 0deg,#012a3d,#00c8ff,#012a3d,#00c8ff,#012a3d);
+                animation:spin 6s linear infinite;
+                box-shadow:0 0 40px 6px rgba(0,200,255,.55), inset 0 0 30px rgba(0,200,255,.4); }
+  .ring.coil { inset:22%; background:repeating-conic-gradient(#00c8ff 0 6deg,#022 6deg 18deg);
+               opacity:.5; animation:spin 9s linear infinite reverse; }
+  .ring.mid { inset:14%; background:#05080d; box-shadow:inset 0 0 24px rgba(0,200,255,.6); }
+  .core { position:absolute; inset:34%; border-radius:50%;
+          background:radial-gradient(circle,#fff 0%,var(--core) 30%,var(--glow) 70%,#024 100%);
+          box-shadow:0 0 50px 12px rgba(120,230,255,.85); animation:pulse 2.6s ease-in-out infinite; }
+  @keyframes spin { to { transform:rotate(360deg); } }
+  @keyframes pulse { 0%,100%{transform:scale(.94);opacity:.85} 50%{transform:scale(1.04);opacity:1} }
+  .reactor.wake .core { animation:flare 1.2s ease-out; box-shadow:0 0 90px 26px rgba(160,240,255,1); }
+  @keyframes flare { 0%{transform:scale(.6)} 60%{transform:scale(1.25)} 100%{transform:scale(1)} }
+  .state { font-size:13px; letter-spacing:2px; color:#7fe8ff; min-height:18px; margin-top:4px; }
+  .clock { font-size:12px; color:#88c9dd; min-height:16px; }
+  .briefing { font-size:13px; line-height:1.5; color:#cdeffb; margin:12px auto; max-width:520px;
+              background:rgba(0,40,60,.35); border:1px solid rgba(0,200,255,.25);
+              border-radius:12px; padding:12px; min-height:6px; }
+  button { font:inherit; color:#7fe8ff; background:#0a2a3a; border:1px solid rgba(0,200,255,.4);
+           border-radius:12px; padding:13px 16px; margin:5px 4px; }
+  button:active { background:#0f3d52; } button:disabled { opacity:.5; }
+  button.primary { background:#0e3a50; font-weight:600; min-width:94%; }
+  button.ghost { background:transparent; }
+  .row { display:flex; flex-wrap:wrap; justify-content:center; gap:4px; max-width:520px; margin:0 auto; }
+  details { max-width:520px; margin:14px auto; text-align:left;
+            border:1px solid rgba(0,200,255,.2); border-radius:12px; }
+  summary { padding:12px; cursor:pointer; color:#7fe8ff; list-style:none; }
+  .panel { padding:0 12px 14px; font-size:13px; }
+  label { display:block; font-size:12px; color:#88c9dd; margin:10px 0 3px; }
+  input,select { width:100%; padding:11px; border-radius:9px; border:1px solid rgba(0,200,255,.3);
+                 background:#04141c; color:#dff; font:inherit; }
+  .muted{color:#7d9aa6;font-size:11px} .ok{color:#7CFC9A} .warn{color:#ffd479}
+  .hint { font-size:11px; color:#6f93a0; max-width:520px; margin:8px auto; line-height:1.4; }
+</style>
+</head>
+<body>
+  <h1>J A R V I S · V6</h1>
+  <div class="mode" id="mode">Modus: <b id="modeVal">LOKAL</b></div>
+
+  <div class="reactor" id="reactor">
+    <div class="ring outer"></div><div class="ring coil"></div>
+    <div class="ring mid"></div><div class="core"></div>
+  </div>
+  <div class="state" id="state">SYSTEM BEREIT</div>
+  <div class="clock" id="clock"></div>
+  <div class="briefing" id="briefing"></div>
+
+  <div class="row">
+    <button class="primary" id="startBtn">Starte Nachtschicht-Protokoll</button>
+    <button id="testBtn" class="ghost">▶ Weckruf testen (jetzt)</button>
+    <button id="stopBtn" class="ghost">■ Stopp</button>
+  </div>
+
+  <details>
+    <summary>⚙️ Einstellungen</summary>
+    <div class="panel">
+      <label>Weckzeit (Stunde : Minute)</label>
+      <div class="row" style="gap:6px">
+        <input id="wakeHour" inputmode="numeric" placeholder="16" style="text-align:center">
+        <input id="wakeMin" inputmode="numeric" placeholder="0" style="text-align:center">
+      </div>
+
+      <label>Server-URL (optional — für echte Automatisierung)</label>
+      <input id="serverUrl" placeholder="http://192.168.x.x:8765" autocapitalize="off" autocomplete="off">
+      <div class="muted">Leer lassen = reiner Lokal-Modus (Reactor, Wecker, Briefing).
+        Mit Server-URL holt die App echte Ergebnisse (E-Mail, Shop) vom JARVIS-Server.</div>
+
+      <label>Eigener Briefing-Text (Lokal-Modus)</label>
+      <input id="customBriefing" placeholder="(leer = Standard-Briefing)">
+
+      <div class="row" style="margin-top:12px"><button class="primary" id="saveBtn">Speichern</button></div>
+      <div class="muted ok" id="saveMsg"></div>
+    </div>
+  </details>
+
+  <details>
+    <summary>📊 Letzte Nachtschicht</summary>
+    <div class="panel" id="dash"><span class="muted">Noch keine Daten.</span></div>
+  </details>
+
+  <p class="hint">📲 <b>Als App speichern:</b> Browser-Menü (⋮) → „Zum Startbildschirm hinzufügen".
+     Dann startet JARVIS als eigenes Icon im Vollbild — ganz ohne Server.</p>
+
+<script>
+"use strict";
+const $ = id => document.getElementById(id);
+const LS = {
+  get: (k,d) => { try { const v = localStorage.getItem("jarvis_"+k); return v===null?d:v; } catch(e){ return d; } },
+  set: (k,v) => { try { localStorage.setItem("jarvis_"+k, v); } catch(e){} }
+};
+
+// ---- Settings ----
+function loadSettings(){
+  $("wakeHour").value = LS.get("wakeHour","16");
+  $("wakeMin").value  = LS.get("wakeMin","0");
+  $("serverUrl").value = LS.get("serverUrl","");
+  $("customBriefing").value = LS.get("customBriefing","");
+  updateMode();
+}
+function saveSettings(){
+  LS.set("wakeHour", ($("wakeHour").value||"16").trim());
+  LS.set("wakeMin",  ($("wakeMin").value||"0").trim());
+  LS.set("serverUrl",($("serverUrl").value||"").trim());
+  LS.set("customBriefing", ($("customBriefing").value||"").trim());
+  $("saveMsg").textContent = "Gespeichert ✓";
+  setTimeout(()=>$("saveMsg").textContent="", 2000);
+  updateMode();
+}
+function updateMode(){
+  const connected = !!LS.get("serverUrl","");
+  $("modeVal").textContent = connected ? "VERBUNDEN" : "LOKAL";
+  $("modeVal").className = connected ? "ok" : "";
+}
+
+// ---- Reactor visuals ----
+let lastState = "";
+function setState(s, label){
+  $("state").textContent = label;
+  const r = $("reactor");
+  const dim = (s==="night"||s==="sleeping");
+  r.classList.toggle("dim", dim);
+  if(s==="wake" && lastState!=="wake"){
+    r.classList.remove("dim"); r.classList.add("wake"); soundCue();
+    setTimeout(()=>r.classList.remove("wake"), 1300);
+  }
+  lastState = s;
+}
+function soundCue(){
+  try{
+    const a = new (window.AudioContext||window.webkitAudioContext)();
+    const o=a.createOscillator(), g=a.createGain();
+    o.connect(g); g.connect(a.destination); o.type="sine";
+    o.frequency.setValueAtTime(520,a.currentTime);
+    o.frequency.exponentialRampToValueAtTime(880,a.currentTime+.25);
+    g.gain.setValueAtTime(.0001,a.currentTime);
+    g.gain.exponentialRampToValueAtTime(.35,a.currentTime+.05);
+    g.gain.exponentialRampToValueAtTime(.0001,a.currentTime+1.0);
+    o.start(); o.stop(a.currentTime+1.0);
+  }catch(e){}
+}
+function speak(text){
+  try{
+    if(!window.speechSynthesis) return;
+    window.speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = "de-DE"; u.rate = 1.02; u.pitch = 1.0;
+    window.speechSynthesis.speak(u);
+  }catch(e){}
+}
+
+// ---- Scheduler ----
+let timer = null, wakeTarget = null, running = false;
+
+function nextWake(){
+  const h = parseInt(LS.get("wakeHour","16"),10) || 0;
+  const m = parseInt(LS.get("wakeMin","0"),10) || 0;
+  const now = new Date();
+  const t = new Date(); t.setHours(h,m,0,0);
+  if(t <= now) t.setDate(t.getDate()+1);
+  return t;
+}
+function fmt(ms){
+  const s = Math.max(0, Math.floor(ms/1000));
+  const hh = String(Math.floor(s/3600)).padStart(2,"0");
+  const mm = String(Math.floor((s%3600)/60)).padStart(2,"0");
+  const ss = String(s%60).padStart(2,"0");
+  return hh+":"+mm+":"+ss;
+}
+function startProtocol(){
+  running = true; wakeTarget = nextWake();
+  $("startBtn").disabled = true; $("briefing").textContent = "";
+  setState("night","NACHTSCHICHT AKTIV");
+  // Wake the AudioContext/voice on a user gesture so it may play later.
+  soundCueSilentPrime();
+  tick();
+  if(timer) clearInterval(timer);
+  timer = setInterval(tick, 1000);
+}
+function soundCueSilentPrime(){
+  try{ const a=new (window.AudioContext||window.webkitAudioContext)();
+    if(a.state==="suspended") a.resume(); }catch(e){}
+}
+function tick(){
+  const now = new Date();
+  if(!running){ $("clock").textContent=""; return; }
+  const remaining = wakeTarget - now;
+  if(remaining > 0){
+    setState("sleeping","WARTE AUF WECK-FENSTER");
+    $("clock").textContent = "Wecken in " + fmt(remaining) +
+      "  (um " + String(wakeTarget.getHours()).padStart(2,"0") + ":" +
+      String(wakeTarget.getMinutes()).padStart(2,"0") + " Uhr)";
+  } else {
+    doWake();
+  }
+}
+async function doWake(){
+  running = false; if(timer){ clearInterval(timer); timer=null; }
+  $("clock").textContent = "";
+  setState("wake","WECK-SEQUENZ");
+  const briefing = await buildBriefing();
+  setTimeout(()=>{
+    setState("idle","EXECUTIVE BRIEFING");
+    $("briefing").textContent = briefing;
+    speak(briefing);
+    saveRun(briefing);
+    $("startBtn").disabled = false;
+  }, 1300);
+}
+function stopProtocol(){
+  running=false; if(timer){clearInterval(timer);timer=null;}
+  setState("idle","SYSTEM BEREIT"); $("clock").textContent="";
+  $("startBtn").disabled=false;
+}
+
+// ---- Briefing (local or via server) ----
+async function buildBriefing(){
+  const url = LS.get("serverUrl","");
+  if(url){
+    try{
+      const r = await fetch(url.replace(/\/$/,"") + "/api/status", {cache:"no-store"});
+      const d = await r.json();
+      renderDash(d.counts);
+      if(d.briefing) return d.briefing;
+      const c = d.counts||{};
+      return "Guten Tag, Jonas. Nachtschicht abgeschlossen. " +
+             "Leads: "+(c.leads||0)+", Winning Products: "+(c.winners||0)+
+             ", neue Lieferanten: "+(c.suppliers||0)+". Systemstatus stabil.";
+    }catch(e){
+      return "Guten Tag, Jonas. Der JARVIS-Server ist nicht erreichbar. " +
+             "Ich laufe im lokalen Modus. Bitte prüfe die Server-URL in den Einstellungen.";
+    }
+  }
+  const custom = LS.get("customBriefing","");
+  if(custom) return custom;
+  return "Guten Tag, Jonas. Das Nachtschicht-Protokoll ist im lokalen Modus gelaufen. " +
+         "Der Reactor, der Wecker und die Sprachausgabe funktionieren. " +
+         "Für die echte E-Mail- und Shop-Automatisierung verbinde unter Einstellungen den JARVIS-Server. " +
+         "Ich bin bereit für deine nächsten Anweisungen.";
+}
+
+// ---- Last run / dashboard ----
+function saveRun(briefing){
+  const rec = { at: new Date().toLocaleString("de-DE"), briefing };
+  LS.set("lastRun", JSON.stringify(rec));
+  renderLastRun();
+}
+function renderLastRun(){
+  try{
+    const rec = JSON.parse(LS.get("lastRun","null"));
+    if(rec) $("dash").innerHTML =
+      '<div class="muted">'+rec.at+'</div><div style="margin-top:6px">'+rec.briefing+'</div>';
+  }catch(e){}
+}
+function renderDash(counts){
+  if(!counts) return;
+  $("dash").innerHTML = '<div class="ok">Vom Server:</div>'+
+    '<div style="margin-top:6px">Leads '+(counts.leads||0)+' · Winner '+(counts.winners||0)+
+    ' · Lieferanten '+(counts.suppliers||0)+' · Entwürfe '+(counts.drafts||0)+'</div>';
+}
+
+// ---- Wire up ----
+$("startBtn").onclick = startProtocol;
+$("stopBtn").onclick  = stopProtocol;
+$("testBtn").onclick   = ()=>{ soundCueSilentPrime(); doWake(); };
+$("saveBtn").onclick   = saveSettings;
+loadSettings(); renderLastRun();
+setState("idle","SYSTEM BEREIT");
+</script>
+</body>
+</html>
