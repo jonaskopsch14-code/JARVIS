@@ -20,10 +20,35 @@ cue, and delivers a spoken German executive briefing.
 
 ```bash
 pip install -e .            # baseline boots on the standard library alone
-jarvis-v6                   # GUI (falls back to headless if no display)
+jarvis-v6                   # desktop GUI (falls back to headless if no display)
+jarvis-v6-web               # mobile web interface (open in your phone browser)
 jarvis-v6-headless          # scheduler only, e.g. on a server
 jarvis-v6-preflight         # check live-readiness without running the night
 ```
+
+## Mobile web interface (control it from your phone)
+
+`webapp.py` serves a responsive, phone-first control panel using the Python
+standard library alone (no Flask/build step) — it runs anywhere Python runs:
+**Termux on Android**, a Raspberry Pi, or a small VPS. The night-shift concept
+needs a process running overnight *somewhere*; this makes that process fully
+operable from any phone browser.
+
+```bash
+jarvis-v6-web                                 # serves http://127.0.0.1:8765
+JARVIS_WEB_HOST=0.0.0.0 JARVIS_WEB_PORT=8765 jarvis-v6-web   # reachable on your LAN
+```
+
+The page gives you: the animated Arc Reactor (dims during the night shift,
+flares to full brightness with a sound cue at the wake clock, and **speaks the
+German briefing via the browser's own speech synthesis**), a **Start** button, a
+**Preflight** check, the live **dashboard** (leads/winners/suppliers/drafts) and
+a **settings form** that writes `.env` for you — so there's no file editing on
+mobile.
+
+Security: it serves a credentials form, so it binds to `127.0.0.1` by default.
+Only expose it (`JARVIS_WEB_HOST=0.0.0.0`) on a trusted network, ideally behind
+a VPN/tunnel. Set `JARVIS_WEB_TOKEN=…` to require `?token=…` on the API.
 
 ## Going live (turnkey activation)
 

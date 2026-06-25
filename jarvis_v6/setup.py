@@ -73,7 +73,7 @@ setup(
     license="MIT",
     python_requires=">=3.9",
     packages=find_packages(include=["jarvis_v6", "jarvis_v6.*"]),
-    py_modules=["main", "dashboard_gui"],
+    py_modules=["main", "dashboard_gui", "webapp"],
     # Baseline: standard library only. Real intent — keep the foundation
     # bulletproof. Capability dependencies live in EXTRAS above.
     install_requires=[],
@@ -81,6 +81,7 @@ setup(
     entry_points={
         "console_scripts": [
             "jarvis-v6=main:main",
+            "jarvis-v6-web=webapp:run_web",
             "jarvis-v6-headless=main:run_headless",
             "jarvis-v6-preflight=main:run_preflight",
         ],
