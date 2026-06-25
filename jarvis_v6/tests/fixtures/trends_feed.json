@@ -1,0 +1,5 @@
+[
+  {"title": "Oversized Strickpullover", "type": "Pullover", "search_volume": 9000, "growth": 80, "competition": 0.3, "margin": 0.6},
+  {"title": "Cargo Wide-Leg Jeans", "type": "Jeans", "search_volume": 12000, "growth": 120, "competition": 0.4, "margin": 0.55},
+  {"title": "Basic Baumwoll-Shirt", "type": "Shirt", "search_volume": 500, "growth": -10, "competition": 0.9, "margin": 0.2}
+]
