@@ -63,6 +63,31 @@ trust each task.
 | `JARVIS_POLL_SECONDS`  | `30`    | Scheduler clock-check interval.          |
 | `JARVIS_DRY_RUN`       | `1`     | `0` to allow external mutations.         |
 | `JARVIS_LOG_LEVEL`     | `INFO`  | Logging verbosity.                       |
+| `JARVIS_IMAP_HOST`     | —       | IMAP host; empty ⇒ mailbox task skipped. |
+| `JARVIS_IMAP_USER`     | —       | IMAP login.                              |
+| `JARVIS_IMAP_PASSWORD` | —       | IMAP password / app-password.            |
+| `JARVIS_IMAP_PORT`     | `993`   | IMAP SSL port.                           |
+| `JARVIS_IMAP_INBOX`    | `INBOX` | Folder to scan.                          |
+| `JARVIS_IMAP_TRASH`    | `Trash` | Folder spam is **moved** to (live mode). |
+
+## Mailbox hygiene (implemented integration)
+
+`integrations/mailbox.py` implements the first integration point:
+
+- **`SpamClassifier`** — a transparent, dependency-free heuristic (German +
+  English signals) that labels each mail `spam`, `lead`, or `keep`. It is
+  conservative: a genuine but salesy business enquiry never out-scores its lead
+  signal, so it is never silently trashed. Fully tested offline in
+  `tests/test_mailbox.py` (`python jarvis_v6/tests/test_mailbox.py`).
+- **`run_hygiene()`** — connects over IMAP (needs the `mail` extra:
+  `pip install -e ".[mail]"`), classifies the inbox, writes qualified leads to
+  `.jarvis_dashboard/leads.json` for review, and — **only when
+  `JARVIS_DRY_RUN=0`** — **moves** spam to the Trash folder. It never
+  hard-deletes: a misfire is always recoverable from Trash.
+
+First-run recommendation: leave `JARVIS_DRY_RUN=1` for a night, read the
+briefing's scan/spam/lead counts and `leads.json`, tune the phrase lists if
+needed, then go live.
 
 ## Extending
 

@@ -90,6 +90,19 @@ class NightShiftConfig:
         Path(__file__).resolve().parent / ".jarvis_cache",
     ])
 
+    # Mailbox-hygiene credentials (IMAP). Empty host => task is skipped.
+    imap_host: str = os.getenv("JARVIS_IMAP_HOST", "")
+    imap_user: str = os.getenv("JARVIS_IMAP_USER", "")
+    imap_password: str = os.getenv("JARVIS_IMAP_PASSWORD", "")
+    imap_port: int = int(os.getenv("JARVIS_IMAP_PORT", "993"))
+    imap_inbox: str = os.getenv("JARVIS_IMAP_INBOX", "INBOX")
+    imap_trash: str = os.getenv("JARVIS_IMAP_TRASH", "Trash")
+
+    # Where qualified leads are written for the dashboard to surface.
+    leads_file: Path = field(default_factory=lambda: (
+        Path(__file__).resolve().parent / ".jarvis_dashboard" / "leads.json"
+    ))
+
     def next_wake(self, now: Optional[datetime] = None) -> datetime:
         """Return the next datetime at which the wake clock fires."""
         now = now or datetime.now()
@@ -245,27 +258,35 @@ class MailboxHygieneTask(NightShiftTask):
     name = "mailbox_hygiene"
 
     def run(self) -> TaskResult:
-        host = os.getenv("JARVIS_IMAP_HOST")
-        if not host:
+        cfg = self.config
+        if not cfg.imap_host:
             return TaskResult(
                 name=self.name, ok=True,
                 summary="Postfach-Hygiene: kein IMAP-Konto konfiguriert (übersprungen).",
                 metrics={"spam": 0, "leads": 0}, dry_run=self.dry_run,
             )
-        # --- INTEGRATION POINT --------------------------------------------
-        # Connect with imap-tools, classify, and ONLY delete when not dry_run.
-        #   from imap_tools import MailBox
-        #   with MailBox(host).login(user, pwd) as mb: ...
-        # Return the real counts below.
+        # --- INTEGRATION POINT (implemented) ------------------------------
+        from integrations.mailbox import run_hygiene  # lazy: optional 'mail' extra
+        report = run_hygiene(
+            host=cfg.imap_host, user=cfg.imap_user, password=cfg.imap_password,
+            port=cfg.imap_port, inbox=cfg.imap_inbox, trash_folder=cfg.imap_trash,
+            leads_file=cfg.leads_file, dry_run=self.dry_run, cancel=self.cancel,
+        )
         # ------------------------------------------------------------------
-        spam_count = 0
-        lead_count = 0
-        action = "markiert (Dry-Run)" if self.dry_run else "liquidiert"
+        if report.error:
+            return TaskResult(
+                name=self.name, ok=False,
+                summary=f"Postfach-Hygiene fehlgeschlagen: {report.error}",
+                metrics=report.as_metrics(), dry_run=self.dry_run, error=report.error,
+            )
+        action = "markiert (Dry-Run, nichts verschoben)" if self.dry_run \
+            else "in den Papierkorb verschoben"
         return TaskResult(
             name=self.name, ok=True,
-            summary=(f"Postfach bereinigt: {spam_count} Spam-Mails {action}, "
-                     f"{lead_count} qualifizierte Geschäftsanfragen im Dashboard."),
-            metrics={"spam": spam_count, "leads": lead_count}, dry_run=self.dry_run,
+            summary=(f"Postfach bereinigt: {report.scanned} Mails gescannt, "
+                     f"{report.spam} Spam-Mails {action}, "
+                     f"{report.leads} qualifizierte Geschäftsanfragen im Dashboard."),
+            metrics=report.as_metrics(), dry_run=self.dry_run,
         )
 
 
