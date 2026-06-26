@@ -109,10 +109,21 @@
         <input id="wakeMin" inputmode="numeric" placeholder="0" style="text-align:center">
       </div>
 
-      <label>Server-URL (optional — für echte Automatisierung)</label>
-      <input id="serverUrl" placeholder="http://192.168.x.x:8765" autocapitalize="off" autocomplete="off">
-      <div class="muted">Leer lassen = reiner Lokal-Modus (Reactor, Wecker, Briefing).
-        Mit Server-URL holt die App echte Ergebnisse (E-Mail, Shop) vom JARVIS-Server.</div>
+      <label>🎙️ JARVIS-Stimme</label>
+      <select id="voiceSel"><option value="">Automatisch (JARVIS)</option></select>
+      <div class="row" style="margin-top:6px">
+        <button class="ghost" id="voiceTest" style="min-width:auto">▶ Stimme testen</button>
+      </div>
+      <div class="muted">Tipp: Für den klassischen britischen JARVIS-Klang eine
+        <b>englische „UK"-Stimme</b> wählen. „Automatisch" sucht die tiefste
+        passende Stimme deines Geräts. Mehr Stimmen bekommst du am Xiaomi unter
+        <i>Einstellungen → Bedienungshilfen → Text-in-Sprache</i> (Google-Sprachausgabe).</div>
+
+      <label>Server-URL (optional — die meisten lassen das LEER)</label>
+      <input id="serverUrl" placeholder="leer lassen" autocapitalize="off" autocomplete="off">
+      <div class="muted"><b>Du brauchst das nicht.</b> Leer = reiner Lokal-Modus (reden,
+        Reactor, Wecker, Briefing) — genau dein aktueller Zustand. Nur falls du später
+        einen echten JARVIS-Server für E-Mail/Shop betreibst, kommt seine Adresse hier rein.</div>
 
       <label>Eigener Briefing-Text (Lokal-Modus)</label>
       <input id="customBriefing" placeholder="(leer = Standard-Briefing)">
@@ -191,14 +202,52 @@ function soundCue(){
     o.start(); o.stop(a.currentTime+1.0);
   }catch(e){}
 }
+// ---- JARVIS-Stimme: tief, ruhig, möglichst britisch-männlich -------------
+// Die echte Film-Stimme lässt sich nicht einbetten; wir wählen die beste
+// vorhandene Geräte-Stimme und tunen Tonhöhe/Tempo auf JARVIS-Gravitas.
+let VOICES = [];
+let chosenVoiceURI = LS.get("voiceURI", "");
+function loadVoices(){
+  try{ VOICES = (window.speechSynthesis.getVoices() || []); }catch(e){ VOICES = []; }
+  fillVoiceSelect();
+}
+function autoPickVoice(){
+  const male = v => /male|männlich|mann|herr|deep|david|daniel|james|george|oliver|arthur|markus|conrad|stefan|hans|yannick|uk english male/i.test(v.name);
+  const de = VOICES.filter(v => /^de/i.test(v.lang));
+  const enGB = VOICES.filter(v => /^en[-_]?gb/i.test(v.lang));   // britischer JARVIS-Klang
+  const en = VOICES.filter(v => /^en/i.test(v.lang));
+  return de.find(male) || enGB.find(male) || enGB[0] || de[0] || en.find(male) || en[0] || VOICES[0] || null;
+}
+function currentVoice(){
+  if(chosenVoiceURI){ const v = VOICES.find(v => v.voiceURI === chosenVoiceURI); if(v) return v; }
+  return autoPickVoice();
+}
+function applyJarvisVoice(u){
+  const v = currentVoice();
+  if(v){ u.voice = v; u.lang = v.lang; } else { u.lang = "de-DE"; }
+  u.pitch = 0.8;   // tiefer = mehr JARVIS
+  u.rate  = 0.96;  // einen Tick ruhiger/gemessener
+}
+function fillVoiceSelect(){
+  const sel = $("voiceSel"); if(!sel) return;
+  if(!VOICES.length){ sel.innerHTML = '<option value="">(keine Stimmen gefunden)</option>'; return; }
+  const auto = autoPickVoice();
+  sel.innerHTML = '<option value="">Automatisch (JARVIS) — '+(auto?auto.name:'Standard')+'</option>' +
+    VOICES.map(v => '<option value="'+v.voiceURI+'">'+v.name+' · '+v.lang+'</option>').join("");
+  sel.value = chosenVoiceURI || "";
+}
 function speak(text){
   try{
     if(!window.speechSynthesis) return;
     window.speechSynthesis.cancel();
     const u = new SpeechSynthesisUtterance(text);
-    u.lang = "de-DE"; u.rate = 1.02; u.pitch = 1.0;
+    applyJarvisVoice(u);
     window.speechSynthesis.speak(u);
   }catch(e){}
+}
+if(window.speechSynthesis){
+  loadVoices();
+  window.speechSynthesis.onvoiceschanged = loadVoices;
 }
 
 // ---- Scheduler ----
@@ -409,7 +458,7 @@ function speakAsync(text){
   return new Promise(res=>{
     if(!text || !window.speechSynthesis){ res(); return; }
     try{ window.speechSynthesis.cancel(); }catch(e){}
-    const u=new SpeechSynthesisUtterance(text); u.lang="de-DE"; u.rate=1.02;
+    const u=new SpeechSynthesisUtterance(text); applyJarvisVoice(u);
     u.onend=()=>res(); u.onerror=()=>res();
     window.speechSynthesis.speak(u);
   });
@@ -456,7 +505,11 @@ $("startBtn").onclick = startProtocol;
 $("stopBtn").onclick  = stopProtocol;
 $("testBtn").onclick   = ()=>{ soundCueSilentPrime(); doWake(); };
 $("saveBtn").onclick   = saveSettings;
-loadSettings(); renderLastRun();
+// Stimme wählen + testen
+$("voiceSel").onchange = ()=>{ chosenVoiceURI = $("voiceSel").value; LS.set("voiceURI", chosenVoiceURI); };
+$("voiceTest").onclick = ()=>{ soundCueSilentPrime();
+  speak("Guten Tag, Jonas. Hier ist JARVIS. So klingt meine Stimme."); };
+loadSettings(); fillVoiceSelect(); renderLastRun();
 setState("idle","SYSTEM BEREIT");
 
 // ---- PWA: Service-Worker + Installations-Button ----

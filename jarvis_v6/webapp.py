@@ -425,9 +425,17 @@ function soundCue(){
     g.gain.exponentialRampToValueAtTime(.0001,a.currentTime+.9); o.start(); o.stop(a.currentTime+.9);
   }catch(e){}
 }
+function jarvisVoice(){
+  const vs=(window.speechSynthesis&&window.speechSynthesis.getVoices())||[];
+  const male=v=>/male|männlich|conrad|stefan|markus|daniel|david|uk english male|george|arthur/i.test(v.name);
+  const de=vs.filter(v=>/^de/i.test(v.lang)), enGB=vs.filter(v=>/^en[-_]?gb/i.test(v.lang));
+  return de.find(male)||enGB.find(male)||enGB[0]||de[0]||vs[0]||null;
+}
 function speak(text){
   if(!text || text===spoken || !window.speechSynthesis) return; spoken=text;
-  const u=new SpeechSynthesisUtterance(text); u.lang="de-DE"; u.rate=1.02;
+  const u=new SpeechSynthesisUtterance(text);
+  const v=jarvisVoice(); if(v){ u.voice=v; u.lang=v.lang; } else { u.lang="de-DE"; }
+  u.pitch=0.8; u.rate=0.96;   // tiefer/ruhiger = JARVIS
   window.speechSynthesis.speak(u);
 }
 const LABELS={booting:"INITIALISIERE…",night_shift:"NACHTSCHICHT AKTIV",sleeping:"WARTE AUF 16:00",
