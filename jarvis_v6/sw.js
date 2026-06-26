@@ -7,7 +7,7 @@
  *
  * Bump CACHE when the app or icons change so clients pick up the new version.
  */
-const CACHE = "jarvis-v6-pwa-v1";
+const CACHE = "jarvis-v6-pwa-v2";
 const ASSETS = [
   "./",
   "./index.html",
@@ -36,16 +36,35 @@ self.addEventListener("fetch", (event) => {
   if (req.method !== "GET" || new URL(req.url).origin !== self.location.origin) return;
   if (new URL(req.url).pathname.includes("/api/")) return;
 
+  const isPage = req.mode === "navigate" ||
+                 (req.headers.get("accept") || "").includes("text/html");
+
+  if (isPage) {
+    // Network-first for the app shell so updates (new voice, fixes) show up
+    // immediately; fall back to the cached page only when offline.
+    event.respondWith(
+      fetch(req).then((res) => {
+        if (res && res.ok) {
+          const copy = res.clone();
+          caches.open(CACHE).then((c) => c.put("./index.html", copy));
+        }
+        return res;
+      }).catch(() => caches.match(req).then((h) => h || caches.match("./index.html")))
+    );
+    return;
+  }
+
+  // Static assets (icons, manifest): cache-first, refresh in the background.
   event.respondWith(
     caches.match(req).then((hit) => {
-      if (hit) return hit;
-      return fetch(req).then((res) => {
+      const net = fetch(req).then((res) => {
         if (res && res.ok) {
           const copy = res.clone();
           caches.open(CACHE).then((c) => c.put(req, copy));
         }
         return res;
-      }).catch(() => caches.match("./index.html"));
+      }).catch(() => hit);
+      return hit || net;
     })
   );
 });
