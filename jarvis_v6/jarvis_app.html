@@ -118,14 +118,27 @@
         Klingt es robotisch, fehlt deinem Handy eine gute Stimme — dann nutze die
         echte JARVIS-Stimme unten.</div>
 
-      <label>🤖 Echte JARVIS-Stimme (ElevenLabs · empfohlen)</label>
+      <label>🤖 Echte JARVIS-Stimme (Cloud · nicht robotisch)</label>
+      <select id="ttsProvider">
+        <option value="auto">Automatisch (nutzt vorhandenen Key)</option>
+        <option value="gemini">Google Gemini</option>
+        <option value="eleven">ElevenLabs</option>
+        <option value="device">Aus — nur Gerätestimme</option>
+      </select>
+      <div class="row" style="margin-top:6px"><button class="ghost" id="xiTest" style="min-width:auto">▶ Echte Stimme testen</button></div>
+
+      <label style="margin-top:10px">Google-Gemini API-Key</label>
+      <input id="gemKey" type="password" placeholder="Gemini API-Key einfügen" autocapitalize="off" autocomplete="off">
+      <input id="gemVoice" placeholder="Stimme (leer = Charon · tief). Auch: Fenrir, Orus, Puck" autocapitalize="off" autocomplete="off">
+
+      <label style="margin-top:10px">ElevenLabs API-Key (Alternative)</label>
       <input id="xiKey" type="password" placeholder="ElevenLabs API-Key einfügen" autocapitalize="off" autocomplete="off">
       <input id="xiVoice" placeholder="Voice-ID (leer = Daniel · tiefe britische Stimme)" autocapitalize="off" autocomplete="off">
-      <div class="row" style="margin-top:6px"><button class="ghost" id="xiTest" style="min-width:auto">▶ Echte Stimme testen</button></div>
-      <div class="muted">Das ist die <b>nicht-robotische</b> JARVIS-Stimme. Hol dir einen
-        <b>kostenlosen</b> Key auf <b>elevenlabs.io</b> (Profil → „API Keys") und füge ihn hier ein.
-        Der Key bleibt <b>nur auf diesem Gerät</b> gespeichert und kommt nie ins Internet/Repo.
-        Ohne Key spricht JARVIS mit der Gerätestimme.</div>
+
+      <div class="muted">Für eine <b>echte, nicht-robotische</b> Stimme. Trage <b>einen</b> Key ein
+        (Gemini bei <b>aistudio.google.com → „Get API key"</b>, oder ElevenLabs bei <b>elevenlabs.io</b>).
+        Der Key bleibt <b>nur auf diesem Gerät</b> und kommt nie ins Repo. Ohne Key spricht JARVIS mit der
+        Gerätestimme. <i>Hinweis: OpenAI geht im Browser nicht (CORS) — dafür bräuchte es den Server.</i></div>
 
       <label>Server-URL (optional — die meisten lassen das LEER)</label>
       <input id="serverUrl" placeholder="leer lassen" autocapitalize="off" autocomplete="off">
@@ -169,6 +182,9 @@ function loadSettings(){
   $("customBriefing").value = LS.get("customBriefing","");
   $("xiKey").value = LS.get("xiKey","");
   $("xiVoice").value = LS.get("xiVoice","");
+  $("gemKey").value = LS.get("gemKey","");
+  $("gemVoice").value = LS.get("gemVoice","");
+  $("ttsProvider").value = LS.get("ttsProvider","auto");
   updateMode();
 }
 function saveSettings(){
@@ -265,24 +281,12 @@ function deviceSpeakAsync(text){
   });
 }
 
-// ---- Echte JARVIS-Stimme über ElevenLabs (optional, API-Key nötig) ---------
-// Der Key wird NUR lokal (localStorage) gespeichert und nie ins Repo committet.
-// Default-Stimme "Daniel" (onwK4e9ZLuTAKqWW03F9): tief, britisch, autoritär.
+// ---- Echte JARVIS-Stimme (Cloud-Neural-TTS, optional, eigener API-Key) ------
+// Keys werden NUR lokal (localStorage) gespeichert und nie ins Repo committet.
+// Anbieter: ElevenLabs (mp3, sehr natürlich) oder Google Gemini (PCM->WAV).
+// Hinweis: OpenAI geht NICHT direkt im Browser (CORS) -> hier nicht wählbar.
 let currentAudio = null;
-function elevenCfg(){
-  return { key: LS.get("xiKey","").trim(),
-           voice: (LS.get("xiVoice","").trim() || "onwK4e9ZLuTAKqWW03F9") };
-}
-async function elevenSpeakAsync(text){
-  const {key, voice} = elevenCfg();
-  const r = await fetch("https://api.elevenlabs.io/v1/text-to-speech/" + encodeURIComponent(voice), {
-    method:"POST",
-    headers:{ "xi-api-key":key, "Content-Type":"application/json", "Accept":"audio/mpeg" },
-    body: JSON.stringify({ text:text, model_id:"eleven_multilingual_v2",
-                           voice_settings:{ stability:0.45, similarity_boost:0.8 } })
-  });
-  if(!r.ok) throw new Error("ElevenLabs " + r.status);
-  const url = URL.createObjectURL(await r.blob());
+function playUrl(url){
   return new Promise(res=>{
     try{ if(currentAudio) currentAudio.pause(); }catch(e){}
     const a = new Audio(url); currentAudio = a;
@@ -296,16 +300,81 @@ function stopAudio(){
   try{ window.speechSynthesis && window.speechSynthesis.cancel(); }catch(e){}
 }
 
-// Einheitliche Sprachausgabe: ElevenLabs wenn Key gesetzt, sonst Gerätestimme.
+// -- ElevenLabs: liefert mp3 direkt --
+async function elevenSpeakAsync(text){
+  const key = LS.get("xiKey","").trim();
+  const voice = LS.get("xiVoice","").trim() || "onwK4e9ZLuTAKqWW03F9";   // "Daniel", tief/britisch
+  const r = await fetch("https://api.elevenlabs.io/v1/text-to-speech/" + encodeURIComponent(voice), {
+    method:"POST",
+    headers:{ "xi-api-key":key, "Content-Type":"application/json", "Accept":"audio/mpeg" },
+    body: JSON.stringify({ text:text, model_id:"eleven_multilingual_v2",
+                           voice_settings:{ stability:0.45, similarity_boost:0.8 } })
+  });
+  if(!r.ok) throw new Error("ElevenLabs " + r.status);
+  return playUrl(URL.createObjectURL(await r.blob()));
+}
+
+// -- Gemini: liefert base64-PCM (L16, mono) -> in WAV verpacken --
+function b64ToBytes(b64){
+  const bin = atob(b64); const out = new Uint8Array(bin.length);
+  for(let i=0;i<bin.length;i++) out[i] = bin.charCodeAt(i);
+  return out;
+}
+function pcm16ToWav(pcm, sampleRate){
+  const dataSize = pcm.length, blockAlign = 2, byteRate = sampleRate * blockAlign;
+  const buf = new ArrayBuffer(44 + dataSize), dv = new DataView(buf); let o = 0;
+  const ws = s => { for(let i=0;i<s.length;i++) dv.setUint8(o++, s.charCodeAt(i)); };
+  ws("RIFF"); dv.setUint32(o,36+dataSize,true); o+=4; ws("WAVE");
+  ws("fmt "); dv.setUint32(o,16,true); o+=4; dv.setUint16(o,1,true); o+=2;
+  dv.setUint16(o,1,true); o+=2; dv.setUint32(o,sampleRate,true); o+=4;
+  dv.setUint32(o,byteRate,true); o+=4; dv.setUint16(o,blockAlign,true); o+=2;
+  dv.setUint16(o,16,true); o+=2; ws("data"); dv.setUint32(o,dataSize,true); o+=4;
+  new Uint8Array(buf,44).set(pcm);
+  return buf;
+}
+async function geminiSpeakAsync(text){
+  const key = LS.get("gemKey","").trim();
+  const voice = LS.get("gemVoice","").trim() || "Charon";   // tiefe, sachliche Stimme
+  const model = "gemini-2.5-flash-preview-tts";
+  const r = await fetch("https://generativelanguage.googleapis.com/v1beta/models/" + model +
+                        ":generateContent?key=" + encodeURIComponent(key), {
+    method:"POST", headers:{ "Content-Type":"application/json" },
+    body: JSON.stringify({
+      contents:[{ parts:[{ text:text }] }],
+      generationConfig:{ responseModalities:["AUDIO"],
+        speechConfig:{ voiceConfig:{ prebuiltVoiceConfig:{ voiceName: voice } } } }
+    })
+  });
+  if(!r.ok) throw new Error("Gemini " + r.status);
+  const j = await r.json();
+  const parts = (((j.candidates||[])[0]||{}).content||{}).parts || [];
+  const data = (parts.find(p=>p.inlineData)||{}).inlineData;
+  if(!data || !data.data) throw new Error("Gemini: keine Audiodaten");
+  const rate = parseInt(((data.mimeType||"").match(/rate=(\d+)/)||[])[1] || "24000", 10);
+  const wav = pcm16ToWav(b64ToBytes(data.data), rate);
+  return playUrl(URL.createObjectURL(new Blob([wav], { type:"audio/wav" })));
+}
+
+// Einheitliche Sprachausgabe: gewählter Cloud-Anbieter, sonst Gerätestimme.
 let xiWarned = false;
+function ttsProvider(){
+  const p = LS.get("ttsProvider","auto");
+  const xi = !!LS.get("xiKey","").trim(), gem = !!LS.get("gemKey","").trim();
+  if(p==="device") return null;
+  if(p==="eleven") return xi ? "eleven" : null;
+  if(p==="gemini") return gem ? "gemini" : null;
+  return xi ? "eleven" : (gem ? "gemini" : null);   // auto
+}
 async function speakAsync(text){
   if(!text) return;
-  if(elevenCfg().key){
-    try{ await elevenSpeakAsync(text); return; }
-    catch(e){
+  const prov = ttsProvider();
+  if(prov){
+    try{
+      if(prov==="eleven") { await elevenSpeakAsync(text); return; }
+      if(prov==="gemini") { await geminiSpeakAsync(text); return; }
+    }catch(e){
       if(!xiWarned){ xiWarned = true;
-        addLine && addLine("jv","(Hinweis: echte Stimme nicht erreichbar — prüfe API-Key/Internet. Ich spreche solange mit der Gerätestimme.)"); }
-      // Fallback auf die Gerätestimme.
+        addLine && addLine("jv","(Hinweis: echte Stimme nicht erreichbar — prüfe Key/Internet. Ich spreche solange mit der Gerätestimme.)"); }
     }
   }
   await deviceSpeakAsync(text);
@@ -568,9 +637,12 @@ $("saveBtn").onclick   = saveSettings;
 $("voiceSel").onchange = ()=>{ chosenVoiceURI = $("voiceSel").value; LS.set("voiceURI", chosenVoiceURI); };
 $("voiceTest").onclick = ()=>{ soundCueSilentPrime();
   speak("Guten Tag, Jonas. Hier ist JARVIS. So klingt meine Stimme."); };
-// Echte JARVIS-Stimme (ElevenLabs): Key/Voice lokal speichern + testen.
+// Echte JARVIS-Stimme: Anbieter/Keys/Stimmen lokal speichern + testen.
+$("ttsProvider").onchange = ()=>{ xiWarned=false; LS.set("ttsProvider", $("ttsProvider").value); };
 $("xiKey").oninput   = ()=>{ xiWarned=false; LS.set("xiKey", $("xiKey").value.trim()); };
 $("xiVoice").oninput = ()=>{ LS.set("xiVoice", $("xiVoice").value.trim()); };
+$("gemKey").oninput   = ()=>{ xiWarned=false; LS.set("gemKey", $("gemKey").value.trim()); };
+$("gemVoice").oninput = ()=>{ LS.set("gemVoice", $("gemVoice").value.trim()); };
 $("xiTest").onclick  = ()=>{ soundCueSilentPrime();
   speakAsync("Guten Tag, Jonas. Hier ist JARVIS. Wie kann ich Ihnen behilflich sein?"); };
 loadSettings(); fillVoiceSelect(); renderLastRun();
