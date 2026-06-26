@@ -14,6 +14,8 @@ It exposes:
   GET  /api/config       current settings (secrets masked)
   POST /api/config       save settings to .env (no manual file editing)
   POST /api/start        start the night shift
+  GET  /api/voice        JARVIS's opening line (pick up the phone)
+  POST /api/voice        one conversation turn: {text} -> {reply, intent, end, action}
 
 The browser handles the wake flourish: when the state turns to WAKING/BRIEFING
 the page flares the reactor to full brightness, plays a sound cue (Web Audio)
@@ -39,6 +41,7 @@ from main import (
     NightShiftConfig, NightShiftSupervisor, SystemState, preflight,
 )
 from integrations.dashboard import load_dashboard
+from voice import brain_for_app
 
 # Settings the mobile form is allowed to write to .env. Secrets are masked on read.
 EDITABLE_KEYS = [
@@ -103,6 +106,9 @@ class WebApp:
         self.briefing = ""
         self.running = False
         self.supervisor = NightShiftSupervisor(self.config, on_state=self._on_state)
+        # The conversation brain ("Telefon-Modus"). Wired to this app's live
+        # providers; no API key, pure standard library.
+        self.brain = brain_for_app(self)
 
     def _on_state(self, state: SystemState, info: dict) -> None:
         with self._lock:
@@ -146,6 +152,14 @@ class WebApp:
     def preflight(self) -> dict:
         rows = preflight(self.config)
         return {"rows": [{"capability": c, "status": s, "detail": d} for c, s, d in rows]}
+
+    def voice(self, text: str) -> dict:
+        """Run one conversational turn: a recognised utterance in, a spoken
+        reply out (the browser speaks it via the Web Speech API)."""
+        return self.brain.reply(text).as_dict()
+
+    def greeting(self) -> str:
+        return self.brain.greeting()
 
 
 def _make_handler(app: WebApp):
@@ -197,6 +211,9 @@ def _make_handler(app: WebApp):
                 return self._send_json(app.preflight())
             if route == "/api/config":
                 return self._send_json(masked_config())
+            if route == "/api/voice":
+                # Pick up the phone: JARVIS's opening line.
+                return self._send_json({"reply": app.greeting(), "intent": "greeting"})
             return self._send_json({"error": "not found"}, 404)
 
         def do_POST(self):
@@ -208,6 +225,13 @@ def _make_handler(app: WebApp):
             if route == "/api/start":
                 started = app.start()
                 return self._send_json({"started": started, "state": app.state})
+            if route == "/api/voice":
+                try:
+                    payload = json.loads(raw) if raw.strip().startswith("{") else \
+                        {k: v[0] for k, v in parse_qs(raw).items()}
+                except ValueError:
+                    return self._send_json({"error": "bad payload"}, 400)
+                return self._send_json(app.voice(str(payload.get("text", ""))))
             if route == "/api/config":
                 try:
                     payload = json.loads(raw) if raw.strip().startswith("{") else \
@@ -307,6 +331,15 @@ INDEX_HTML = r"""<!DOCTYPE html>
   .counts { font-size:12px; color:#9fd8e8; margin:8px 0; }
   .item { padding:6px 0; border-bottom:1px solid rgba(0,200,255,.12); font-size:12px; }
   .ok{color:#7CFC9A}.warn{color:#ffd479}.bad{color:#ff8080}.muted{color:#88a}
+  .callhint { font-size:11px; max-width:520px; margin:2px auto 6px; line-height:1.4; }
+  button.calling { background:#3a0e1c; border-color:rgba(255,90,120,.5); color:#ffd0d8;
+                   animation:callpulse 1.4s ease-in-out infinite; }
+  @keyframes callpulse { 0%,100%{ box-shadow:0 0 0 0 rgba(255,90,120,.4);} 50%{ box-shadow:0 0 0 10px rgba(255,90,120,0);} }
+  .transcript { max-width:520px; margin:8px auto; text-align:left; font-size:13px; line-height:1.45; }
+  .transcript .me  { color:#9fd8e8; margin:6px 0; }
+  .transcript .jv  { color:#cdeffb; margin:6px 0; background:rgba(0,40,60,.35);
+                     border:1px solid rgba(0,200,255,.22); border-radius:10px; padding:8px 10px; }
+  .transcript .me b, .transcript .jv b { color:#7fe8ff; font-weight:600; }
 </style>
 </head>
 <body>
@@ -322,6 +355,14 @@ INDEX_HTML = r"""<!DOCTYPE html>
     <button onclick="preflight()">Preflight prüfen</button>
     <button onclick="loadDash()">Dashboard aktualisieren</button>
   </div>
+
+  <div class="row">
+    <button class="primary" id="callBtn" onclick="toggleCall()">📞 Telefon-Modus starten</button>
+  </div>
+  <div class="callhint muted" id="callHint">Tippe „Telefon-Modus", erlaube das Mikrofon und sprich
+    mit JARVIS — z.&nbsp;B. „Wie ist der Status?", „Gib mir das Briefing", „Starte die Nachtschicht".
+    Zum Auflegen „Tschüss" sagen oder den Button erneut tippen.</div>
+  <div class="transcript" id="transcript"></div>
 
   <details id="pf"><summary>Preflight-Status</summary><div class="panel" id="pfBody">—</div></details>
 
@@ -399,7 +440,7 @@ async function tick(){
     setReactor(s.state);
     const c=s.counts||{};
     $("counts").textContent = `Leads ${c.leads||0} · Winner ${c.winners||0} · Lieferanten ${c.suppliers||0} · Entwürfe ${c.drafts||0}`;
-    if(s.briefing){ $("briefing").textContent = s.briefing; if(s.state==="briefing") speak(s.briefing); }
+    if(s.briefing){ $("briefing").textContent = s.briefing; if(s.state==="briefing" && !inCall) speak(s.briefing); }
     $("startBtn").disabled = !!s.running;
     $("startBtn").textContent = s.running ? "Protokoll läuft…" : "Starte Nachtschicht-Protokoll";
   }catch(e){ $("state").textContent="OFFLINE"; }
@@ -434,6 +475,80 @@ async function saveCfg(){
   const r = await api("/api/config",{method:"POST",body:JSON.stringify(body)});
   $("cfgMsg").textContent = "Gespeichert: "+(r.saved||[]).join(", ")+" — "+(r.note||"");
 }
+// ---- Telefon-Modus: zweiweg-Sprache über die Web Speech API ----------------
+// Turn-basiert (Walkie-Talkie): JARVIS spricht, dann hört er zu, dann wieder.
+// Das vermeidet, dass das Mikro die eigene Sprachausgabe als Eingabe aufnimmt.
+const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+let recog=null, inCall=false, listening=false, awaitingReply=false;
+
+function addLine(who, text){
+  const box=$("transcript");
+  const div=document.createElement("div");
+  div.className = who==="me" ? "me" : "jv";
+  const safe=(text||"").replace(/&/g,"&amp;").replace(/</g,"&lt;");
+  div.innerHTML = `<b>${who==="me"?"Du":"JARVIS"}:</b> ${safe}`;
+  box.appendChild(div); div.scrollIntoView({block:"end", behavior:"smooth"});
+}
+
+// Speak and resolve when the utterance finishes (so we re-arm the mic after).
+function speakAsync(text){
+  return new Promise(res=>{
+    if(!text || !window.speechSynthesis){ res(); return; }
+    try{ window.speechSynthesis.cancel(); }catch(e){}
+    const u=new SpeechSynthesisUtterance(text); u.lang="de-DE"; u.rate=1.02;
+    u.onend=()=>res(); u.onerror=()=>res();
+    window.speechSynthesis.speak(u);
+  });
+}
+async function jarvisSay(text){ addLine("jv", text); await speakAsync(text); }
+
+function listenOnce(){
+  if(!inCall || !recog || listening) return;
+  try{ recog.start(); listening=true; }catch(e){ /* already running */ }
+}
+
+async function handleUtterance(text){
+  if(!text){ listenOnce(); return; }
+  awaitingReply=true; addLine("me", text);
+  let data;
+  try{ data = await api("/api/voice",{method:"POST",body:JSON.stringify({text})}); }
+  catch(e){ data={reply:"Verbindungsfehler — ich erreiche das System gerade nicht.", end:false}; }
+  await jarvisSay(data.reply || "…");
+  if(data.action==="started") tick();
+  awaitingReply=false;
+  if(data.end){ stopCall(); return; }
+  listenOnce();
+}
+
+async function startCall(){
+  if(!SR){ addLine("jv","Dein Browser unterstützt keine Spracherkennung. Bitte Chrome, Edge oder Safari nutzen.");
+           speakAsync("Dein Browser unterstützt keine Spracherkennung."); return; }
+  inCall=true;
+  $("callBtn").classList.add("calling");
+  $("callBtn").textContent="📞 Auflegen";
+  recog=new SR(); recog.lang="de-DE"; recog.continuous=false;
+  recog.interimResults=false; recog.maxAlternatives=1;
+  recog.onresult=(e)=>{ listening=false; handleUtterance(e.results[0][0].transcript.trim()); };
+  recog.onerror=(e)=>{ listening=false;
+    if(inCall && !awaitingReply && e.error!=="aborted" && e.error!=="not-allowed")
+      setTimeout(listenOnce, 500);
+    if(e.error==="not-allowed"){ addLine("jv","Mikrofon-Zugriff verweigert."); stopCall(); }
+  };
+  recog.onend=()=>{ listening=false; if(inCall && !awaitingReply) setTimeout(listenOnce, 300); };
+  let g; try{ g=await api("/api/voice"); }catch(_){ g={reply:"Hier ist JARVIS. Ich höre."}; }
+  await jarvisSay(g.reply || "Hier ist JARVIS. Ich höre.");
+  listenOnce();
+}
+
+function stopCall(){
+  inCall=false; listening=false; awaitingReply=false;
+  try{ recog && recog.abort(); }catch(e){}
+  try{ window.speechSynthesis.cancel(); }catch(e){}
+  $("callBtn").classList.remove("calling");
+  $("callBtn").textContent="📞 Telefon-Modus starten";
+}
+function toggleCall(){ inCall ? stopCall() : startCall(); }
+
 loadCfg(); loadDash(); tick(); setInterval(tick, 2000);
 </script>
 </body>

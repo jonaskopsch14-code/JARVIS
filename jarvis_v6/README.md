@@ -15,6 +15,8 @@ cue, and delivers a spoken German executive briefing.
 | `setup.py`         | Packaging + optional capability extras (`voice`, `mail`, …).     |
 | `main.py`          | Threading foundation, scheduler, tasks, briefing builder.        |
 | `dashboard_gui.py` | Tkinter Arc-Reactor GUI; reacts to the supervisor state stream.  |
+| `webapp.py`        | Phone-first web control panel + JSON API (stdlib `http.server`). |
+| `voice.py`         | Telefon-Modus dialogue brain — talk to JARVIS, no API key.       |
 
 ## Quick start
 
@@ -49,6 +51,46 @@ mobile.
 Security: it serves a credentials form, so it binds to `127.0.0.1` by default.
 Only expose it (`JARVIS_WEB_HOST=0.0.0.0`) on a trusted network, ideally behind
 a VPN/tunnel. Set `JARVIS_WEB_TOKEN=…` to require `?token=…` on the API.
+
+## Telefon-Modus — talk to JARVIS like a phone call
+
+Tap **📞 Telefon-Modus** in the web interface, allow microphone access, and
+*speak* to JARVIS in German. It listens, understands your intent, answers from
+**live system state**, and speaks the reply back — then re-arms the mic for the
+next turn, so it feels like a hands-free phone call. Say *"Tschüss"* (or tap the
+button again) to hang up.
+
+Things you can say:
+
+| You say… | JARVIS does |
+|--------------------------------------------|-----------------------------------------|
+| „Wie ist der Status?"                       | reports the supervisor state + safety mode |
+| „Gib mir das Briefing"                      | speaks the latest executive briefing    |
+| „Wie viele Leads / Winner / Lieferanten?"   | the live dashboard counts               |
+| „Wann ist die Weckzeit?"                    | the configured wake clock               |
+| „Sind wir im Sicherheitsmodus?"             | Dry-Run vs. Live                        |
+| „Mach einen Preflight" / „Bist du bereit?"  | summarises the live-readiness report    |
+| „Starte die Nachtschicht"                   | actually starts the protocol            |
+| „Wie spät ist es?", „Hilfe", „Tschüss"      | clock · capabilities · hang up          |
+
+How it works — and why there's **no API key, no cloud**:
+
+- Speech-to-text and text-to-speech run **in the browser** via the standard
+  Web Speech API (`SpeechRecognition` + `SpeechSynthesis`). Best support is in
+  Chrome, Edge and Safari; on the desktop these need an internet connection for
+  recognition, but no key and no account.
+- The dialogue brain (`voice.py`) is **pure standard library** and answers from
+  injected live providers, so it never invents numbers and is fully unit-tested
+  offline. It exposes one endpoint pair:
+  `GET /api/voice` (JARVIS's opening line) and
+  `POST /api/voice` `{text}` → `{reply, intent, end, action}`.
+- Want free-form chat too? Pass an `llm_fn` to `VoiceBrain` — it's used **only**
+  as the fallback when no built-in intent matches, so the no-key path stays the
+  default.
+
+The same `JARVIS_WEB_TOKEN` gate and `127.0.0.1` binding apply to the voice
+endpoint. Note that browsers only allow microphone access over `https://` or on
+`localhost`, so for remote phone use, put it behind a TLS tunnel.
 
 ## Going live (turnkey activation)
 
