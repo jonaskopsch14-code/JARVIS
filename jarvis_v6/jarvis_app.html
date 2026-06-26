@@ -9,6 +9,10 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="JARVIS V6">
+<!-- PWA: installierbar als echte App (Android/Chrome, iOS) -->
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
 <title>JARVIS V6</title>
 <style>
   :root { --glow:#00c8ff; --core:#d2f5ff; --bg:#05080d; }
@@ -123,8 +127,12 @@
     <div class="panel" id="dash"><span class="muted">Noch keine Daten.</span></div>
   </details>
 
-  <p class="hint">📲 <b>Als App speichern:</b> Browser-Menü (⋮) → „Zum Startbildschirm hinzufügen".
-     Dann startet JARVIS als eigenes Icon im Vollbild — ganz ohne Server.</p>
+  <div class="row" style="margin-top:8px">
+    <button class="primary" id="installBtn" style="display:none">📲 Als App installieren</button>
+  </div>
+  <p class="hint">📲 <b>Als App speichern:</b> Erscheint kein Button, geht es über das
+     Browser-Menü (⋮) → „App installieren" bzw. „Zum Startbildschirm hinzufügen".
+     Dann startet JARVIS als eigenes Icon im Vollbild.</p>
 
 <script>
 "use strict";
@@ -450,6 +458,23 @@ $("testBtn").onclick   = ()=>{ soundCueSilentPrime(); doWake(); };
 $("saveBtn").onclick   = saveSettings;
 loadSettings(); renderLastRun();
 setState("idle","SYSTEM BEREIT");
+
+// ---- PWA: Service-Worker + Installations-Button ----
+if("serviceWorker" in navigator && location.protocol.startsWith("http")){
+  // SW läuft nur über http(s), nicht bei file:// — dann einfach ohne Offline-Cache.
+  window.addEventListener("load", ()=>{ navigator.serviceWorker.register("sw.js").catch(()=>{}); });
+}
+let deferredPrompt = null;
+window.addEventListener("beforeinstallprompt", (e)=>{
+  e.preventDefault(); deferredPrompt = e; $("installBtn").style.display = "";
+});
+$("installBtn").onclick = async ()=>{
+  if(!deferredPrompt) return;
+  deferredPrompt.prompt();
+  try{ await deferredPrompt.userChoice; }catch(e){}
+  deferredPrompt = null; $("installBtn").style.display = "none";
+};
+window.addEventListener("appinstalled", ()=>{ $("installBtn").style.display = "none"; });
 </script>
 </body>
 </html>

@@ -1,0 +1,66 @@
+name: Deploy JARVIS PWA to GitHub Pages
+
+# Publishes the standalone JARVIS V6 app (jarvis_v6/jarvis_app.html) as an
+# installable PWA at https://<user>.github.io/JARVIS/ so the PC and the phone
+# (Xiaomi 13T Pro / Android) open the exact same app from one https URL — and
+# the microphone works (Telefon-Modus needs https on Android).
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "jarvis_v6/jarvis_app.html"
+      - "jarvis_v6/manifest.webmanifest"
+      - "jarvis_v6/sw.js"
+      - "jarvis_v6/icon-*.png"
+      - ".github/workflows/pages.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# One deploy at a time; don't cancel an in-progress release.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Assemble the site
+        run: |
+          set -euo pipefail
+          mkdir -p _site
+          # jarvis_app.html is the app; Pages serves index.html by default.
+          cp jarvis_v6/jarvis_app.html _site/index.html
+          cp jarvis_v6/manifest.webmanifest _site/manifest.webmanifest
+          cp jarvis_v6/sw.js _site/sw.js
+          cp jarvis_v6/icon-192.png _site/icon-192.png
+          cp jarvis_v6/icon-512.png _site/icon-512.png
+          # Avoid Jekyll processing of the static files.
+          touch _site/.nojekyll
+
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+        with:
+          enablement: true
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

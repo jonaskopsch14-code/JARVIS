@@ -102,6 +102,31 @@ wake clock, "starte die Nachtschicht", clock, help). If you set a **Server-URL**
 in the settings, the call is routed to the server's `/api/voice` instead, so you
 get the full live answers (real dashboard counts) automatically.
 
+### One identical app on PC **and** phone (installable PWA via GitHub Pages)
+
+`jarvis_app.html` is a full **PWA** (`manifest.webmanifest` + `sw.js` + arc-reactor
+icons), so it installs as a real app with its own icon and runs offline. To get
+the *same* app on your PC and your phone (e.g. Xiaomi 13T Pro / Android), serve
+it over one `https` URL — the included GitHub Actions workflow
+(`.github/workflows/pages.yml`) does this automatically:
+
+1. Merge to `main`. The workflow assembles the app (`jarvis_app.html` →
+   `index.html` + manifest/sw/icons) and deploys it to GitHub Pages. The first
+   run enables Pages itself (`actions/configure-pages` with `enablement: true`);
+   if your org blocks that, flip it on once under **Settings → Pages → Source:
+   GitHub Actions**.
+2. Open the published URL — `https://<user>.github.io/JARVIS/` — on **both** the
+   PC and the phone. Same code, same URL ⇒ identical app.
+3. Tap **📲 Als App installieren** (Android/Chrome shows it; on iOS use Share →
+   *Add to Home Screen*). JARVIS now lives as its own full-screen app icon.
+
+Why Pages and not just copying the file: on Android the microphone (and the
+service worker) require `https`, which a local `file://` does not provide — so
+the Pages URL is what makes the hands-free Telefon-Modus work on the phone. The
+in-app settings are per device; for a *shared, synced* state across both
+devices, point the **Server-URL** at one running `jarvis-v6-web` instance behind
+a TLS tunnel (then voice + status + counts come live from that one server).
+
 ## Going live (turnkey activation)
 
 1. `cp jarvis_v6/.env.example jarvis_v6/.env` and fill in real values. `.env`
