@@ -114,10 +114,18 @@
       <div class="row" style="margin-top:6px">
         <button class="ghost" id="voiceTest" style="min-width:auto">▶ Stimme testen</button>
       </div>
-      <div class="muted">Tipp: Für den klassischen britischen JARVIS-Klang eine
-        <b>englische „UK"-Stimme</b> wählen. „Automatisch" sucht die tiefste
-        passende Stimme deines Geräts. Mehr Stimmen bekommst du am Xiaomi unter
-        <i>Einstellungen → Bedienungshilfen → Text-in-Sprache</i> (Google-Sprachausgabe).</div>
+      <div class="muted">„Automatisch" sucht die natürlichste Stimme deines Geräts.
+        Klingt es robotisch, fehlt deinem Handy eine gute Stimme — dann nutze die
+        echte JARVIS-Stimme unten.</div>
+
+      <label>🤖 Echte JARVIS-Stimme (ElevenLabs · empfohlen)</label>
+      <input id="xiKey" type="password" placeholder="ElevenLabs API-Key einfügen" autocapitalize="off" autocomplete="off">
+      <input id="xiVoice" placeholder="Voice-ID (leer = Daniel · tiefe britische Stimme)" autocapitalize="off" autocomplete="off">
+      <div class="row" style="margin-top:6px"><button class="ghost" id="xiTest" style="min-width:auto">▶ Echte Stimme testen</button></div>
+      <div class="muted">Das ist die <b>nicht-robotische</b> JARVIS-Stimme. Hol dir einen
+        <b>kostenlosen</b> Key auf <b>elevenlabs.io</b> (Profil → „API Keys") und füge ihn hier ein.
+        Der Key bleibt <b>nur auf diesem Gerät</b> gespeichert und kommt nie ins Internet/Repo.
+        Ohne Key spricht JARVIS mit der Gerätestimme.</div>
 
       <label>Server-URL (optional — die meisten lassen das LEER)</label>
       <input id="serverUrl" placeholder="leer lassen" autocapitalize="off" autocomplete="off">
@@ -159,6 +167,8 @@ function loadSettings(){
   $("wakeMin").value  = LS.get("wakeMin","0");
   $("serverUrl").value = LS.get("serverUrl","");
   $("customBriefing").value = LS.get("customBriefing","");
+  $("xiKey").value = LS.get("xiKey","");
+  $("xiVoice").value = LS.get("xiVoice","");
   updateMode();
 }
 function saveSettings(){
@@ -244,15 +254,64 @@ function fillVoiceSelect(){
     VOICES.map(v => '<option value="'+v.voiceURI+'">'+v.name+' · '+v.lang+'</option>').join("");
   sel.value = chosenVoiceURI || "";
 }
-function speak(text){
-  try{
-    if(!window.speechSynthesis) return;
-    window.speechSynthesis.cancel();
-    const u = new SpeechSynthesisUtterance(text);
-    applyJarvisVoice(u);
+// Geräte-Stimme (Fallback) — gibt ein Promise zurück, das beim Sprechende endet.
+function deviceSpeakAsync(text){
+  return new Promise(res=>{
+    if(!text || !window.speechSynthesis){ res(); return; }
+    try{ window.speechSynthesis.cancel(); }catch(e){}
+    const u = new SpeechSynthesisUtterance(text); applyJarvisVoice(u);
+    u.onend=()=>res(); u.onerror=()=>res();
     window.speechSynthesis.speak(u);
-  }catch(e){}
+  });
 }
+
+// ---- Echte JARVIS-Stimme über ElevenLabs (optional, API-Key nötig) ---------
+// Der Key wird NUR lokal (localStorage) gespeichert und nie ins Repo committet.
+// Default-Stimme "Daniel" (onwK4e9ZLuTAKqWW03F9): tief, britisch, autoritär.
+let currentAudio = null;
+function elevenCfg(){
+  return { key: LS.get("xiKey","").trim(),
+           voice: (LS.get("xiVoice","").trim() || "onwK4e9ZLuTAKqWW03F9") };
+}
+async function elevenSpeakAsync(text){
+  const {key, voice} = elevenCfg();
+  const r = await fetch("https://api.elevenlabs.io/v1/text-to-speech/" + encodeURIComponent(voice), {
+    method:"POST",
+    headers:{ "xi-api-key":key, "Content-Type":"application/json", "Accept":"audio/mpeg" },
+    body: JSON.stringify({ text:text, model_id:"eleven_multilingual_v2",
+                           voice_settings:{ stability:0.45, similarity_boost:0.8 } })
+  });
+  if(!r.ok) throw new Error("ElevenLabs " + r.status);
+  const url = URL.createObjectURL(await r.blob());
+  return new Promise(res=>{
+    try{ if(currentAudio) currentAudio.pause(); }catch(e){}
+    const a = new Audio(url); currentAudio = a;
+    const done = ()=>{ try{ URL.revokeObjectURL(url); }catch(e){} res(); };
+    a.onended = done; a.onerror = done;
+    a.play().catch(done);
+  });
+}
+function stopAudio(){
+  try{ if(currentAudio){ currentAudio.pause(); currentAudio = null; } }catch(e){}
+  try{ window.speechSynthesis && window.speechSynthesis.cancel(); }catch(e){}
+}
+
+// Einheitliche Sprachausgabe: ElevenLabs wenn Key gesetzt, sonst Gerätestimme.
+let xiWarned = false;
+async function speakAsync(text){
+  if(!text) return;
+  if(elevenCfg().key){
+    try{ await elevenSpeakAsync(text); return; }
+    catch(e){
+      if(!xiWarned){ xiWarned = true;
+        addLine && addLine("jv","(Hinweis: echte Stimme nicht erreichbar — prüfe API-Key/Internet. Ich spreche solange mit der Gerätestimme.)"); }
+      // Fallback auf die Gerätestimme.
+    }
+  }
+  await deviceSpeakAsync(text);
+}
+function speak(text){ speakAsync(text); }
+
 if(window.speechSynthesis){
   loadVoices();
   window.speechSynthesis.onvoiceschanged = loadVoices;
@@ -462,15 +521,7 @@ function addLine(who, text){
   div.innerHTML = "<b>"+(who==="me"?"Du":"JARVIS")+":</b> "+safe;
   box.appendChild(div); div.scrollIntoView({block:"end", behavior:"smooth"});
 }
-function speakAsync(text){
-  return new Promise(res=>{
-    if(!text || !window.speechSynthesis){ res(); return; }
-    try{ window.speechSynthesis.cancel(); }catch(e){}
-    const u=new SpeechSynthesisUtterance(text); applyJarvisVoice(u);
-    u.onend=()=>res(); u.onerror=()=>res();
-    window.speechSynthesis.speak(u);
-  });
-}
+// speakAsync ist oben definiert (ElevenLabs falls Key gesetzt, sonst Gerät).
 async function jarvisSay(text){ addLine("jv", text); await speakAsync(text); }
 function listenOnce(){ if(!inCall||!recog||listening) return; try{ recog.start(); listening=true; }catch(e){} }
 
@@ -502,7 +553,7 @@ async function startCall(){
 function stopCall(){
   inCall=false; listening=false; awaitingReply=false;
   try{ recog && recog.abort(); }catch(e){}
-  try{ window.speechSynthesis.cancel(); }catch(e){}
+  stopAudio();
   $("callBtn").classList.remove("calling"); $("callBtn").textContent="📞 Telefon-Modus starten";
 }
 function toggleCall(){ inCall ? stopCall() : startCall(); }
@@ -517,6 +568,11 @@ $("saveBtn").onclick   = saveSettings;
 $("voiceSel").onchange = ()=>{ chosenVoiceURI = $("voiceSel").value; LS.set("voiceURI", chosenVoiceURI); };
 $("voiceTest").onclick = ()=>{ soundCueSilentPrime();
   speak("Guten Tag, Jonas. Hier ist JARVIS. So klingt meine Stimme."); };
+// Echte JARVIS-Stimme (ElevenLabs): Key/Voice lokal speichern + testen.
+$("xiKey").oninput   = ()=>{ xiWarned=false; LS.set("xiKey", $("xiKey").value.trim()); };
+$("xiVoice").oninput = ()=>{ LS.set("xiVoice", $("xiVoice").value.trim()); };
+$("xiTest").onclick  = ()=>{ soundCueSilentPrime();
+  speakAsync("Guten Tag, Jonas. Hier ist JARVIS. Wie kann ich Ihnen behilflich sein?"); };
 loadSettings(); fillVoiceSelect(); renderLastRun();
 setState("idle","SYSTEM BEREIT");
 
