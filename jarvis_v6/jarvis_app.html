@@ -58,6 +58,15 @@
                  background:#04141c; color:#dff; font:inherit; }
   .muted{color:#7d9aa6;font-size:11px} .ok{color:#7CFC9A} .warn{color:#ffd479}
   .hint { font-size:11px; color:#6f93a0; max-width:520px; margin:8px auto; line-height:1.4; }
+  /* ---- Telefon-Modus ---- */
+  button.calling { background:#3a0e1c; border-color:rgba(255,90,120,.5); color:#ffd0d8;
+                   animation:callpulse 1.4s ease-in-out infinite; }
+  @keyframes callpulse { 0%,100%{box-shadow:0 0 0 0 rgba(255,90,120,.45)} 50%{box-shadow:0 0 0 11px rgba(255,90,120,0)} }
+  .transcript { max-width:520px; margin:8px auto; text-align:left; font-size:13px; line-height:1.45; }
+  .transcript .me { color:#9fd8e8; margin:6px 0; }
+  .transcript .jv { color:#cdeffb; margin:6px 0; background:rgba(0,40,60,.35);
+                    border:1px solid rgba(0,200,255,.22); border-radius:10px; padding:8px 10px; }
+  .transcript b { color:#7fe8ff; font-weight:600; }
 </style>
 </head>
 <body>
@@ -77,6 +86,15 @@
     <button id="testBtn" class="ghost">▶ Weckruf testen (jetzt)</button>
     <button id="stopBtn" class="ghost">■ Stopp</button>
   </div>
+
+  <div class="row" style="margin-top:6px">
+    <button class="primary" id="callBtn">📞 Telefon-Modus starten</button>
+  </div>
+  <div class="hint" id="callHint">Tippen, Mikrofon erlauben und auf Deutsch sprechen — z.&nbsp;B.
+    „Wie ist der Status?", „Gib mir das Briefing", „Starte die Nachtschicht".
+    Zum Auflegen „Tschüss" sagen oder erneut tippen. Läuft offline; mit Server-URL
+    nutzt er automatisch das volle JARVIS-Gehirn.</div>
+  <div class="transcript" id="transcript"></div>
 
   <details>
     <summary>⚙️ Einstellungen</summary>
@@ -285,7 +303,147 @@ function renderDash(counts){
     ' · Lieferanten '+(counts.suppliers||0)+' · Entwürfe '+(counts.drafts||0)+'</div>';
 }
 
+// ===========================================================================
+// Telefon-Modus — mit JARVIS sprechen, komplett offline.
+// Eine JS-Portierung des Dialog-Gehirns (voice.py). Antwortet aus dem lokalen
+// App-Zustand. Ist eine Server-URL gesetzt, wird stattdessen das volle
+// Server-Gehirn (/api/voice) genutzt.
+// ===========================================================================
+function vnorm(text){
+  text = (text||"").toLowerCase().trim();
+  text = text.replace(/ä/g,"ae").replace(/ö/g,"oe").replace(/ü/g,"ue").replace(/ß/g,"ss");
+  text = text.normalize("NFKD").replace(/[\u0300-\u036f]/g,"");
+  return text.replace(/[^a-z0-9\s]/g," ").replace(/\s+/g," ").trim();
+}
+const vhas = (t, ...keys) => keys.some(k => t.indexOf(k) !== -1);
+
+function localReply(utterance){
+  const t = vnorm(utterance);
+  if(!t) return {reply:"Ich habe nichts verstanden. Sag es bitte noch einmal.", intent:"empty"};
+
+  if(vhas(t,"auflegen","tschuess","wiederhoeren","auf wiedersehen","beenden","ende","leg auf","schluss"))
+    return {reply:"Auf Wiederhören, Jonas.", intent:"goodbye", end:true};
+
+  if(vhas(t,"starte","start","leg los","loslegen","beginne","fang an") && vhas(t,"nachtschicht","protokoll","schicht","los")
+     || vhas(t,"nachtschicht starten","protokoll starten"))
+    {
+      if(running) return {reply:"Das Protokoll läuft bereits.", intent:"start_already"};
+      startProtocol();
+      return {reply:"Verstanden. Ich starte das Nachtschicht-Protokoll.", intent:"start", action:"started"};
+    }
+
+  if(vhas(t,"briefing","zusammenfassung","bericht","fasse zusammen","was ist passiert","ergebnis")){
+    try{ const rec = JSON.parse(LS.get("lastRun","null")); if(rec && rec.briefing) return {reply:rec.briefing, intent:"briefing"}; }catch(e){}
+    return {reply:"Es liegt noch kein Briefing vor. Starte die Nachtschicht oder teste den Weckruf, dann fasse ich alles zusammen.", intent:"briefing_empty"};
+  }
+
+  if(vhas(t,"weckzeit","weck","wann weckst","aufwachen","wann ist")){
+    const h=String(parseInt(LS.get("wakeHour","16"),10)||0).padStart(2,"0");
+    const m=String(parseInt(LS.get("wakeMin","0"),10)||0).padStart(2,"0");
+    return {reply:"Die Weckzeit ist auf "+h+":"+m+" Uhr gesetzt. Dann hellt der Reactor auf und ich liefere das Briefing.", intent:"wake"};
+  }
+
+  if(vhas(t,"dry run","sicherheitsmodus","sicher","live modus","scharf"))
+    return {reply:"Diese App läuft im lokalen Modus und verändert keine echten Systeme. Für echte Automatisierung verbinde den JARVIS-Server.", intent:"safety"};
+
+  if(vhas(t,"dashboard","zahlen","wie viele","wieviele","leads","winner","gewinner","lieferant","entwuerfe","entwurf"))
+    return {reply:"Im lokalen Modus habe ich keine Live-Zahlen. Trage in den Einstellungen die Server-URL ein, dann nenne ich dir Leads, Winning Products und Lieferanten in echt.", intent:"counts_local"};
+
+  if(vhas(t,"wie spaet","uhrzeit","wie viel uhr","wieviel uhr","welche zeit","datum","welcher tag")){
+    const n=new Date(), tage=["Sonntag","Montag","Dienstag","Mittwoch","Donnerstag","Freitag","Samstag"];
+    return {reply:"Es ist "+String(n.getHours()).padStart(2,"0")+":"+String(n.getMinutes()).padStart(2,"0")+" Uhr, "+tage[n.getDay()]+", der "+n.getDate()+"."+(n.getMonth()+1)+"."+n.getFullYear()+".", intent:"clock"};
+  }
+
+  if(vhas(t,"status","wie geht","was machst du","laeuft","zustand","alles ok","alles in ordnung","wie steht")){
+    let line;
+    if(running && lastState==="night") line="Die Nachtschicht läuft, der Reactor ist gedimmt.";
+    else if(running && lastState==="sleeping") line="Die Arbeit ist erledigt, ich warte auf das Weck-Fenster.";
+    else line="Ich bin im Leerlauf und bereit für deine Anweisungen.";
+    return {reply:line+" Wir sind im lokalen Modus.", intent:"status"};
+  }
+
+  if(vhas(t,"was kannst du","hilfe","kommandos","befehle","moeglichkeiten","optionen"))
+    return {reply:"Du kannst sagen: Wie ist der Status? Gib mir das Briefing. Wann ist die Weckzeit? Starte die Nachtschicht. Wie spät ist es? Zum Auflegen sag Tschüss.", intent:"help"};
+
+  if(vhas(t,"danke","vielen dank","super","perfekt","klasse"))
+    return {reply:"Gern geschehen. Sonst noch etwas?", intent:"thanks"};
+
+  if(vhas(t,"hallo","hi","hey","guten tag","guten morgen","guten abend","moin","jarvis"))
+    return {reply:"Hallo Jonas. Ich bin bereit. Frag mich nach dem Status, dem Briefing oder der Weckzeit, oder sag 'starte die Nachtschicht'.", intent:"greeting"};
+
+  return {reply:"Das habe ich nicht ganz verstanden. Du kannst mich nach dem Status, dem Briefing oder der Weckzeit fragen — oder sagen 'starte die Nachtschicht'.", intent:"fallback"};
+}
+
+async function voiceReply(text){
+  const url = LS.get("serverUrl","");
+  if(url){
+    try{
+      const r = await fetch(url.replace(/\/$/,"")+"/api/voice",
+        {method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({text})});
+      if(r.ok) return await r.json();
+    }catch(e){ /* Server weg -> lokal antworten */ }
+  }
+  return localReply(text);
+}
+
+// ---- Call loop (Web Speech API, turn-basiert) ----
+const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+let recog=null, inCall=false, listening=false, awaitingReply=false;
+
+function addLine(who, text){
+  const box=$("transcript"), div=document.createElement("div");
+  div.className = who==="me" ? "me" : "jv";
+  const safe=(text||"").replace(/&/g,"&amp;").replace(/</g,"&lt;");
+  div.innerHTML = "<b>"+(who==="me"?"Du":"JARVIS")+":</b> "+safe;
+  box.appendChild(div); div.scrollIntoView({block:"end", behavior:"smooth"});
+}
+function speakAsync(text){
+  return new Promise(res=>{
+    if(!text || !window.speechSynthesis){ res(); return; }
+    try{ window.speechSynthesis.cancel(); }catch(e){}
+    const u=new SpeechSynthesisUtterance(text); u.lang="de-DE"; u.rate=1.02;
+    u.onend=()=>res(); u.onerror=()=>res();
+    window.speechSynthesis.speak(u);
+  });
+}
+async function jarvisSay(text){ addLine("jv", text); await speakAsync(text); }
+function listenOnce(){ if(!inCall||!recog||listening) return; try{ recog.start(); listening=true; }catch(e){} }
+
+async function handleUtterance(text){
+  if(!text){ listenOnce(); return; }
+  awaitingReply=true; addLine("me", text);
+  let data; try{ data = await voiceReply(text); }
+  catch(e){ data={reply:"Es gab einen Fehler. Bitte noch einmal.", end:false}; }
+  await jarvisSay(data.reply||"…");
+  awaitingReply=false;
+  if(data.end){ stopCall(); return; }
+  listenOnce();
+}
+
+async function startCall(){
+  if(!SR){ addLine("jv","Dein Browser unterstützt keine Spracherkennung. Bitte Chrome, Edge oder Safari nutzen.");
+           speakAsync("Dein Browser unterstützt keine Spracherkennung."); return; }
+  inCall=true; soundCueSilentPrime();
+  $("callBtn").classList.add("calling"); $("callBtn").textContent="📞 Auflegen";
+  recog=new SR(); recog.lang="de-DE"; recog.continuous=false; recog.interimResults=false; recog.maxAlternatives=1;
+  recog.onresult=(e)=>{ listening=false; handleUtterance(e.results[0][0].transcript.trim()); };
+  recog.onerror=(e)=>{ listening=false;
+    if(e.error==="not-allowed"){ addLine("jv","Mikrofon-Zugriff verweigert."); stopCall(); return; }
+    if(inCall && !awaitingReply && e.error!=="aborted") setTimeout(listenOnce,500); };
+  recog.onend=()=>{ listening=false; if(inCall && !awaitingReply) setTimeout(listenOnce,300); };
+  await jarvisSay("Guten Tag, Jonas. Hier ist JARVIS. Ich höre — wie kann ich helfen?");
+  listenOnce();
+}
+function stopCall(){
+  inCall=false; listening=false; awaitingReply=false;
+  try{ recog && recog.abort(); }catch(e){}
+  try{ window.speechSynthesis.cancel(); }catch(e){}
+  $("callBtn").classList.remove("calling"); $("callBtn").textContent="📞 Telefon-Modus starten";
+}
+function toggleCall(){ inCall ? stopCall() : startCall(); }
+
 // ---- Wire up ----
+$("callBtn").onclick = toggleCall;
 $("startBtn").onclick = startProtocol;
 $("stopBtn").onclick  = stopProtocol;
 $("testBtn").onclick   = ()=>{ soundCueSilentPrime(); doWake(); };

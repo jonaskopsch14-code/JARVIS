@@ -92,6 +92,16 @@ The same `JARVIS_WEB_TOKEN` gate and `127.0.0.1` binding apply to the voice
 endpoint. Note that browsers only allow microphone access over `https://` or on
 `localhost`, so for remote phone use, put it behind a TLS tunnel.
 
+### No server at all: `jarvis_app.html`
+
+The standalone app `jarvis_app.html` has the **same Telefon-Modus built in,
+fully offline** — just open the file (or add it to your home screen) and tap
+**📞 Telefon-Modus**. There's no Python backend there, so the dialogue brain is
+ported to JavaScript and answers from the app's local state (status, briefing,
+wake clock, "starte die Nachtschicht", clock, help). If you set a **Server-URL**
+in the settings, the call is routed to the server's `/api/voice` instead, so you
+get the full live answers (real dashboard counts) automatically.
+
 ## Going live (turnkey activation)
 
 1. `cp jarvis_v6/.env.example jarvis_v6/.env` and fill in real values. `.env`
