@@ -7,7 +7,7 @@
  *
  * Bump CACHE when the app or icons change so clients pick up the new version.
  */
-const CACHE = "jarvis-v6-pwa-v2";
+const CACHE = "jarvis-v6-pwa-v3";
 const ASSETS = [
   "./",
   "./index.html",

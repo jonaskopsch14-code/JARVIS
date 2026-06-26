@@ -212,11 +212,18 @@ function loadVoices(){
   fillVoiceSelect();
 }
 function autoPickVoice(){
-  const male = v => /male|männlich|mann|herr|deep|david|daniel|james|george|oliver|arthur|markus|conrad|stefan|hans|yannick|uk english male/i.test(v.name);
-  const de = VOICES.filter(v => /^de/i.test(v.lang));
-  const enGB = VOICES.filter(v => /^en[-_]?gb/i.test(v.lang));   // britischer JARVIS-Klang
-  const en = VOICES.filter(v => /^en/i.test(v.lang));
-  return de.find(male) || enGB.find(male) || enGB[0] || de[0] || en.find(male) || en[0] || VOICES[0] || null;
+  // Natürlichkeit zuerst (sonst klingt es nach Roboter): Google/Neural/Online-
+  // Stimmen oder Netzwerk-Stimmen (localService===false) bevorzugen.
+  const good = v => /google|natural|neural|enhanced|premium|wavenet|online|siri/i.test(v.name) || v.localService === false;
+  // Roboter-Engines (eSpeak/pico) hart vermeiden.
+  const bad  = v => /espeak|pico|compact|robot/i.test(v.name);
+  const male = v => /male|männlich|mann|herr|david|daniel|james|george|oliver|arthur|markus|conrad|stefan|hans|yannick|uk english male/i.test(v.name);
+  const de = VOICES.filter(v => /^de/i.test(v.lang) && !bad(v));
+  const enGB = VOICES.filter(v => /^en[-_]?gb/i.test(v.lang) && !bad(v));   // britischer JARVIS-Klang
+  const en = VOICES.filter(v => /^en/i.test(v.lang) && !bad(v));
+  // Pro Sprache: am liebsten natürlich+männlich, sonst natürlich, sonst männlich, sonst irgendeine.
+  const pick = list => list.find(v=>good(v)&&male(v)) || list.find(good) || list.find(male) || list[0];
+  return pick(de) || pick(enGB) || pick(en) || VOICES.find(good) || VOICES.find(v=>!bad(v)) || VOICES[0] || null;
 }
 function currentVoice(){
   if(chosenVoiceURI){ const v = VOICES.find(v => v.voiceURI === chosenVoiceURI); if(v) return v; }
@@ -225,8 +232,9 @@ function currentVoice(){
 function applyJarvisVoice(u){
   const v = currentVoice();
   if(v){ u.voice = v; u.lang = v.lang; } else { u.lang = "de-DE"; }
-  u.pitch = 0.8;   // tiefer = mehr JARVIS
-  u.rate  = 0.96;  // einen Tick ruhiger/gemessener
+  // Sanft: starke pitch-Absenkung lässt einfache Stimmen nach Roboter klingen.
+  u.pitch = 0.95;  // nur leicht tiefer
+  u.rate  = 1.0;   // natürliches Tempo
 }
 function fillVoiceSelect(){
   const sel = $("voiceSel"); if(!sel) return;

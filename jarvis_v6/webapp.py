@@ -427,15 +427,18 @@ function soundCue(){
 }
 function jarvisVoice(){
   const vs=(window.speechSynthesis&&window.speechSynthesis.getVoices())||[];
+  const good=v=>/google|natural|neural|enhanced|premium|wavenet|online|siri/i.test(v.name)||v.localService===false;
+  const bad=v=>/espeak|pico|compact|robot/i.test(v.name);
   const male=v=>/male|männlich|conrad|stefan|markus|daniel|david|uk english male|george|arthur/i.test(v.name);
-  const de=vs.filter(v=>/^de/i.test(v.lang)), enGB=vs.filter(v=>/^en[-_]?gb/i.test(v.lang));
-  return de.find(male)||enGB.find(male)||enGB[0]||de[0]||vs[0]||null;
+  const de=vs.filter(v=>/^de/i.test(v.lang)&&!bad(v)), enGB=vs.filter(v=>/^en[-_]?gb/i.test(v.lang)&&!bad(v));
+  const pick=l=>l.find(v=>good(v)&&male(v))||l.find(good)||l.find(male)||l[0];
+  return pick(de)||pick(enGB)||vs.find(good)||vs.find(v=>!bad(v))||vs[0]||null;
 }
 function speak(text){
   if(!text || text===spoken || !window.speechSynthesis) return; spoken=text;
   const u=new SpeechSynthesisUtterance(text);
   const v=jarvisVoice(); if(v){ u.voice=v; u.lang=v.lang; } else { u.lang="de-DE"; }
-  u.pitch=0.8; u.rate=0.96;   // tiefer/ruhiger = JARVIS
+  u.pitch=0.95; u.rate=1.0;   // natürlich, nur leicht tiefer
   window.speechSynthesis.speak(u);
 }
 const LABELS={booting:"INITIALISIERE…",night_shift:"NACHTSCHICHT AKTIV",sleeping:"WARTE AUF 16:00",
