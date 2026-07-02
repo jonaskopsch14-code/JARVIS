@@ -1,0 +1,30 @@
+# Jarvis — Laufzeit-Abhängigkeiten (Windows).
+# Der Kern importiert alles LAZY, d. h. fehlt ein Paket, bleibt der Rest lauffähig.
+
+# --- Kern / Netzwerk ---
+httpx>=0.27
+
+# --- Phase 1: Sprache rein/raus + Bedienung ---
+faster-whisper>=1.0        # STT (lokal)
+sounddevice>=0.4           # Mikro-Aufnahme
+numpy>=1.24
+keyboard>=0.13             # globaler Push-to-Talk-Hotkey (evtl. Adminrechte)
+pyttsx3>=2.90              # SAPI5-Fallback für TTS
+playsound==1.2.2           # MP3-Wiedergabe (ElevenLabs)
+pystray>=0.19              # Tray-Icon
+Pillow>=10.0               # Icon-Grafik
+
+# --- Phase 3: Systemkontrolle ---
+psutil>=5.9                # Prozesse
+mss>=9.0                   # Screenshots (Bildschirm sehen)
+playwright>=1.44           # Browser-Automatisierung  (danach: playwright install)
+
+# --- Phase 3: Gmail ---
+google-api-python-client>=2.0
+google-auth-oauthlib>=1.0
+
+# --- Phase 4: Proaktivität ---
+APScheduler>=3.10
+
+# --- Phase 6: Weckwort (optional) ---
+# openwakeword>=0.6
