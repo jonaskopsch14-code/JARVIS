@@ -123,7 +123,17 @@ def run_voice() -> None:
 
     from .hotkey import HotkeyManager
     hk = HotkeyManager(cfg.hotkey, cfg.panic_hotkey)
-    if not hk.register(on_talk, on_panic):
+    hotkey_ok = hk.register(on_talk, on_panic)
+
+    # Phase 6: optionales Always-on-Weckwort zusätzlich zum Hotkey.
+    if cfg.wakeword_enabled:
+        try:
+            from .wakeword import WakeWordListener
+            WakeWordListener(on_talk, cfg.wakeword).start()
+        except Exception as exc:  # noqa: BLE001
+            log(f"Weckwort nicht gestartet: {exc}", "warning")
+
+    if not hotkey_ok and not cfg.wakeword_enabled:
         log("Kein globaler Hotkey möglich — wechsle in den Text-Modus.")
         return run_text()
 
@@ -153,7 +163,7 @@ def run_voice() -> None:
     # Optionales Tray-Icon (blockiert, wenn vorhanden); sonst auf Stop warten.
     try:
         from .tray import Tray
-        tray = Tray(on_quit=stop.set)
+        tray = Tray(on_quit=stop.set, log_file=str(cfg.log_file))
         if not tray.run():
             stop.wait()
     except Exception:  # noqa: BLE001

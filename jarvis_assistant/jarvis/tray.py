@@ -10,10 +10,28 @@ from typing import Callable, Optional
 
 class Tray:
     def __init__(self, on_quit: Callable[[], None],
-                 on_toggle: Optional[Callable[[], None]] = None):
+                 on_toggle: Optional[Callable[[], None]] = None,
+                 log_file: Optional[str] = None):
         self.on_quit = on_quit
         self.on_toggle = on_toggle
+        self.log_file = log_file
         self._icon = None
+
+    def _open_log(self) -> None:
+        """Aktivitätslog im Standard-Editor öffnen (Phase 6)."""
+        if not self.log_file:
+            return
+        try:
+            import os
+            os.startfile(self.log_file)  # type: ignore[attr-defined]  # Windows
+        except Exception:  # noqa: BLE001
+            import subprocess
+            import sys
+            opener = "open" if sys.platform == "darwin" else "xdg-open"
+            try:
+                subprocess.Popen([opener, self.log_file])
+            except Exception:  # noqa: BLE001
+                pass
 
     def _image(self):
         from PIL import Image, ImageDraw  # lazy
@@ -32,6 +50,8 @@ class Tray:
             log(f"Tray nicht verfügbar ({exc}) — laufe ohne Tray weiter.", "warning")
             return False
         items = [pystray.MenuItem("Jarvis beenden", lambda: self._quit())]
+        if self.log_file:
+            items.insert(0, pystray.MenuItem("Aktivitätslog öffnen", lambda: self._open_log()))
         if self.on_toggle:
             items.insert(0, pystray.MenuItem("Pause/Weiter", lambda: self.on_toggle()))
         self._icon = pystray.Icon("jarvis", self._image(), "Jarvis",

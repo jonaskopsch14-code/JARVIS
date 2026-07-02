@@ -64,6 +64,7 @@ def _register_builtin() -> None:
     # Import der Skill-Module registriert sie über den Dekorator.
     from . import open_app, web_search, read_file, weather, calendar_local  # noqa: F401
     from . import memory_skills  # noqa: F401  (Phase 2)
+    from . import marketing, product_research  # noqa: F401  (Phase 7 Beispiele)
     # Phasen 3/4/5 (werden importiert, wenn vorhanden — brechen den Kern nie).
     for mod in ("files", "processes", "browser", "screen", "email_gmail",
                 "system_health", "shop_watch"):
