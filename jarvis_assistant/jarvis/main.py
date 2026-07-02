@@ -127,6 +127,25 @@ def run_voice() -> None:
         log("Kein globaler Hotkey möglich — wechsle in den Text-Modus.")
         return run_text()
 
+    # Phase 4/5: proaktive Hintergrund-Checks (morgendliches Briefing, Speicher,
+    # Shop-Wächter). Meldungen werden vorgelesen.
+    try:
+        from .proactive import build_default_engine
+        engine = build_default_engine(cfg, notifier=speaker.say)
+        try:
+            from .skills import shop_watch
+            chk = shop_watch.proactive_check(cfg)
+            if chk:
+                from .proactive import Check
+                engine.add(Check("shop_watch", func=chk, kind="interval",
+                                 interval_s=3 * 3600))
+        except Exception:  # noqa: BLE001
+            pass
+        engine.start()
+        log("Proaktive Engine gestartet.")
+    except Exception as exc:  # noqa: BLE001
+        log(f"Proaktive Engine nicht gestartet: {exc}", "warning")
+
     speaker.say(f"Jarvis ist bereit, {cfg.user_name}. "
                 f"Drücke {cfg.hotkey}, um mit mir zu sprechen.")
     log(f"Sprach-Modus aktiv. Push-to-Talk: {cfg.hotkey}, Not-Aus: {cfg.panic_hotkey}")
