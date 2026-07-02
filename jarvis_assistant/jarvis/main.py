@@ -28,6 +28,23 @@ def _apply_config_to_skills(cfg: Config) -> None:
     from .skills import calendar_local as c
     w.DEFAULT_CITY = cfg.city
     c.CALENDAR_PATH = cfg.calendar_file
+    # Phase 3: Bildschirm (Vision) und Gmail-Datenordner
+    try:
+        from .skills import screen as s
+        s.OLLAMA_URL = cfg.ollama_url
+    except Exception:  # noqa: BLE001
+        pass
+    try:
+        from .skills import email_gmail as e
+        e.DATA_DIR = cfg.data_dir
+    except Exception:  # noqa: BLE001
+        pass
+    # Phase 5: Shopify
+    try:
+        from .skills import shop_watch as sw
+        sw.configure(cfg.shopify_domain, cfg.shopify_token)
+    except Exception:  # noqa: BLE001
+        pass
 
 
 def _build_memory(cfg: Config):
