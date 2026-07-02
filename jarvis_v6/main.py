@@ -109,6 +109,10 @@ class NightShiftConfig:
     # second once the window is near.
     poll_seconds: float = float(os.getenv("JARVIS_POLL_SECONDS", "30"))
 
+    # QA-Agent: validate each task output and refine on fixable issues.
+    enable_qa: bool = os.getenv("JARVIS_ENABLE_QA", "1") != "0"
+    max_refine: int = int(os.getenv("JARVIS_MAX_REFINE", "2"))
+
     # Master safety switch. While True, no task is allowed to mutate external
     # systems (mailbox, store, ad accounts). Flip to False only once you have
     # wired in credentials and accept unattended changes.
@@ -175,6 +179,11 @@ class TaskResult:
     dry_run: bool = False
     duration_s: float = 0.0
     error: Optional[str] = None
+    # Rich output the QA-Agent can inspect (e.g. {"drafts": [...]}).
+    artifacts: Dict = field(default_factory=dict)
+    # Filled by the QA-Agent: "OK" | "REFINE" | "FAIL", plus structured issues.
+    qa_status: Optional[str] = None
+    qa_issues: List[dict] = field(default_factory=list)
 
 
 class NightShiftTask:
@@ -191,6 +200,9 @@ class NightShiftTask:
     def __init__(self, config: NightShiftConfig, cancel: threading.Event):
         self.config = config
         self.cancel = cancel
+        # Set by the QA refine loop before a re-run so a (future/LLM) task can
+        # use the critique to improve. Deterministic tasks may ignore it.
+        self.critique: Optional[list] = None
 
     @property
     def dry_run(self) -> bool:
@@ -403,6 +415,7 @@ class StoreOptimizerTask(NightShiftTask):
             summary=(f"Fashion Aura: {report.products_seo} Produkttexte SEO-optimiert {state}, "
                      f"{report.campaigns} Werbekampagnen erstellt."),
             metrics=report.as_metrics(), dry_run=self.dry_run,
+            artifacts={"drafts": report.drafts},   # QA-Agent validates these
         )
 
 
@@ -443,6 +456,11 @@ class Briefing:
         if failed:
             lines.append("Achtung: " + "; ".join(f"{r.name} fehlgeschlagen ({r.error})" for r in failed) + ".")
 
+        flagged = [r for r in results if r.qa_status in ("REFINE", "FAIL") and r.ok]
+        if flagged:
+            lines.append("Qualitätshinweis: " + ", ".join(
+                f"{r.name} ({r.qa_status})" for r in flagged) + " — Details im Dashboard.")
+
         any_dry = any(r.dry_run for r in results)
         status = "stabil im Sicherheitsmodus (Dry-Run)" if any_dry else "stabil bei 100%"
         lines.append(f"Systemstatus ist {status}. Ich bin bereit für deine nächsten Anweisungen.")
@@ -481,6 +499,14 @@ class NightShiftSupervisor:
         self.cancel = threading.Event()
         self.results: List[TaskResult] = []
         self._thread: Optional[threading.Thread] = None
+        # QA-Agent (lazy import keeps main.py dependency-free at module load).
+        self._validator = None
+        if self.config.enable_qa:
+            try:
+                from integrations.validator import Validator
+                self._validator = Validator()
+            except Exception:  # noqa: BLE001 - QA is optional, never block the run
+                LOG.warning("QA-Agent nicht verfügbar — Validierung übersprungen.")
 
     # -- state broadcast -----------------------------------------------------
     def _emit(self, state: SystemState, **info) -> None:
@@ -498,13 +524,35 @@ class NightShiftSupervisor:
         tasks = [cls(self.config, self.cancel) for cls in self.task_classes]
         with ThreadPoolExecutor(max_workers=self.config.max_workers,
                                 thread_name_prefix="jarvis") as pool:
-            futures = {pool.submit(self._guarded, t): t for t in tasks}
+            futures = {pool.submit(self._run_with_qa, t): t for t in tasks}
             for fut in as_completed(futures):
                 res = fut.result()
                 results.append(res)
-                self._emit(SystemState.NIGHT_SHIFT, completed=res.name, ok=res.ok)
+                self._emit(SystemState.NIGHT_SHIFT, completed=res.name,
+                           ok=res.ok, qa=res.qa_status)
         self.results = results
         return results
+
+    def _run_with_qa(self, task: NightShiftTask) -> TaskResult:
+        """Run a task, then let the QA-Agent review it; on a REFINE verdict feed
+        the critique back and re-run, up to max_refine times. The loop always
+        terminates (OK, or refine budget exhausted, or FAIL)."""
+        attempt = 0
+        while True:
+            res = self._guarded(task)
+            if self._validator is None:
+                return res
+            verdict = self._validator.review(res)
+            res.qa_status = verdict.status
+            res.qa_issues = [i.as_dict() for i in verdict.issues]
+            if verdict.status == "REFINE" and attempt < self.config.max_refine \
+                    and not self.cancel.is_set():
+                attempt += 1
+                task.critique = verdict.issues  # hand the critique to the agent
+                LOG.info("QA: %s → REFINE (Versuch %d, Score %d)",
+                         task.name, attempt, verdict.score)
+                continue
+            return res
 
     def _guarded(self, task: NightShiftTask) -> TaskResult:
         """Run one task, turning any exception into a failed TaskResult so one
