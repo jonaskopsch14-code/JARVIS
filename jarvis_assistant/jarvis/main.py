@@ -33,7 +33,11 @@ def _apply_config_to_skills(cfg: Config) -> None:
 def _build_memory(cfg: Config):
     try:
         from .memory import Memory  # Phase 2 (optional)
-        return Memory(cfg.memory_db)
+        mem = Memory(cfg.memory_db)
+        # Speicher auch den Gedächtnis-Skills bekannt machen.
+        from .skills import memory_skills
+        memory_skills.MEMORY = mem
+        return mem
     except Exception:  # noqa: BLE001
         return None
 

@@ -63,9 +63,10 @@ def build_tools() -> List[dict]:
 def _register_builtin() -> None:
     # Import der Skill-Module registriert sie über den Dekorator.
     from . import open_app, web_search, read_file, weather, calendar_local  # noqa: F401
-    # Phasen 3/5 (werden importiert, wenn vorhanden — brechen den Kern nie).
+    from . import memory_skills  # noqa: F401  (Phase 2)
+    # Phasen 3/4/5 (werden importiert, wenn vorhanden — brechen den Kern nie).
     for mod in ("files", "processes", "browser", "screen", "email_gmail",
-                "shop_watch"):
+                "system_health", "shop_watch"):
         try:
             __import__(f"jarvis.skills.{mod}")
         except Exception:  # noqa: BLE001 - optionale/hardware-abhängige Skills
