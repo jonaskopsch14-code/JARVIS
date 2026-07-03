@@ -1,0 +1,47 @@
+name: tests
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+
+jobs:
+  jarvis-assistant:
+    name: Jarvis assistant (offline suite)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Kompilieren
+        working-directory: jarvis_assistant
+        run: python -m py_compile jarvis/*.py jarvis/skills/*.py tests/*.py
+      - name: Tests (alle Phasen)
+        working-directory: jarvis_assistant
+        run: |
+          set -e
+          for t in tests/test_*.py; do
+            echo "== $t =="
+            python "$t"
+          done
+
+  jarvis-v6:
+    name: JARVIS V6 Nachtschicht (offline suite)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Kompilieren
+        working-directory: jarvis_v6
+        run: python -m py_compile main.py dashboard_gui.py webapp.py integrations/*.py tests/*.py
+      - name: Tests
+        working-directory: jarvis_v6
+        run: |
+          set -e
+          for t in tests/test_*.py; do
+            echo "== $t =="
+            python "$t"
+          done
