@@ -14,8 +14,8 @@ database_id = "REPLACE_WITH_D1_DATABASE_ID"
 [vars]
 APP_URL = "https://app.consentflow.de"        # Dashboard-URL (für Stripe-Redirects & CORS)
 CONSENT_VERSION = "1"                          # erhöhen, wenn sich Kategorien/Texte rechtlich ändern
-STRIPE_PRICE_STARTER = "price_REPLACE_STARTER" # Stripe-Preis-ID Starter (19 €/Monat)
-STRIPE_PRICE_AGENCY  = "price_REPLACE_AGENCY"  # Stripe-Preis-ID Agency (49 €/Monat)
+STRIPE_PRICE_STARTER = "price_REPLACE_STARTER" # Stripe-Preis-ID Starter (29 €/Monat)
+STRIPE_PRICE_AGENCY  = "price_REPLACE_AGENCY"  # Stripe-Preis-ID Agency (59 €/Monat)
 
 # Zu setzende Secrets (Beispiel):
 #   wrangler secret put JWT_SECRET

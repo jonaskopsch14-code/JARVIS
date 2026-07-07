@@ -4,7 +4,7 @@
 
 Ein per Copy-&-Paste einbindbares Consent-Banner + zentrales Dashboard, mit dem
 kleine Website-Betreiber und Agenturen rechtssichere Einwilligungen einsammeln,
-protokollieren und verwalten — ab 19 €/Monat, ohne technisches Wissen.
+protokollieren und verwalten — ab 29 €/Monat, ohne technisches Wissen.
 
 > ⚖️ ConsentFlow ist ein **technisches Werkzeug**, keine Rechtsberatung.
 > Details siehe [`RECHTLICHES.md`](./RECHTLICHES.md).
@@ -113,7 +113,7 @@ PUBLIC_API_URL=https://api.consentflow.de npm run build   # → dist/ auf Cloudf
 
 ### Stripe
 
-1. Zwei Produkte/Preise anlegen: Starter (19 €/Monat), Agency (49 €/Monat).
+1. Zwei Produkte/Preise anlegen: Starter (29 €/Monat), Agency (59 €/Monat).
 2. Preis-IDs in `worker/wrangler.toml` (`STRIPE_PRICE_*`) eintragen.
 3. Webhook-Endpunkt `https://api.consentflow.de/v1/billing/webhook` einrichten
    (Events: `checkout.session.completed`, `customer.subscription.*`).
@@ -123,8 +123,8 @@ PUBLIC_API_URL=https://api.consentflow.de npm run build   # → dist/ auf Cloudf
 | Plan       | Preis        | Websites | Besonderheit                     |
 |------------|--------------|----------|----------------------------------|
 | Free-Trial | 0 € / 14 Tage| 1        | voller Funktionsumfang           |
-| Starter    | 19 € / Monat | bis 3    | deutscher E-Mail-Support         |
-| Agency     | 49 € / Monat | bis 25   | „powered by“ entfernbar          |
+| Starter    | 29 € / Monat | bis 3    | deutscher E-Mail-Support         |
+| Agency     | 59 € / Monat | bis 25   | „powered by“ entfernbar          |
 
 ## Freigabe-Punkte (durch Jonas)
 
