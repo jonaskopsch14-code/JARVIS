@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ConsentFlow – Widget-Demo</title>
+  <style>
+    body { font: 16px/1.6 system-ui, sans-serif; max-width: 760px; margin: 40px auto; padding: 0 20px; color: #1f2430; }
+    code { background: #f0f2f7; padding: 2px 6px; border-radius: 5px; }
+    .card { border: 1px solid #e3e7ef; border-radius: 12px; padding: 20px; margin: 20px 0; }
+    button { cursor: pointer; padding: 10px 16px; border-radius: 8px; border: 1px solid #ccd; background: #fff; }
+    #log { background: #0f1420; color: #7CE38B; padding: 14px; border-radius: 10px; font-family: ui-monospace, monospace; font-size: 13px; min-height: 60px; white-space: pre-wrap; }
+  </style>
+</head>
+<body>
+  <h1>ConsentFlow – Widget-Demo</h1>
+  <p>Diese Seite bindet das Consent-Banner ein. Ein „Statistik“-Skript wird
+     <strong>erst nach Einwilligung</strong> geladen (echtes Opt-in).</p>
+
+  <div class="card">
+    <p><strong>Widerruf / Einstellungen ändern</strong> – jederzeit möglich:</p>
+    <button onclick="ConsentFlow.open()">Cookie-Einstellungen öffnen</button>
+    <button onclick="ConsentFlow.reset()">Einwilligung zurücksetzen</button>
+  </div>
+
+  <div class="card">
+    <p>Status-Log (hört auf <code>consentflow:change</code>):</p>
+    <div id="log">warte auf Entscheidung …</div>
+  </div>
+
+  <!-- So bindet der Kunde ein blockiertes Statistik-Skript ein: -->
+  <script type="text/plain" data-cf-category="statistics">
+    document.getElementById("log").textContent =
+      "✓ Statistik-Skript wurde nach Einwilligung ausgeführt (" + new Date().toLocaleTimeString() + ")";
+  </script>
+
+  <script>
+    window.addEventListener("consentflow:change", function (e) {
+      console.log("Consent geändert:", e.detail);
+    });
+  </script>
+
+  <!-- Lokaler Test: Widget-Quelle + lokale API. In Produktion: CDN-URL + api.consentflow.de -->
+  <script async src="./src/consentflow.js"
+          data-cf-site="cf_demo0000000000000000"
+          data-cf-api="http://localhost:8787"></script>
+</body>
+</html>

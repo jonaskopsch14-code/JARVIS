@@ -1,0 +1,65 @@
+---
+import Base from "../layouts/Base.astro";
+const plans = [
+  { name: "Free-Trial", price: "0 €", period: "14 Tage", sites: "1 Website", cta: "Kostenlos testen",
+    features: ["Voller Funktionsumfang", "Consent-Protokoll & CSV-Export", "Deutscher Banner"], highlight: false },
+  { name: "Starter", price: "29 €", period: "pro Monat", sites: "bis 3 Websites", cta: "Starter wählen",
+    features: ["Alles aus Trial", "3 Websites", "E-Mail-Support (deutsch)"], highlight: true },
+  { name: "Agency", price: "59 €", period: "pro Monat", sites: "bis 25 Websites", cta: "Agency wählen",
+    features: ["Alles aus Starter", "25 Websites", "„powered by“ entfernbar"], highlight: false },
+];
+---
+<Base title="ConsentFlow – DSGVO Cookie-Banner ab 29 €/Monat">
+  <section class="grid" style="gap:22px;text-align:center;padding:40px 0 20px;">
+    <div>
+      <span class="badge">DSGVO · DACH · Copy &amp; Paste</span>
+      <h1 style="font-size:40px;line-height:1.15;margin:16px 0 8px;letter-spacing:-1px;">
+        Rechtssicherer Cookie-Banner<br />in 5 Minuten eingebunden.
+      </h1>
+      <p class="muted" style="font-size:18px;max-width:620px;margin:0 auto;">
+        Echtes Opt-in, lückenlose Protokollierung, deutscher Support.
+        Ein <code>&lt;script&gt;</code>-Snippet – fertig. Ab 29 €/Monat, ohne technisches Wissen.
+      </p>
+      <div style="margin-top:22px;display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
+        <a href="/app" class="btn" style="padding:13px 22px;">14 Tage kostenlos testen</a>
+        <a href="#preise" class="btn ghost" style="padding:13px 22px;">Preise ansehen</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="grid" style="grid-template-columns:repeat(auto-fit,minmax(240px,1fr));margin-top:30px;">
+    <div class="card">
+      <h3>✅ Echtes Opt-in</h3>
+      <p class="muted">Nicht-notwendige Skripte (Analytics, Marketing) werden erst <em>nach</em> Einwilligung geladen – wie es die DSGVO verlangt.</p>
+    </div>
+    <div class="card">
+      <h3>📋 Nachweispflicht erfüllt</h3>
+      <p class="muted">Jede Einwilligung wird pseudonymisiert protokolliert (gehashte IP + Zeitstempel) und ist als CSV exportierbar.</p>
+    </div>
+    <div class="card">
+      <h3>🎨 An Ihre Marke angepasst</h3>
+      <p class="muted">Farben, Position, Logo und Texte – pro Website individuell im Editor mit Live-Vorschau.</p>
+    </div>
+  </section>
+
+  <section id="preise" style="margin-top:56px;">
+    <h2 style="text-align:center;">Einfache, faire Preise</h2>
+    <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(240px,1fr));margin-top:22px;">
+      {plans.map((p) => (
+        <div class="card" style={`border-color:${p.highlight ? "var(--primary)" : "var(--border)"};${p.highlight ? "box-shadow:0 8px 30px rgba(47,109,246,.15);" : ""}`}>
+          {p.highlight && <span class="badge">Beliebt</span>}
+          <h3 style="margin:8px 0 2px;">{p.name}</h3>
+          <div style="font-size:32px;font-weight:800;">{p.price}<span class="muted" style="font-size:14px;font-weight:500;"> / {p.period}</span></div>
+          <p class="muted" style="margin:4px 0 12px;">{p.sites}</p>
+          <ul style="list-style:none;padding:0;margin:0 0 16px;">
+            {p.features.map((f) => <li style="padding:5px 0;">✓ {f}</li>)}
+          </ul>
+          <a href="/app" class="btn" style="width:100%;text-align:center;">{p.cta}</a>
+        </div>
+      ))}
+    </div>
+    <p class="muted" style="text-align:center;margin-top:14px;font-size:13px;">
+      Alle Preise zzgl. USt. Monatlich kündbar über das Stripe-Kundenportal.
+    </p>
+  </section>
+</Base>

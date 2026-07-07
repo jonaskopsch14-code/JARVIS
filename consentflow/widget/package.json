@@ -1,0 +1,13 @@
+{
+  "name": "consentflow-widget",
+  "version": "0.1.0",
+  "private": true,
+  "description": "ConsentFlow – Consent-Banner-Widget (Vanilla JS)",
+  "scripts": {
+    "build": "esbuild src/consentflow.js --minify --bundle --outfile=dist/widget.js --banner:js=\"/* ConsentFlow Widget */\"",
+    "size": "node -e \"console.log((require('fs').statSync('src/consentflow.js').size/1024).toFixed(1)+' KB (Quelle)')\""
+  },
+  "devDependencies": {
+    "esbuild": "^0.24.0"
+  }
+}

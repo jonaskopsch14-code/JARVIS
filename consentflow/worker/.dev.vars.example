@@ -1,0 +1,7 @@
+# Lokale Secrets für `wrangler dev` – Datei nach `.dev.vars` kopieren.
+# NICHT einchecken (steht in .gitignore).
+JWT_SECRET="dev-secret-bitte-aendern"
+
+# Optional für lokale Zahlungstests:
+# STRIPE_SECRET_KEY="sk_test_..."
+# STRIPE_WEBHOOK_SECRET="whsec_..."

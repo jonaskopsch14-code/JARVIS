@@ -1,0 +1,89 @@
+---
+import Base from "../layouts/Base.astro";
+---
+<Base title="ConsentFlow – Dashboard">
+  <!-- Auth-Ansicht -->
+  <section id="view-auth" class="hide" style="max-width:420px;margin:30px auto;">
+    <div class="card">
+      <h2 id="auth-title" style="margin-top:0;">Anmelden</h2>
+      <div id="auth-error" class="error hide"></div>
+      <label>E-Mail</label>
+      <input id="auth-email" type="email" autocomplete="email" placeholder="du@agentur.de" />
+      <label>Passwort</label>
+      <input id="auth-password" type="password" autocomplete="current-password" placeholder="mind. 8 Zeichen" />
+      <button id="auth-submit" class="btn" style="width:100%;margin-top:16px;">Anmelden</button>
+      <p class="muted" style="text-align:center;margin-top:14px;font-size:14px;">
+        <span id="auth-toggle-text">Noch kein Konto?</span>
+        <a href="#" id="auth-toggle">Jetzt registrieren</a>
+      </p>
+    </div>
+  </section>
+
+  <!-- Dashboard-Ansicht -->
+  <section id="view-app" class="hide">
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;">
+      <div>
+        <h2 style="margin:0;">Deine Websites</h2>
+        <p class="muted" style="margin:2px 0 0;">
+          Plan: <strong id="user-plan">–</strong> · <span id="user-email" class="muted"></span>
+          · <a href="#" id="link-billing">Abo verwalten</a>
+          · <a href="#" id="link-logout">Abmelden</a>
+        </p>
+      </div>
+      <button id="btn-new-site" class="btn">+ Website hinzufügen</button>
+    </div>
+    <div id="sites-list" class="grid" style="margin-top:20px;"></div>
+  </section>
+
+  <!-- Editor-Ansicht -->
+  <section id="view-editor" class="hide">
+    <a href="#" id="editor-back">← Zurück zur Übersicht</a>
+    <div id="editor-msg" style="margin-top:12px;"></div>
+    <div class="grid" style="grid-template-columns:1fr 1fr;margin-top:12px;align-items:start;">
+      <div class="card" id="editor-form"></div>
+      <div class="grid">
+        <div class="card">
+          <h3 style="margin-top:0;">Live-Vorschau</h3>
+          <div id="preview" style="position:relative;min-height:230px;background:#eef1f6;border-radius:10px;overflow:hidden;"></div>
+        </div>
+        <div class="card">
+          <h3 style="margin-top:0;">Einbindungs-Snippet</h3>
+          <p class="muted" style="margin-top:0;">Diesen Code auf jeder Seite vor <code>&lt;/body&gt;</code> einfügen:</p>
+          <pre id="snippet"></pre>
+          <button id="btn-copy" class="btn ghost">Snippet kopieren</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Consent-Ansicht -->
+  <section id="view-consents" class="hide">
+    <a href="#" id="consents-back">← Zurück zur Übersicht</a>
+    <h2 id="consents-title" style="margin-bottom:4px;">Einwilligungen</h2>
+    <div id="consents-stats" class="grid" style="grid-template-columns:repeat(auto-fit,minmax(160px,1fr));margin-top:16px;"></div>
+    <a id="consents-csv" class="btn" style="margin-top:18px;" href="#" download>CSV exportieren (Nachweis)</a>
+  </section>
+
+  <!-- Billing-Ansicht -->
+  <section id="view-billing" class="hide" style="max-width:640px;">
+    <a href="#" id="billing-back">← Zurück zur Übersicht</a>
+    <h2>Abo &amp; Zahlung</h2>
+    <div id="billing-msg"></div>
+    <div class="card">
+      <p>Aktueller Plan: <strong id="billing-plan">–</strong> <span id="billing-status" class="muted"></span></p>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:10px;">
+        <button class="btn" data-plan="starter">Starter – 29 €/Monat</button>
+        <button class="btn" data-plan="agency">Agency – 59 €/Monat</button>
+        <button id="btn-portal" class="btn ghost">Zahlungsdaten &amp; Kündigung (Stripe-Portal)</button>
+      </div>
+      <p class="muted" style="margin-top:12px;font-size:13px;">
+        Die Zahlung läuft sicher über Stripe. Du wirst zum Checkout weitergeleitet.
+      </p>
+    </div>
+  </section>
+
+  <script>
+    import { initApp } from "../client/app.js";
+    initApp();
+  </script>
+</Base>

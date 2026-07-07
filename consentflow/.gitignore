@@ -1,0 +1,12 @@
+# Abhängigkeiten & Build-Artefakte
+node_modules/
+dist/
+.astro/
+
+# Wrangler / Cloudflare
+.wrangler/
+.dev.vars
+
+# Umgebungsvariablen (nur .env.example wird eingecheckt)
+.env
+.env.local
