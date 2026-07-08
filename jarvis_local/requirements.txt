@@ -1,0 +1,27 @@
+# Der getestete Jarvis-KERN nutzt ausschließlich die Python-Standardbibliothek
+# und braucht KEINE dieser Pakete. Sie werden erst für den Live-Betrieb auf dem
+# Windows-PC benötigt (Sprache, lokales LLM, Gmail, Web-Agent).
+
+# --- Lokales LLM (Qwen3-8B via Ollama) ---
+ollama>=0.3.0
+
+# --- Spracheingabe (STT) ---
+faster-whisper>=1.0.0
+sounddevice>=0.4.6
+numpy>=1.26.0
+
+# --- Sprachausgabe (TTS) ---
+piper-tts>=1.2.0
+
+# --- Globaler Hotkey (Push-to-Talk) ---
+pynput>=1.7.6
+
+# --- Gmail (nur readonly + compose, kein send) ---
+google-api-python-client>=2.100.0
+google-auth-oauthlib>=1.2.0
+google-auth>=2.30.0
+
+# --- Optional: semantischer Index / Web-Agent / Premium-TTS ---
+# chromadb>=0.5.0
+# browser-use>=0.1.0
+# elevenlabs>=1.0.0

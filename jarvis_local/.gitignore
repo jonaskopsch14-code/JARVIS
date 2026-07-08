@@ -1,0 +1,21 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.egg-info/
+build/
+dist/
+
+# Jarvis-Daten & Geheimnisse (niemals einchecken)
+.jarvis/
+*.sqlite3
+*.sqlite3-wal
+*.sqlite3-shm
+.env
+credentials.json
+token.json
+*.onnx
+
+# Vault-Inhalte (persönliche Notizen)
+vault/
