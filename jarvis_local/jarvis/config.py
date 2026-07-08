@@ -22,6 +22,7 @@ class Config:
     # Voice
     whisper_model: str = "large-v3"
     whisper_device: str = "cuda"
+    whisper_compute: str = "int8"   # CPU-tauglich; für GPU z.B. "float16" via JARVIS_WHISPER_COMPUTE
     piper_model: str = "de_DE-thorsten-high.onnx"
 
     @property
@@ -49,6 +50,7 @@ class Config:
             num_ctx=int(_env("JARVIS_NUM_CTX", "16384")),
             whisper_model=_env("JARVIS_WHISPER_MODEL", "large-v3"),
             whisper_device=_env("JARVIS_WHISPER_DEVICE", "cuda"),
+            whisper_compute=_env("JARVIS_WHISPER_COMPUTE", "int8"),
             piper_model=_env("JARVIS_PIPER_MODEL", "de_DE-thorsten-high.onnx"),
         )
 

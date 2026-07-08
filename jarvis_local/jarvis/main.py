@@ -60,7 +60,7 @@ def run_voice(config: Config) -> None:  # pragma: no cover - benötigt Audio/GPU
 
     backend = OllamaBackend(config.ollama_model, config.ollama_host, config.temperature, config.num_ctx)
     app = build_app(config, backend, persist=True)
-    stt = WhisperSTT(config.whisper_model, config.whisper_device)
+    stt = WhisperSTT(config.whisper_model, config.whisper_device, compute_type=config.whisper_compute)
     tts = PiperTTS(config.piper_model)
 
     def voice_approver(action: Action) -> bool:
