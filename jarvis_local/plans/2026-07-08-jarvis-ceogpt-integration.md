@@ -1,7 +1,8 @@
 # Integrationsplan: Jarvis × CEO-GPT — ein Gehirn, zwei Zugänge
 
 **Datum:** 2026-07-08
-**Status:** ENTWURF — nur Plan, noch keine Implementierung
+**Status:** Entscheidungen GEKLÄRT (2026-07-08) — Umsetzung wartet verbindlich auf die Phase-0-Abnahme (Sprach-Kern am PC). Kein Integrations-Code, bis Phase 0 abgenommen ist.
+**Nächster Schritt:** Phase-0-Checkliste → `plans/2026-07-08-phase-0-sprachkern-checkliste.md`
 **Betrifft:** Jarvis (`claude/jarvis-local-assistant`, PR #9) + CEO-GPT (Claude-Code-Arbeitsplatz)
 **Format:** folgt dem `create-plan.md`-Muster (Kontext → Zielbild → Ist-Zustand → Architektur → Phasen → Risiken → offene Fragen). *Da mir die reale `create-plan.md` von CEO-GPT nicht vorliegt, ist die Struktur sinngemäß nachgebildet.*
 
@@ -63,14 +64,11 @@ Ein lokaler Assistent auf dem Windows-PC (RTX 2080 Super, 8 GB VRAM), der:
 Beide Systeme zeigen auf **einen** Ordner. Kein Kopieren, keine Synchronisation, keine doppelte Wahrheit.
 
 ```
-C:\Jarvis\brain\                (Vorschlag – Pfad ist offene Frage #2)
-├── context\                    ← CEO-GPT pflegt (per Terminal). Jarvis liest NUR.
-│   ├── company.md
-│   ├── offers.md
-│   ├── customers.md
-│   └── ...
-├── key-metrics.md              ← CEO-GPT/Daten-Modul pflegt. Jarvis liest NUR.
-├── vault\                      ← Jarvis' Obsidian-Vault. Jarvis liest & SCHREIBT.
+C:\Jarvis\brain\                (konkreter Pfad → Phase-1-Detail, unkritisch)
+├── context\                    ← FREMD-Zone. CEO-GPT pflegt. Jarvis NUR LESEN.
+│   └── *.md                    ← beliebiges Markdown (Frontmatter optional)
+├── key-metrics.md              ← FREMD-Zone. Jarvis NUR LESEN (falls vorhanden).
+├── jarvis-memory\              ← EIGEN-Zone. Jarvis liest & SCHREIBT (Obsidian-Vault).
 │   ├── 00-inbox\
 │   ├── 10-raw\
 │   ├── 20-wiki\
@@ -78,15 +76,18 @@ C:\Jarvis\brain\                (Vorschlag – Pfad ist offene Frage #2)
 └── .claude\                    ← CEO-GPT Slash-Befehle + CLAUDE.md (nur fürs Terminal)
 ```
 
-**Rollentrennung (wichtig gegen Datenkorruption):**
-- `context/` + `key-metrics.md` → für Jarvis **read-only**. So kann Jarvis CEO-GPTs kuratiertes Wissen niemals überschreiben.
-- Neue Erkenntnisse, die Jarvis selbst festhält (z. B. aus einem Gespräch), landen in `vault/00-inbox/`. Du (via CEO-GPT) entscheidest, was davon ins kuratierte `context/` wandert.
+**Zwei klar getrennte Zonen (Entscheidung #2):**
+- **Fremd-Zone** `context/` + `key-metrics.md` → für Jarvis **strikt read-only**. Jarvis kann CEO-GPTs kuratiertes Wissen niemals überschreiben.
+- **Eigen-Zone** `jarvis-memory/` → Jarvis' beschreibbarer Obsidian-Vault. Alles, was Jarvis selbst festhält, landet hier (z. B. `00-inbox/`). Du entscheidest via CEO-GPT, was davon ins `context/` übernommen wird.
+
+**Format-Adapter (Entscheidung #1 — Jarvis definiert das Format, kein hartes Schema):**
+- Der Reader liest **beliebiges Markdown** aus `context/`: Frontmatter **optional** (der bestehende Parser aus `obsidian.py` kann das), ansonsten reiner Fließtext + Überschriften. Keine Pflichtfelder, keine erzwungene Struktur → robust, egal wie die CEO-GPT-Dateien am Ende aussehen.
 
 **Code-Änderungen (klein, additiv):**
-- `config.py`: neue Variablen `JARVIS_BRAIN_DIR`, `JARVIS_CONTEXT_DIR` (= `brain/context`), `JARVIS_METRICS_FILE` (= `brain/key-metrics.md`), `JARVIS_VAULT_DIR` (= `brain/vault`).
-- `memory/context_source.py` (neu): liest `context/*.md` schreibgeschützt ein, indexiert sie beim Start in den bestehenden `VectorIndex`, sodass `memory_search` **auch** CEO-GPT-Wissen findet.
-- `memory/metrics.py` (neu): defensiver Parser für `key-metrics.md` → `dict` (z. B. `{"mrr_eur": 190, "kunden": 7}`); tolerant gegenüber fehlenden/umbenannten Feldern.
-- `tools/metrics_tool.py` (neu): Tool `metrics_read` (Effekt `READ`, Tier 0) → aktuelle Kennzahlen als Text.
+- `config.py`: neue Variablen `JARVIS_BRAIN_DIR`, `JARVIS_CONTEXT_DIR` (= `brain/context`), `JARVIS_METRICS_FILE` (= `brain/key-metrics.md`), `JARVIS_VAULT_DIR` (= `brain/jarvis-memory`).
+- `memory/context_source.py` (neu): liest `context/*.md` **schreibgeschützt** ein (flexibler Adapter, s. o.), indexiert sie beim Start in den bestehenden `VectorIndex`, sodass `memory_search` **auch** CEO-GPT-Wissen findet.
+- `memory/metrics.py` (neu): **defensiver, optionaler** Parser für `key-metrics.md` → `dict`. Fehlt die Datei oder ein Feld, fällt Jarvis auf eine neutrale Ausgabe zurück (kein Crash, kein hartes Schema).
+- `tools/metrics_tool.py` (neu): Tool `metrics_read` (Effekt `READ`, Tier 0) → aktuelle Kennzahlen als Text (oder „keine Kennzahlen hinterlegt").
 - Kein Eingriff in Gateway/Agent-Loop nötig.
 
 ### 4.2 Wake-Word „Jarvis"
@@ -110,10 +111,12 @@ C:\Jarvis\brain\                (Vorschlag – Pfad ist offene Frage #2)
 
 ### 4.3 Proaktives Sprechen
 
-Ein vom Anfrage-Loop **getrennter** Auslöser-Mechanismus: `core/proactive.py`.
+Ein vom Anfrage-Loop **getrennter** Auslöser-Mechanismus: `core/proactive.py`. **Zum Start genau ZWEI Trigger, mehr nicht (Entscheidung #3):**
 
-- **Zeitgesteuert:** Morgenbegrüßung (z. B. 08:00) → gesprochene Zusammenfassung aus `key-metrics.md` (MRR, Kundenzahl) + Zahl neuer ungelesener Mails.
-- **Ereignisgesteuert:** Polling alle N Minuten über Gmail (`readonly`) → „Es sind 3 neue Kunden-Mails."
+1. **Morgenbegrüßung** (einmal täglich, zeitgesteuert): liest `key-metrics.md` vor, **falls vorhanden** — sonst neutrale Begrüßung ohne Zahlen. Tier 0.
+2. **Mail-Hinweis** (ereignisgesteuert, Polling über Gmail `readonly`): „Es sind neue Kunden-Mails / Entwürfe da." Tier 0.
+
+Kalender, ConsentFlow-Umsatz-Alerts etc. kommen **später**, nicht jetzt.
 
 **Gateway-Kopplung (zentral):**
 - Reines **Sprechen** ist Tier 0 (keine externe Nebenwirkung) — Jarvis darf einfach reden.
@@ -201,15 +204,22 @@ Autostart-Task, Hintergrund-Dienst, Fehlauslöser-Feintuning, optional Barge-in.
 
 Der elegante Weg ist **keine Verschmelzung der Programme, sondern eine geteilte Datenschicht**: ein `brain/`-Ordner, den CEO-GPT pflegt und Jarvis ausspricht. Jarvis bekommt drei additive Fähigkeiten (CEO-GPT-Wissen lesen, proaktiv sprechen, Wake-Word) — der bewährte Kern (Gateway, Agent-Loop) bleibt unverändert. Gebaut wird **strikt phasenweise**: erst dein Sprach-Kern am PC, dann die reine Software-Datenbrücke, dann proaktives Sprechen, zuletzt das Wake-Word. Team-Features (Intelligenz-Modul) werden bewusst weggelassen.
 
-## 9. Offene Fragen (bevor `/implement` laufen kann)
+## 9. Geklärte Entscheidungen (2026-07-08)
 
-1. **CEO-GPT real:** Kannst du das echte `context/`-Layout und das **Format von `key-metrics.md`** teilen (Beispieldatei)? Der Reader braucht das reale Format — sonst rate ich.
-2. **Pfad:** Wo soll der gemeinsame `brain/`-Ordner liegen? (Vorschlag `C:\Jarvis\brain`)
-3. **Schreibrechte:** Darf Jarvis in `context/` **schreiben** (Erkenntnisse anhängen), oder strikt read-only dort und schreiben nur in `vault/`?
-4. **Proaktive Trigger v1:** Welche willst du zuerst? (Morgenbegrüßung? Neue-Mail-Hinweis? ConsentFlow-MRR-Änderung?)
-5. **Wake-Word:** openWakeWords vortrainiertes „hey jarvis" (zwei Wörter) — oder ein eigen-trainiertes einzelnes „Jarvis" (braucht Sprach-Samples von dir)?
-6. **Autostart:** Soll der Dauer-Hörprozess automatisch beim Windows-Login starten?
-7. **Repo-Struktur:** Soll die CEO-GPT-Integration im bestehenden `jarvis_local/`-Projekt wachsen, oder willst du CEO-GPT als eigenes Verzeichnis im Repo?
+Alle offenen Fragen sind beantwortet. ✅ = verbindlich entschieden.
+
+1. ✅ **Format:** Jarvis definiert das Format. Schlanker Adapter liest **beliebiges Markdown** in `brain/context/` (Frontmatter optional, sonst Fließtext + Überschriften). **Kein hartes Schema** — robust gegenüber jeder späteren CEO-GPT-Struktur.
+2. ✅ **Schreibrechte / Zonen:** Fremd-Zone (`context/`, `key-metrics.md`) **strikt read-only**. Eigen-Zone `brain/jarvis-memory/` (bestehender Obsidian-Vault) ist beschreibbar. Zwei klar getrennte Zonen.
+3. ✅ **Proaktive Trigger:** Genau zwei zum Start — (a) Morgenbegrüßung (liest `key-metrics.md`, falls vorhanden; sonst neutral) und (b) Hinweis auf neue Gmail-Entwürfe/wichtige ungelesene Mails. Beide Tier 0. Kalender/ConsentFlow-Alerts später.
+4. ✅ **Wake-Word:** openWakeWord „hey jarvis", CPU-only. Push-to-Talk (`Strg+Alt+J`) bleibt **gleichwertiger Fallback**, wird nicht ersetzt.
+5. ✅ **Modul-Abgrenzung (Solo):** Kontext ✅, Daten/Stripe ✅ (später für ConsentFlow-Umsatz), Absicherung ⚠️ nicht doppeln (Jarvis hat Gateway/Git/Tests), Intelligenz-Modul ❌ komplett weglassen.
+6. ✅ **VRAM:** Whisper `medium` **auf CPU**, damit Qwen3-8B ungestört im VRAM bleibt. Nur falls CPU-Whisper zu langsam → dann GPU-`medium` testen; nie beide groß gleichzeitig auf 8 GB.
+7. ✅ **Reihenfolge (verbindlich):** Phase 0 (Sprach-Kern am PC) muss abgeschlossen und **von Jonas abgenommen** sein, BEVOR Phase 1 gebaut wird. Der Plan bleibt Plan, bis der Sprach-Kern läuft.
+
+### Noch nicht entschieden (unkritisch, erst zu Phase-1-Beginn)
+- Konkreter `brain/`-Pfad auf dem PC (Vorschlag `C:\Jarvis\brain`).
+- Repo-Struktur der Integration (Vorschlag: im bestehenden `jarvis_local/` wachsen lassen).
+- Autostart des Dauer-Hörprozesses beim Windows-Login (Vorschlag: ja, per Task Scheduler).
 
 ---
-*Nur Planungsdokument. Umsetzung erst nach Klärung der offenen Fragen und Phase-0-Abnahme.*
+*Planungsdokument. Umsetzung der Integration erst nach Phase-0-Abnahme. Nächster Schritt: `plans/2026-07-08-phase-0-sprachkern-checkliste.md`.*
