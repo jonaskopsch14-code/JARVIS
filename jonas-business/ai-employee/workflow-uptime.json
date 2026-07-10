@@ -1,0 +1,111 @@
+{
+  "name": "KI-Mitarbeiter — Website-Uptime-Check (Telegram-Alert)",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes",
+              "minutesInterval": 5
+            }
+          ]
+        }
+      },
+      "id": "trigger-schedule",
+      "name": "Alle 5 Minuten",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [240, 300]
+    },
+    {
+      "parameters": {
+        "url": "={{ $env.WEBSITE_URL }}",
+        "options": {
+          "response": {
+            "response": {
+              "fullResponse": true,
+              "neverError": true
+            }
+          },
+          "timeout": 15000
+        }
+      },
+      "id": "http-check",
+      "name": "HTTP: Website prüfen",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [460, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "typeValidation": "loose"
+          },
+          "conditions": [
+            {
+              "id": "status-not-200",
+              "leftValue": "={{ $json.statusCode }}",
+              "rightValue": 200,
+              "operator": {
+                "type": "number",
+                "operation": "notEquals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "if-down",
+      "name": "IF Status != 200",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [680, 300]
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $env.TELEGRAM_CHAT_ID }}",
+        "text": "=🔴 Website *{{ $env.WEBSITE_URL }}* ist offline (Status {{ $json.statusCode }})!",
+        "additionalFields": {
+          "parse_mode": "Markdown"
+        }
+      },
+      "id": "telegram-alert",
+      "name": "Telegram: Offline-Alarm",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [900, 220],
+      "credentials": {
+        "telegramApi": {
+          "id": "TELEGRAM_CREDENTIAL_ID",
+          "name": "Telegram Bot"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Alle 5 Minuten": {
+      "main": [[{ "node": "HTTP: Website prüfen", "type": "main", "index": 0 }]]
+    },
+    "HTTP: Website prüfen": {
+      "main": [[{ "node": "IF Status != 200", "type": "main", "index": 0 }]]
+    },
+    "IF Status != 200": {
+      "main": [
+        [{ "node": "Telegram: Offline-Alarm", "type": "main", "index": 0 }],
+        []
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "Europe/Berlin"
+  },
+  "staticData": null,
+  "meta": {
+    "note": "Alternative ohne n8n: UptimeRobot Free (50 Monitore, 5-Min-Intervall, Telegram-Integration) — laut Report die empfohlene Variante fuer reines Uptime-Monitoring. Dieser Workflow ist die n8n-Option, falls alles an einem Ort laufen soll."
+  }
+}

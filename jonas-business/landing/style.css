@@ -1,0 +1,184 @@
+/* ==========================================================================
+   [MARKENNAME] — Landingpage Styles
+   Mobile-first, responsiv, ohne externe Abhängigkeiten (keine Web-Fonts, kein CDN).
+   ========================================================================== */
+
+:root {
+  --bg: #ffffff;
+  --bg-alt: #f5f7fa;
+  --text: #1a2233;
+  --text-soft: #4a5568;
+  --brand: #2b6cb0;
+  --brand-dark: #234e7d;
+  --accent: #e8f0fb;
+  --border: #e2e8f0;
+  --radius: 14px;
+  --shadow: 0 6px 24px rgba(26, 34, 51, 0.08);
+  --maxw: 960px;
+}
+
+* { box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  color: var(--text);
+  background: var(--bg);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+.container {
+  width: 100%;
+  max-width: var(--maxw);
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+h1, h2, h3 { line-height: 1.25; margin: 0 0 0.5em; }
+h1 { font-size: 1.9rem; }
+h2 { font-size: 1.5rem; }
+p { margin: 0 0 1em; }
+
+/* ---------- Buttons ---------- */
+.btn {
+  display: inline-block;
+  background: var(--brand);
+  color: #fff;
+  text-decoration: none;
+  font-weight: 600;
+  padding: 12px 22px;
+  border: none;
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: background 0.15s ease, transform 0.05s ease;
+  font-size: 1rem;
+}
+.btn:hover { background: var(--brand-dark); }
+.btn:active { transform: translateY(1px); }
+.btn-large { padding: 16px 30px; font-size: 1.15rem; }
+.btn-small { padding: 8px 16px; font-size: 0.9rem; }
+.btn-buy { width: 100%; text-align: center; }
+
+/* ---------- Header ---------- */
+.site-header {
+  position: sticky; top: 0; z-index: 10;
+  background: rgba(255,255,255,0.92);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--border);
+}
+.header-inner {
+  display: flex; align-items: center; justify-content: space-between;
+  padding-top: 12px; padding-bottom: 12px;
+}
+.brand { font-weight: 800; font-size: 1.1rem; letter-spacing: -0.02em; }
+
+/* ---------- Hero ---------- */
+.hero {
+  background: linear-gradient(160deg, var(--accent), var(--bg));
+  padding: 56px 0 48px;
+  text-align: center;
+}
+.hero h1 { font-size: 2.1rem; max-width: 720px; margin-inline: auto; }
+.hero-sub { font-size: 1.15rem; color: var(--text-soft); max-width: 640px; margin: 0 auto 1.6em; }
+.hero-note { color: var(--text-soft); font-size: 0.95rem; margin-top: 1em; }
+
+/* ---------- Benefits ---------- */
+.benefits .container {
+  display: grid; gap: 22px; padding-top: 48px; padding-bottom: 48px;
+  grid-template-columns: 1fr;
+}
+.benefit {
+  background: var(--bg-alt);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 26px 22px;
+  text-align: center;
+}
+.benefit-icon { font-size: 2.2rem; margin-bottom: 8px; }
+.benefit h3 { font-size: 1.2rem; }
+.benefit p { color: var(--text-soft); margin: 0; }
+
+/* ---------- Screenshots ---------- */
+.screenshots { background: var(--bg-alt); padding: 48px 0; }
+.screenshots h2 { text-align: center; margin-bottom: 1.2em; }
+.shot-grid { display: grid; gap: 16px; grid-template-columns: 1fr; }
+.shot-placeholder {
+  border: 2px dashed var(--brand);
+  border-radius: var(--radius);
+  min-height: 180px;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--brand-dark); font-weight: 600;
+  background: var(--accent);
+  text-align: center; padding: 12px;
+}
+
+/* ---------- Pricing ---------- */
+.pricing { padding: 56px 0; }
+.price-card {
+  max-width: 480px; margin: 0 auto;
+  background: var(--bg); border: 1px solid var(--border);
+  border-radius: var(--radius); box-shadow: var(--shadow);
+  padding: 32px 26px; text-align: center;
+}
+.price { margin: 0.4em 0 1em; }
+.price .amount { font-size: 2.6rem; font-weight: 800; color: var(--brand); }
+.price .once { color: var(--text-soft); font-size: 1rem; }
+.price-list { list-style: none; padding: 0; margin: 0 0 1.6em; text-align: left; }
+.price-list li { padding: 6px 0; border-bottom: 1px solid var(--border); }
+.price-list li:last-child { border-bottom: none; }
+.secure-note { font-size: 0.85rem; color: var(--text-soft); margin-top: 1em; }
+
+/* ---------- Newsletter ---------- */
+.newsletter { background: var(--accent); padding: 48px 0; text-align: center; }
+.newsletter-form { display: flex; gap: 10px; max-width: 440px; margin: 1em auto 0; flex-wrap: wrap; }
+.newsletter-form input {
+  flex: 1 1 200px; padding: 12px 14px; border: 1px solid var(--border);
+  border-radius: var(--radius); font-size: 1rem;
+}
+
+/* ---------- FAQ ---------- */
+.faq { padding: 48px 0; }
+.faq h2 { text-align: center; margin-bottom: 1.2em; }
+.faq details {
+  border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 14px 18px; margin-bottom: 12px; background: var(--bg-alt);
+}
+.faq summary { cursor: pointer; font-weight: 600; }
+.faq details p { margin: 10px 0 0; color: var(--text-soft); }
+
+/* ---------- Footer ---------- */
+.site-footer { border-top: 1px solid var(--border); padding: 28px 0; background: var(--bg-alt); }
+.footer-nav { display: flex; gap: 18px; flex-wrap: wrap; justify-content: center; margin-bottom: 10px; }
+.footer-nav a { color: var(--brand-dark); text-decoration: none; font-size: 0.95rem; }
+.footer-nav a:hover { text-decoration: underline; }
+.footer-copy { text-align: center; color: var(--text-soft); font-size: 0.85rem; margin: 0; }
+
+/* ==========================================================================
+   Desktop / Tablet
+   ========================================================================== */
+@media (min-width: 720px) {
+  h1 { font-size: 2.6rem; }
+  .hero h1 { font-size: 2.8rem; }
+  .benefits .container { grid-template-columns: repeat(3, 1fr); }
+  .shot-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+/* ---------- Dark Mode ---------- */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #12161f;
+    --bg-alt: #1a2130;
+    --text: #e8ecf3;
+    --text-soft: #a0aec0;
+    --brand: #63a4e0;
+    --brand-dark: #4a89c8;
+    --accent: #1c2740;
+    --border: #2a3547;
+    --shadow: 0 6px 24px rgba(0, 0, 0, 0.4);
+  }
+  .site-header { background: rgba(18,22,31,0.9); }
+  .btn { color: #0d1017; }
+}
