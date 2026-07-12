@@ -1,0 +1,143 @@
+{
+  "name": "KI-Mitarbeiter — E-Mail-Agent (Triage + Entwurf, sendet NIE)",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes",
+              "minutesInterval": 20
+            }
+          ]
+        }
+      },
+      "id": "trigger-schedule",
+      "name": "Alle 20 Minuten",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [240, 300]
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "returnAll": true,
+        "filters": {
+          "q": "is:unread newer_than:1d",
+          "readStatus": "unread"
+        }
+      },
+      "id": "gmail-get",
+      "name": "Gmail: Ungelesene holen",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [460, 300],
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "GMAIL_CREDENTIAL_ID",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.anthropic.com/v1/messages",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "x-api-key", "value": "={{ $env.ANTHROPIC_API_KEY }}" },
+            { "name": "anthropic-version", "value": "2023-06-01" },
+            { "name": "content-type", "value": "application/json" }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"model\": \"claude-haiku-4-5\",\n  \"max_tokens\": 800,\n  \"system\": \"Du bist der E-Mail-Assistent eines deutschen Kleinunternehmers. HARTE REGELN: Du darfst NIEMALS senden, löschen, archivieren, Geld ausgeben oder irgendetwas verändern. Du darfst NUR lesen und Entwürfe vorschlagen. Bei sensiblen Themen (Rechnungen, Rechtliches, Beschwerden, Rückerstattungen) oder jedem Zweifel: markiere als 'wichtig' und schlage KEINEN fertigen Text vor, sondern weise auf manuelle Prüfung hin. Erfinde niemals Preise oder Fakten. Antworte AUSSCHLIESSLICH als JSON mit den Feldern: einstufung (wichtig|normal|spam), zusammenfassung (1-2 deutsche Sätze), entwurf (deutscher Antwortentwurf oder leer).\",\n  \"messages\": [\n    {\n      \"role\": \"user\",\n      \"content\": \"Absender: {{ $json.from }}\\nBetreff: {{ $json.subject }}\\n\\nText:\\n{{ $json.snippet }}\"\n    }\n  ]\n}",
+        "options": {}
+      },
+      "id": "claude-triage",
+      "name": "Claude Haiku 4.5: Triage + Entwurf",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [680, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Claude-Antwort (JSON im ersten Content-Block) robust parsen.\nconst raw = $json.content?.[0]?.text ?? '{}';\nlet parsed;\ntry {\n  parsed = JSON.parse(raw);\n} catch (e) {\n  parsed = { einstufung: 'wichtig', zusammenfassung: 'Konnte Antwort nicht parsen — bitte manuell prüfen.', entwurf: '' };\n}\n// Ursprüngliche Mail-Metadaten aus dem Gmail-Node mitnehmen.\nconst mail = $('Gmail: Ungelesene holen').item.json;\nreturn [{\n  json: {\n    absender: mail.from,\n    betreff: mail.subject,\n    threadId: mail.threadId,\n    messageId: mail.id,\n    einstufung: parsed.einstufung,\n    zusammenfassung: parsed.zusammenfassung,\n    entwurf: parsed.entwurf || ''\n  }\n}];"
+      },
+      "id": "parse-claude",
+      "name": "Antwort aufbereiten",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [900, 300]
+    },
+    {
+      "parameters": {
+        "resource": "draft",
+        "operation": "create",
+        "subject": "={{ 'Re: ' + $json.betreff }}",
+        "message": "={{ $json.entwurf }}",
+        "options": {
+          "threadId": "={{ $json.threadId }}"
+        }
+      },
+      "id": "gmail-draft",
+      "name": "Gmail: Entwurf anlegen (KEIN Senden)",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [1120, 300],
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "GMAIL_CREDENTIAL_ID",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $env.TELEGRAM_CHAT_ID }}",
+        "text": "=📧 *{{ $('Antwort aufbereiten').item.json.absender }}* hat geschrieben zu _{{ $('Antwort aufbereiten').item.json.betreff }}_\n\nEinstufung: *{{ $('Antwort aufbereiten').item.json.einstufung }}*\nZusammenfassung: {{ $('Antwort aufbereiten').item.json.zusammenfassung }}\n\nEin Antwortentwurf liegt in Gmail bereit — du musst ihn nur prüfen & freigeben.",
+        "additionalFields": {
+          "parse_mode": "Markdown"
+        }
+      },
+      "id": "telegram-notify",
+      "name": "Telegram: Push-Benachrichtigung",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [1340, 300],
+      "credentials": {
+        "telegramApi": {
+          "id": "TELEGRAM_CREDENTIAL_ID",
+          "name": "Telegram Bot"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Alle 20 Minuten": {
+      "main": [[{ "node": "Gmail: Ungelesene holen", "type": "main", "index": 0 }]]
+    },
+    "Gmail: Ungelesene holen": {
+      "main": [[{ "node": "Claude Haiku 4.5: Triage + Entwurf", "type": "main", "index": 0 }]]
+    },
+    "Claude Haiku 4.5: Triage + Entwurf": {
+      "main": [[{ "node": "Antwort aufbereiten", "type": "main", "index": 0 }]]
+    },
+    "Antwort aufbereiten": {
+      "main": [[{ "node": "Gmail: Entwurf anlegen (KEIN Senden)", "type": "main", "index": 0 }]]
+    },
+    "Gmail: Entwurf anlegen (KEIN Senden)": {
+      "main": [[{ "node": "Telegram: Push-Benachrichtigung", "type": "main", "index": 0 }]]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "Europe/Berlin"
+  },
+  "staticData": null,
+  "meta": {
+    "note": "Tiered Permission: Es existiert BEWUSST kein Send-, Delete- oder Payment-Node. Nur Lesen + Draft + Telegram-Hinweis."
+  }
+}

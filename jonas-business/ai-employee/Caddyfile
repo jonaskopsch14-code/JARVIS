@@ -1,0 +1,22 @@
+# =============================================================================
+# Caddy Reverse Proxy für n8n — automatisches HTTPS (Let's Encrypt)
+# -----------------------------------------------------------------------------
+# {$N8N_HOST} kommt aus der .env (z. B. n8n.deinedomain.de).
+# Caddy besorgt und erneuert das TLS-Zertifikat vollautomatisch, solange die
+# Domain per DNS auf die Server-IP zeigt und Ports 80/443 offen sind.
+# =============================================================================
+
+{$N8N_HOST} {
+    # Alle Anfragen an den n8n-Container weiterreichen.
+    reverse_proxy n8n:5678
+
+    # Sinnvolle Security-Header.
+    header {
+        Strict-Transport-Security "max-age=31536000; includeSubDomains"
+        X-Content-Type-Options "nosniff"
+        X-Frame-Options "SAMEORIGIN"
+        Referrer-Policy "strict-origin-when-cross-origin"
+    }
+
+    encode gzip zstd
+}
