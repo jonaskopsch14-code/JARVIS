@@ -1,5 +1,5 @@
 /* ==========================================================================
-   [MARKENNAME] — Landingpage Styles
+   ZahlenKlar — Landingpage Styles
    Mobile-first, responsiv, ohne externe Abhängigkeiten (keine Web-Fonts, kein CDN).
    ========================================================================== */
 
@@ -162,8 +162,12 @@ p { margin: 0 0 1em; }
 @media (min-width: 720px) {
   h1 { font-size: 2.6rem; }
   .hero h1 { font-size: 2.8rem; }
-  .benefits .container { grid-template-columns: repeat(3, 1fr); }
+  .benefits .container { grid-template-columns: repeat(2, 1fr); }
   .shot-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (min-width: 980px) {
+  .benefits .container { grid-template-columns: repeat(4, 1fr); }
 }
 
 /* ---------- Dark Mode ---------- */

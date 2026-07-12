@@ -1,18 +1,18 @@
-# Google Ads — Suchkampagne (Sekundärkanal, DACH)
+# Google Ads — Suchkampagne (Sekundärkanal) — Etsy-Nische
 
-Ergänzt Pinterest: fängt **bestehende Nachfrage** über die Google-Suche ab.
-Long-Tail-Keywords haben höhere Kaufabsicht und günstigere CPCs in der Nische.
+Ergänzt Pinterest: fängt **bestehende Nachfrage** über die Google-Suche ab. Etsy-Seller
+googeln aktiv nach „etsy steuern" & „etsy gebühren rechner" — hohe Kaufabsicht,
+günstige CPCs in der Nische.
 
-**Budget:** ~15 €/Monat (Rest des 75-€-Gesamtbudgets liegt auf Pinterest).
+**Budget:** ~15 €/Monat.
 
 ---
 
 ## Kampagnen-Setup
 
 - **Typ:** 1 Suchkampagne (Search).
-- **Gebotsstrategie:** **Manuelles CPC** (volle Kostenkontrolle bei kleinem Budget;
-  später ggf. „Conversions maximieren", wenn genug Daten).
-- **Standorte:** Deutschland, Österreich, Schweiz.
+- **Gebotsstrategie:** **Manuelles CPC**, Start-Gebot ~**0,80 €** (volle Kostenkontrolle).
+- **Standorte:** Deutschland (primär), Österreich, Schweiz.
 - **Sprache:** Deutsch.
 - **Tagesbudget:** ~0,50 € (ergibt ~15 €/Monat).
 - **Anzeigenrotation:** gleichmäßig, bis Datenlage klar ist.
@@ -21,83 +21,73 @@ Long-Tail-Keywords haben höhere Kaufabsicht und günstigere CPCs in der Nische.
 
 ## Keywords (Long-Tail, exact / phrase match)
 
-Bewusst spezifisch — hohe Kaufabsicht, niedriger Wettbewerb:
-
 ```
-[notion vorlage kleinunternehmer buchhaltung]
-[eür vorlage excel]
-[buchhaltung vorlage kleinunternehmer]
-[rechnung ohne umsatzsteuer vorlage]
-"kleinunternehmer buchhaltung template"
-"steuer vorlage selbstständige"
-"eür tabelle vorlage"
-"belege tracker vorlage"
+[etsy steuern kleinunternehmer]
+[etsy gebühren rechner]
+[etsy buchhaltung excel]
+[etsy reverse charge]
+"etsy umsatzsteuer gebühren"
+"etsy steuern excel vorlage"
+"kleinunternehmer etsy buchhaltung"
 ```
 
-- `[eckige Klammern]` = **exact match**, `"Anführungszeichen"` = **phrase match**.
-- Keine breiten Broad-Keywords bei diesem Budget (verbrennt Geld).
+- `[eckige Klammern]` = exact match, `"Anführungszeichen"` = phrase match.
+- Keine breiten Broad-Keywords bei diesem Budget.
 
 ## Negative Keywords (Ausschluss)
 
 ```
 kostenlos
 gratis
-free
-software
-programm
-buchhalter (Beruf/Dienstleister gesucht, nicht Vorlage)
-ausbildung
 job
-jobs
-elster
+erfahrungen
+login
 ```
 
 ---
 
 ## 3 Responsive Search Ads (Deutsch)
 
-Pro Anzeige mehrere Headlines + Beschreibungen; Google kombiniert automatisch.
-
 ### Anzeige 1
 **Headlines:**
-- Notion-Vorlage Kleinunternehmer
-- EÜR, Belege & Rechnungen
-- Buchhaltung in Minuten
+- Etsy Steuern für Kleinunternehmer
+- Etsy-Gebühren-Rechner in Excel
+- EÜR, Marge & Umsatz-Ampel
 - Sofort-Download, einmal 29 €
-- § 19-Rechnung inklusive
+- Kein Abo, keine Software
 
 **Beschreibungen:**
-- EÜR, Belege-Tracker und Umsatzgrenzen-Ampel in einer Vorlage. Für Notion & Excel.
-- Rechtssichere Rechnung ohne Umsatzsteuer mit § 19-Hinweis. Sofort nach Kauf verfügbar.
+- EÜR, Etsy-Gebühren, Reverse Charge und Umsatz-Ampel in einer Excel-Vorlage.
+- USt-freie Rechnung mit § 19-Hinweis inklusive. Läuft in Excel, LibreOffice & Sheets.
 
 ### Anzeige 2
 **Headlines:**
-- EÜR-Vorlage für Selbstständige
-- Umsatzgrenzen-Ampel 25k/100k
-- Nie wieder Beleg-Chaos
-- Für Notion und Excel
-- DACH-Kleinunternehmer
+- Etsy Gebühren – was bleibt übrig?
+- Margenrechner pro Produkt
+- Etsy Buchhaltung ohne Stress
+- Für deutsche Etsy-Seller
+- Reverse Charge automatisch
 
 **Beschreibungen:**
-- Behalte die Kleinunternehmer-Grenzen im Blick und vermeide den Fallbeileffekt.
-- Einnahmen, Ausgaben, Belege – automatisch summiert. Einmal 29 €, kein Abo.
+- Sieh pro Produkt, was nach allen Etsy-Gebühren wirklich übrig bleibt – mit Ampel.
+- Die 19-%-Reverse-Charge-Falle automatisch berechnet. Einmal 29 €, kein Abo.
 
 ### Anzeige 3
 **Headlines:**
-- Rechnung ohne Umsatzsteuer
-- Korrekt mit § 19 UStG
-- Buchhaltungs-Cockpit
-- Weniger Zettel, mehr Überblick
+- Etsy Buchhaltung Excel-Vorlage
+- Umsatz-Ampel 25k / 100k
+- DAC7? Zahlen im Griff
+- § 19-Rechnung inklusive
 - Sofort einsatzbereit
 
 **Beschreibungen:**
-- Fertige USt-freie Rechnungsvorlage plus EÜR und Belege-Tracker. Notion & Excel.
-- Für Freelancer und Kleinunternehmer in DACH. Sofort-Download nach dem Kauf.
+- Seit DAC7 meldet Etsy deine Umsätze. Bring deine EÜR & Grenzen in Ordnung.
+- Beispieldaten enthalten, in 10 Minuten startklar. Für Kleinunternehmer auf Etsy.
 
 ---
 
 ## Tracking & Regeln
 - Google-Ads-Conversion-Tracking auf der „Danke/Download"-Seite (Consent-pflichtig).
 - Wöchentlich Suchbegriffe-Bericht prüfen → schlechte Begriffe als Negative ergänzen.
-- Gleiche Nachjustier-Regel wie Pinterest: bei Conversion < 1 % nach 150 € Spend
+- Gleiche Nachjustier-Regel wie Pinterest: Conversion < 1 % nach 150 € Spend →
   Landingpage/Preis/Creative fixen, nicht Budget erhöhen.
