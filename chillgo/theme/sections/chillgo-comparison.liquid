@@ -1,0 +1,61 @@
+{%- comment -%}
+  ChillGo comparison table (Section 5.2 #5): "Basic fan" vs "ChillGo".
+  Rows are blocks so the operator can edit each comparison point in the editor.
+{%- endcomment -%}
+<link rel="stylesheet" href="{{ 'chillgo.css' | asset_url }}" media="all">
+
+<section class="chillgo-section chillgo-compare-section">
+  <h2>{{ section.settings.heading }}</h2>
+  <div class="chillgo-compare__wrap">
+    <table class="chillgo-compare">
+      <thead>
+        <tr>
+          <th></th>
+          <th>{{ section.settings.col_other }}</th>
+          <th class="chillgo-col">{{ section.settings.col_ours }}</th>
+        </tr>
+      </thead>
+      <tbody>
+        {%- for block in section.blocks -%}
+          <tr {{ block.shopify_attributes }}>
+            <td>{{ block.settings.feature }}</td>
+            <td>{% if block.settings.other == blank %}—{% else %}{{ block.settings.other }}{% endif %}</td>
+            <td class="chillgo-col is-us">{{ block.settings.ours }}</td>
+          </tr>
+        {%- endfor -%}
+      </tbody>
+    </table>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "ChillGo comparison",
+  "settings": [
+    { "type": "text", "id": "heading", "label": "Heading", "default": "Basic fan vs ChillGo" },
+    { "type": "text", "id": "col_other", "label": "Left column label", "default": "Basic fan" },
+    { "type": "text", "id": "col_ours", "label": "Right column label", "default": "ChillGo" }
+  ],
+  "blocks": [
+    {
+      "type": "row",
+      "name": "Row",
+      "settings": [
+        { "type": "text", "id": "feature", "label": "Feature", "default": "Speed settings" },
+        { "type": "text", "id": "other", "label": "Basic fan value", "default": "1" },
+        { "type": "text", "id": "ours", "label": "ChillGo value", "default": "3-speed" }
+      ]
+    }
+  ],
+  "presets": [{
+    "name": "ChillGo comparison",
+    "blocks": [
+      { "type": "row", "settings": { "feature": "Speed settings", "other": "1", "ours": "3-speed" } },
+      { "type": "row", "settings": { "feature": "Battery", "other": "Disposable / short", "ours": "USB-C rechargeable" } },
+      { "type": "row", "settings": { "feature": "Portability", "other": "Bulky", "ours": "Pocket-sized" } },
+      { "type": "row", "settings": { "feature": "Bonus features", "other": "None", "ours": "Battery display + power bank" } },
+      { "type": "row", "settings": { "feature": "Shipping", "other": "Weeks from overseas", "ours": "From a local warehouse" } }
+    ]
+  }]
+}
+{% endschema %}

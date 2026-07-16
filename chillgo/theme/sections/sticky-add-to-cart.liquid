@@ -1,0 +1,39 @@
+{%- comment -%}
+  ChillGo sticky mobile add-to-cart (Section 5.3).
+  Mirrors product.selected_or_first_available_variant. Hidden by default;
+  shown on mobile only once the user scrolls the main buy box out of view.
+  Visibility is driven by assets/sticky-atc.js (IntersectionObserver).
+{%- endcomment -%}
+<div
+  class="sticky-atc"
+  data-product-id="{{ product.id }}"
+  style="display:none;"
+  aria-hidden="true"
+>
+  <div class="sticky-atc__info">
+    <span class="sticky-atc__title">{{ product.title | escape }}</span>
+    <span class="sticky-atc__price" data-sticky-price>
+      {{ product.selected_or_first_available_variant.price | money }}
+    </span>
+  </div>
+  <button
+    type="button"
+    class="sticky-atc__button"
+    data-variant-id="{{ product.selected_or_first_available_variant.id }}"
+    {% unless product.selected_or_first_available_variant.available %}disabled{% endunless %}
+  >
+    {%- if product.selected_or_first_available_variant.available -%}
+      Add to Cart
+    {%- else -%}
+      Sold Out
+    {%- endif -%}
+  </button>
+</div>
+
+{% schema %}
+{
+  "name": "Sticky add to cart",
+  "settings": [],
+  "presets": [{ "name": "Sticky add to cart" }]
+}
+{% endschema %}
