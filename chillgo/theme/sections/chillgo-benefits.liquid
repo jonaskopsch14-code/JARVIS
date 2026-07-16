@@ -1,0 +1,48 @@
+{%- comment -%}
+  ChillGo feature-benefit bullets (Section 5.2 #4): icon + 4–6 word benefit each,
+  not a spec dump. Add/remove blocks in the theme editor.
+{%- endcomment -%}
+<link rel="stylesheet" href="{{ 'chillgo.css' | asset_url }}" media="all">
+
+<section class="chillgo-section chillgo-benefits">
+  <h2>{{ section.settings.heading }}</h2>
+  <div class="chillgo-benefits__grid">
+    {%- for block in section.blocks -%}
+      <div class="chillgo-benefit" {{ block.shopify_attributes }}>
+        <span class="chillgo-benefit__icon">{{ block.settings.icon }}</span>
+        <span class="chillgo-benefit__text">{{ block.settings.text }}</span>
+      </div>
+    {%- endfor -%}
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "ChillGo benefits",
+  "settings": [
+    { "type": "text", "id": "heading", "label": "Heading", "default": "Why you'll actually carry it" }
+  ],
+  "blocks": [
+    {
+      "type": "benefit",
+      "name": "Benefit",
+      "settings": [
+        { "type": "text", "id": "icon", "label": "Icon (emoji)", "default": "⚡" },
+        { "type": "text", "id": "text", "label": "Benefit (4–6 words)", "default": "All-day power, one charge" }
+      ]
+    }
+  ],
+  "max_blocks": 6,
+  "presets": [{
+    "name": "ChillGo benefits",
+    "blocks": [
+      { "type": "benefit", "settings": { "icon": "⚡", "text": "All-day power, one charge" } },
+      { "type": "benefit", "settings": { "icon": "🌀", "text": "Turbo airflow, tiny size" } },
+      { "type": "benefit", "settings": { "icon": "🔋", "text": "USB-C — charge anywhere" } },
+      { "type": "benefit", "settings": { "icon": "🎚️", "text": "Speed for every moment" } },
+      { "type": "benefit", "settings": { "icon": "🤫", "text": "Quiet enough for the office" } },
+      { "type": "benefit", "settings": { "icon": "🎒", "text": "Slips into any bag" } }
+    ]
+  }]
+}
+{% endschema %}

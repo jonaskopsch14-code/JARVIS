@@ -1,0 +1,33 @@
+{%- comment -%}
+  ChillGo problem/agitate (Section 5.2 #2) + solution intro (#3).
+  2–3 lines on the heat-discomfort scenario, then the product framing.
+{%- endcomment -%}
+<link rel="stylesheet" href="{{ 'chillgo.css' | asset_url }}" media="all">
+
+<section class="chillgo-section chillgo-problem" style="text-align:center;">
+  {%- if section.settings.eyebrow != blank -%}
+    <p style="text-transform:uppercase;letter-spacing:0.08em;font-size:0.8rem;opacity:0.7;">{{ section.settings.eyebrow }}</p>
+  {%- endif -%}
+  <h2>{{ section.settings.heading }}</h2>
+  <div style="max-width:640px;margin:0 auto;">
+    {{ section.settings.problem_text }}
+  </div>
+  {%- if section.settings.solution_text != blank -%}
+    <div style="max-width:640px;margin:1.5rem auto 0;font-weight:600;">
+      {{ section.settings.solution_text }}
+    </div>
+  {%- endif -%}
+</section>
+
+{% schema %}
+{
+  "name": "ChillGo problem / solution",
+  "settings": [
+    { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "When the heat hits" },
+    { "type": "text", "id": "heading", "label": "Heading", "default": "That sticky, can't-escape-it heat" },
+    { "type": "richtext", "id": "problem_text", "label": "Problem / agitate", "default": "<p>Crammed on a summer commute. Stuck in a festival crowd at 35°C. Walking to your gate with sweat running down your back. A wall fan can't help you there — and cracking a window never does enough.</p>" },
+    { "type": "richtext", "id": "solution_text", "label": "Solution intro", "default": "<p>ChillGo puts real turbo airflow in your pocket — so you carry your own cool wherever the day takes you.</p>" }
+  ],
+  "presets": [{ "name": "ChillGo problem / solution" }]
+}
+{% endschema %}

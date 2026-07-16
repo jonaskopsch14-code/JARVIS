@@ -1,0 +1,60 @@
+{%- comment -%}
+  ChillGo hero (Section 5.2 #1): headline + product video/GIF above the fold,
+  price, primary CTA. Video is optional; falls back to the product's featured image.
+{%- endcomment -%}
+<link rel="stylesheet" href="{{ 'chillgo.css' | asset_url }}" media="all">
+
+<section class="chillgo-section chillgo-hero" style="max-width:1000px;">
+  <div class="chillgo-hero__grid" style="display:grid;grid-template-columns:1fr;gap:1.5rem;align-items:center;">
+    <div class="chillgo-hero__media">
+      {%- if section.settings.video != blank -%}
+        {{ section.settings.video | video_tag: autoplay: true, loop: true, muted: true, playsinline: true, controls: false }}
+      {%- elsif section.settings.gif != blank -%}
+        <img src="{{ section.settings.gif | image_url: width: 900 }}" alt="{{ product.title | escape }}" loading="eager" style="width:100%;border-radius:var(--chillgo-radius);">
+      {%- elsif product.featured_image -%}
+        <img src="{{ product.featured_image | image_url: width: 900 }}" alt="{{ product.featured_image.alt | default: product.title | escape }}" loading="eager" style="width:100%;border-radius:var(--chillgo-radius);">
+      {%- endif -%}
+    </div>
+    <div class="chillgo-hero__copy" style="text-align:center;">
+      <h1 style="font-size:clamp(1.8rem,6vw,2.8rem);line-height:1.1;">
+        {{ section.settings.headline }}
+      </h1>
+      {%- if section.settings.subhead != blank -%}
+        <p style="font-size:1.1rem;opacity:0.85;margin-top:0.5rem;">{{ section.settings.subhead }}</p>
+      {%- endif -%}
+      <p class="chillgo-hero__price" style="font-size:1.6rem;font-weight:700;margin:1rem 0;">
+        {{ product.selected_or_first_available_variant.price | money }}
+        {%- if product.compare_at_price > product.price -%}
+          <s style="opacity:0.5;font-weight:400;font-size:1.1rem;margin-left:0.5rem;">{{ product.compare_at_price | money }}</s>
+        {%- endif -%}
+      </p>
+      {%- comment -%} Reuse Dawn's real product form so the buy button is fully functional. {%- endcomment -%}
+      {%- render 'buy-buttons', block: section.blocks.first, product: product, product_form_id: 'chillgo-hero-form', section_id: section.id -%}
+      {%- if section.settings.reassurance != blank -%}
+        <p style="font-size:0.85rem;opacity:0.75;margin-top:0.75rem;">{{ section.settings.reassurance }}</p>
+      {%- endif -%}
+    </div>
+  </div>
+</section>
+
+<style>
+  @media (min-width: 750px) {
+    .chillgo-hero__grid { grid-template-columns: 1fr 1fr; }
+    .chillgo-hero__copy { text-align: left !important; }
+  }
+</style>
+
+{% schema %}
+{
+  "name": "ChillGo hero",
+  "settings": [
+    { "type": "text", "id": "headline", "label": "Headline", "default": "Stay Cool Anywhere — Turbo Airflow That Fits In Your Bag" },
+    { "type": "text", "id": "subhead", "label": "Subheadline", "default": "Rechargeable handheld turbo fan. USB-C. All-day battery." },
+    { "type": "video", "id": "video", "label": "Hero video (best for conversion)" },
+    { "type": "image_picker", "id": "gif", "label": "Hero image / GIF (fallback)" },
+    { "type": "text", "id": "reassurance", "label": "Reassurance line", "default": "Free shipping · 30-day returns · Ships from local warehouse" }
+  ],
+  "blocks": [{ "type": "buy_buttons", "name": "Buy buttons", "limit": 1 }],
+  "presets": [{ "name": "ChillGo hero", "blocks": [{ "type": "buy_buttons" }] }]
+}
+{% endschema %}

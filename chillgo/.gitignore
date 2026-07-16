@@ -1,0 +1,10 @@
+# Sourcing runtime artifacts — regenerated on every run, never commit
+sourcing/.env
+sourcing/.cj_token.json
+sourcing/decision_record.md
+sourcing/selected_product.json
+
+# Python
+sourcing/.venv/
+__pycache__/
+*.pyc

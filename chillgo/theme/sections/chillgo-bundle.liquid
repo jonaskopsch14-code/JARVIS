@@ -1,0 +1,39 @@
+{%- comment -%}
+  ChillGo bundle offer (Section 5.2 #7): "Buy 2, save X%" — lifts AOV without
+  deep-discounting single units. Wire the actual discount via a Shopify
+  automatic discount / "Buy X get Y" rule, or a bundle app; this block is the
+  on-page pitch + a pre-filled 2-pack add to cart.
+{%- endcomment -%}
+<link rel="stylesheet" href="{{ 'chillgo.css' | asset_url }}" media="all">
+
+<section class="chillgo-section chillgo-bundle-section">
+  <div class="chillgo-bundle">
+    <span class="chillgo-bundle__badge">{{ section.settings.badge }}</span>
+    <h2 style="margin-top:0.75rem;">{{ section.settings.heading }}</h2>
+    <p style="max-width:520px;margin:0.5rem auto 1.25rem;">{{ section.settings.subtext }}</p>
+    <form action="{{ routes.cart_add_url }}" method="post" enctype="multipart/form-data">
+      <input type="hidden" name="id" value="{{ product.selected_or_first_available_variant.id }}">
+      <input type="hidden" name="quantity" value="{{ section.settings.bundle_qty }}">
+      <button type="submit" class="button chillgo-bundle__cta"
+        style="background:var(--chillgo-accent);color:#fff;border:0;border-radius:999px;padding:0.9rem 2rem;font-weight:700;cursor:pointer;">
+        {{ section.settings.cta }}
+      </button>
+    </form>
+    <p style="font-size:0.8rem;opacity:0.7;margin-top:0.75rem;">{{ section.settings.finequote }}</p>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "ChillGo bundle offer",
+  "settings": [
+    { "type": "text", "id": "badge", "label": "Badge", "default": "MOST POPULAR" },
+    { "type": "text", "id": "heading", "label": "Heading", "default": "Buy 2, save 15%" },
+    { "type": "textarea", "id": "subtext", "label": "Subtext", "default": "One for your bag, one for someone who keeps stealing yours. Grab the 2-pack and save." },
+    { "type": "text", "id": "cta", "label": "Button text", "default": "Add 2-pack to cart" },
+    { "type": "number", "id": "bundle_qty", "label": "Quantity added", "default": 2 },
+    { "type": "text", "id": "finequote", "label": "Fine print", "default": "Discount applied automatically at checkout." }
+  ],
+  "presets": [{ "name": "ChillGo bundle offer" }]
+}
+{% endschema %}

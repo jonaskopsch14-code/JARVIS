@@ -1,0 +1,145 @@
+/* ChillGo single-product landing styles (Section 5).
+   Scoped to .chillgo-* / .sticky-atc classes so nothing here collides with Dawn.
+   Uses Dawn's CSS custom properties where useful so it inherits the theme palette. */
+
+:root {
+  --chillgo-accent: #17a2b8;
+  --chillgo-accent-dark: #0f7c8c;
+  --chillgo-ink: rgb(var(--color-foreground, 18 18 18));
+  --chillgo-radius: 12px;
+  --chillgo-gap: clamp(1rem, 4vw, 2.5rem);
+}
+
+/* ---------- Generic section rhythm ---------- */
+.chillgo-section {
+  padding: var(--chillgo-gap) 1.5rem;
+  max-width: 900px;
+  margin: 0 auto;
+}
+.chillgo-section h2 {
+  font-size: clamp(1.4rem, 4vw, 2rem);
+  margin-bottom: 0.75rem;
+  text-align: center;
+}
+.chillgo-section p { line-height: 1.55; }
+
+/* ---------- Feature-benefit grid ---------- */
+.chillgo-benefits__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+.chillgo-benefit {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.9rem 1rem;
+  border: 1px solid rgba(var(--color-foreground, 18 18 18), 0.12);
+  border-radius: var(--chillgo-radius);
+}
+.chillgo-benefit__icon { font-size: 1.5rem; line-height: 1; }
+.chillgo-benefit__text { font-weight: 600; font-size: 0.95rem; }
+
+/* ---------- Comparison table ---------- */
+.chillgo-compare__wrap { overflow-x: auto; margin-top: 1rem; }
+.chillgo-compare {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 420px;
+}
+.chillgo-compare th,
+.chillgo-compare td {
+  padding: 0.75rem 1rem;
+  text-align: center;
+  border-bottom: 1px solid rgba(var(--color-foreground, 18 18 18), 0.12);
+}
+.chillgo-compare th:first-child,
+.chillgo-compare td:first-child { text-align: left; }
+.chillgo-compare thead th { font-size: 0.95rem; }
+.chillgo-compare .is-us { color: var(--chillgo-accent-dark); font-weight: 700; }
+.chillgo-compare .chillgo-col {
+  background: rgba(23, 162, 184, 0.08);
+  border-radius: var(--chillgo-radius) var(--chillgo-radius) 0 0;
+}
+
+/* ---------- Bundle offer ---------- */
+.chillgo-bundle {
+  text-align: center;
+  border: 2px dashed var(--chillgo-accent);
+  border-radius: var(--chillgo-radius);
+  padding: 1.5rem;
+  margin-top: 1rem;
+}
+.chillgo-bundle__badge {
+  display: inline-block;
+  background: var(--chillgo-accent);
+  color: #fff;
+  font-weight: 700;
+  padding: 0.25rem 0.75rem;
+  border-radius: 999px;
+  font-size: 0.85rem;
+}
+
+/* ---------- FAQ accordion ---------- */
+.chillgo-faq__item {
+  border-bottom: 1px solid rgba(var(--color-foreground, 18 18 18), 0.12);
+}
+.chillgo-faq__item summary {
+  cursor: pointer;
+  padding: 1rem 0;
+  font-weight: 600;
+  list-style: none;
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+}
+.chillgo-faq__item summary::-webkit-details-marker { display: none; }
+.chillgo-faq__item summary::after { content: '+'; font-size: 1.3rem; line-height: 1; }
+.chillgo-faq__item[open] summary::after { content: '\2013'; }
+.chillgo-faq__item p { padding: 0 0 1rem; margin: 0; }
+
+/* ---------- Sticky add-to-cart (Section 5.3) ---------- */
+.sticky-atc {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 20;
+  display: none; /* toggled inline by sticky-atc.js on mobile */
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.75rem 1rem;
+  background: rgb(var(--color-background, 255 255 255));
+  border-top: 1px solid rgba(var(--color-foreground, 18 18 18), 0.15);
+  box-shadow: 0 -4px 18px rgba(0, 0, 0, 0.08);
+  padding-bottom: calc(0.75rem + env(safe-area-inset-bottom, 0));
+}
+.sticky-atc__info { display: flex; flex-direction: column; min-width: 0; }
+.sticky-atc__title {
+  font-size: 0.85rem;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 45vw;
+}
+.sticky-atc__price { font-size: 1.05rem; font-weight: 700; }
+.sticky-atc__button {
+  flex: 0 0 auto;
+  background: var(--chillgo-accent);
+  color: #fff;
+  border: 0;
+  border-radius: 999px;
+  padding: 0.85rem 1.75rem;
+  font-weight: 700;
+  font-size: 1rem;
+  cursor: pointer;
+}
+.sticky-atc__button:disabled { opacity: 0.6; cursor: not-allowed; }
+
+/* Never show the sticky bar on desktop, whatever the inline style says. */
+@media (min-width: 750px) {
+  .sticky-atc { display: none !important; }
+}

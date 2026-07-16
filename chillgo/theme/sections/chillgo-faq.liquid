@@ -1,0 +1,66 @@
+{%- comment -%}
+  ChillGo FAQ accordion (Section 5.2 #8, content per Sections 7 & 9).
+  Native <details>/<summary> — no JS needed. Also emits FAQPage JSON-LD so the
+  five support-killer questions can earn rich snippets. Write answers honestly
+  (Section 9): don't oversell battery/noise/shipping.
+{%- endcomment -%}
+<link rel="stylesheet" href="{{ 'chillgo.css' | asset_url }}" media="all">
+
+<section class="chillgo-section chillgo-faq">
+  <h2>{{ section.settings.heading }}</h2>
+  <div class="chillgo-faq__list">
+    {%- for block in section.blocks -%}
+      <details class="chillgo-faq__item" {{ block.shopify_attributes }}>
+        <summary>{{ block.settings.question }}</summary>
+        <div>{{ block.settings.answer }}</div>
+      </details>
+    {%- endfor -%}
+  </div>
+</section>
+
+{%- if section.blocks.size > 0 -%}
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {%- for block in section.blocks -%}
+      {
+        "@type": "Question",
+        "name": {{ block.settings.question | json }},
+        "acceptedAnswer": { "@type": "Answer", "text": {{ block.settings.answer | strip_html | json }} }
+      }{%- unless forloop.last -%},{%- endunless -%}
+      {%- endfor -%}
+    ]
+  }
+  </script>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "ChillGo FAQ",
+  "settings": [
+    { "type": "text", "id": "heading", "label": "Heading", "default": "Questions, answered honestly" }
+  ],
+  "blocks": [
+    {
+      "type": "qa",
+      "name": "Q&A",
+      "settings": [
+        { "type": "text", "id": "question", "label": "Question", "default": "How long does the battery last?" },
+        { "type": "richtext", "id": "answer", "label": "Answer", "default": "<p>On the lowest setting you'll get the full runtime; on turbo it drains faster — see the product spec for the exact tested range. Real talk: a full charge easily covers a commute, a walk, or an afternoon out.</p>" }
+      ]
+    }
+  ],
+  "presets": [{
+    "name": "ChillGo FAQ",
+    "blocks": [
+      { "type": "qa", "settings": { "question": "How long does the battery last?", "answer": "<p>Runtime depends on the speed — longest on low, shortest on turbo. See the spec box above for the exact tested range. A full charge comfortably covers a day out.</p>" } },
+      { "type": "qa", "settings": { "question": "How long does it take to charge?", "answer": "<p>Around a couple of hours from empty over USB-C — top it up from any phone charger, laptop, or power bank. Exact time is on the spec sheet.</p>" } },
+      { "type": "qa", "settings": { "question": "How loud is it on the highest setting?", "answer": "<p>Turbo has a noticeable whoosh — it's moving real air. Low and medium are quiet enough for the office or a desk. It's a fan, not a whisper, and we won't pretend otherwise.</p>" } },
+      { "type": "qa", "settings": { "question": "How long will shipping actually take?", "answer": "<p>Orders ship from our local warehouse, so most arrive within the delivery window shown at checkout for your country. We update this to match the real warehouse — no fake \"2-day\" promises.</p>" } },
+      { "type": "qa", "settings": { "question": "What's your return policy?", "answer": "<p>30-day returns, and EU customers keep the full 14-day right of withdrawal. If it's not for you, start a return from your order confirmation email — most requests are fully self-service.</p>" } }
+    ]
+  }]
+}
+{% endschema %}

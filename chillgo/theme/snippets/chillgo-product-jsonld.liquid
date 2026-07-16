@@ -1,0 +1,26 @@
+{%- comment -%}
+  ChillGo Product structured data (Section 5.4). Render inside <head> on the
+  product template: {% render 'chillgo-product-jsonld', product: product %}
+  Emits real, honest values from the product object — no invented ratings.
+  Uses money_without_currency so `price` is a bare number, as schema.org expects.
+{%- endcomment -%}
+{%- if product -%}
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org/",
+    "@type": "Product",
+    "name": {{ product.title | json }},
+    {% if product.featured_image %}"image": [{{ product.featured_image | image_url: width: 1200 | prepend: 'https:' | json }}],{% endif %}
+    "description": {{ product.description | strip_html | truncatewords: 60 | json }},
+    {% if product.vendor != blank %}"brand": { "@type": "Brand", "name": {{ product.vendor | json }} },{% endif %}
+    {% if product.selected_or_first_available_variant.sku != blank %}"sku": {{ product.selected_or_first_available_variant.sku | json }},{% endif %}
+    "offers": {
+      "@type": "Offer",
+      "url": {{ request.origin | append: product.url | json }},
+      "priceCurrency": {{ cart.currency.iso_code | json }},
+      "price": "{{ product.selected_or_first_available_variant.price | money_without_currency | strip_html }}",
+      "availability": "{% if product.selected_or_first_available_variant.available %}https://schema.org/InStock{% else %}https://schema.org/OutOfStock{% endif %}"
+    }
+  }
+  </script>
+{%- endif -%}
