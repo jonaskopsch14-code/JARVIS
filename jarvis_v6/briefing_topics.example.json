@@ -1,0 +1,11 @@
+{
+  "_comment": "Kopiere diese Datei nach briefing_topics.json und setze JARVIS_BRIEFING_CONFIG auf ihren Pfad (oder nutze JARVIS_BRIEFING_TOPICS in der .env). 'topics' speist die news-Quelle; die inbox-Quelle nutzt die JARVIS_IMAP_* Einstellungen.",
+  "topics": [
+    "Wirtschaft",
+    "Technologie",
+    "Künstliche Intelligenz",
+    "Wittenberg",
+    "Sachsen-Anhalt"
+  ],
+  "max_items": 10
+}

@@ -128,6 +128,16 @@ class NightShiftConfig:
     imap_inbox: str = os.getenv("JARVIS_IMAP_INBOX", "INBOX")
     imap_trash: str = os.getenv("JARVIS_IMAP_TRASH", "Trash")
 
+    # Browser task execution (generic Playwright toolset). Headless by default.
+    browser_headless: bool = os.getenv("JARVIS_BROWSER_HEADLESS", "1") != "0"
+
+    # Briefing skill: comma-separated topics for the 'news' source (empty ⇒
+    # the briefing module falls back to sensible defaults). The 'inbox' source
+    # reuses the IMAP settings above.
+    briefing_topics: List[str] = field(default_factory=lambda: [
+        t.strip() for t in os.getenv("JARVIS_BRIEFING_TOPICS", "").split(",") if t.strip()
+    ])
+
     # Supplier crawl: comma-separated source URLs.
     supplier_sources: List[str] = field(default_factory=lambda: [
         s.strip() for s in os.getenv("JARVIS_SUPPLIER_SOURCES", "").split(",") if s.strip()

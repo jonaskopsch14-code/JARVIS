@@ -237,11 +237,99 @@ triple-gated: it runs only when `JARVIS_DRY_RUN=0` **and**
 product. **Ad campaigns are never auto-launched** — launching paid ads spends
 real money, so the drafts wait for you to start them by hand.
 
+## Interactive capabilities — Browser task execution & Briefing
+
+Two capabilities let JARVIS act and report interactively, wired in as tools
+(not a parallel architecture). Both share one **tier permission system**
+(`integrations/permissions.py`): `read`/`suggest` run automatically; `send`,
+`spend`, `delete`, `publish` require an explicit confirmation first (with no
+confirmation path wired, they are refused — nothing money-moving happens
+unattended).
+
+### Browser task execution (`integrations/browser.py`)
+
+A generic, **not site-specific** Playwright toolset the agent drives step by
+step (search → open result → add to cart) — no hard-coded Amazon script:
+
+```
+browser_open(url)
+browser_click(description)      # finds by visible text/role, not brittle CSS
+browser_type(description, text)
+browser_read(description=None)  # returns page text/structure
+browser_screenshot()            # fallback when text selectors fall short
+```
+
+Safety: opening, reading, searching, typing and **adding to the cart** run
+automatically. Any click that completes a purchase — "Jetzt kaufen", "Zur
+Kasse", "Checkout", "Bezahlen", "Buy now" — is classified `spend` and routed
+through the permission gate, so JARVIS **always asks before it buys**,
+regardless of what triggered the task (`classify_click_tier`).
+
+Enable it:
+
+```bash
+pip install -e ".[browser]"
+playwright install chromium     # one-time browser download
+```
+
+```python
+from integrations.permissions import PermissionManager, Tier
+from integrations.browser import BrowserTools
+
+# confirm_fn is your "ask Jonas" prompt; return True to allow a spend action.
+tools = BrowserTools(PermissionManager(confirm_fn=lambda tier, action: input(f"{action}? [j/N] ") == "j"))
+tools.browser_open("amazon.de")
+tools.browser_type("Suchfeld", "Weider Protein")
+tools.browser_click("In den Warenkorb")   # runs automatically
+tools.browser_click("Jetzt kaufen")        # stops and asks first
+```
+
+### Briefing skill (`integrations/briefing.py`)
+
+On-demand ("Gib mir ein Briefing") or schedulable spoken briefing that pulls
+from **two equally-weighted sources**:
+
+* `news` — headlines for configurable topics (default fetcher uses the
+  standard-library Google-News RSS endpoint; swap in a paid API by passing your
+  own `news_fetcher`).
+* `inbox` — recent mail, **reusing the existing `JARVIS_IMAP_*` access** (a
+  Gmail app-password works). Read-only: it never marks, moves or deletes.
+
+It is a pure read action, so it needs no confirmation. The result is phrased in
+the Jarvis tone (addressing "Jonas", never "Master") and spoken via the
+existing TTS pipeline.
+
+```python
+from integrations.briefing import briefing_compile
+print(briefing_compile(["news", "inbox"], max_items=10))
+```
+
+Configure the news topics without touching code — either in `.env`:
+
+```
+JARVIS_BRIEFING_TOPICS=Wirtschaft, Technologie, Wittenberg
+```
+
+or via a JSON file (copy `briefing_topics.example.json` →
+`briefing_topics.json` and set `JARVIS_BRIEFING_CONFIG=/pfad/briefing_topics.json`).
+The mobile settings form also has a **"Briefing-Themen"** field.
+
+### Persona at idle
+
+When you address JARVIS without a concrete task ("Hallo JARVIS"), it answers
+with a bit of character and then actively asks for work, instead of a neutral
+"wie kann ich helfen" — while staying on the established address ("Jonas"),
+never "Master".
+
 ## Tests
 
 ```bash
-python jarvis_v6/tests/test_mailbox.py        # 5 classifier tests
-python jarvis_v6/tests/test_integrations.py   # 8 supplier/trends/store + e2e tests
+python jarvis_v6/tests/test_mailbox.py             # 5 spam-classifier tests
+python jarvis_v6/tests/test_integrations.py        # supplier/trends/store + e2e
+python jarvis_v6/tests/test_permissions_browser.py # 14 permission + browser-gate tests
+python jarvis_v6/tests/test_briefing.py            # 11 briefing composition tests
+# voice + webapp tests run under pytest:
+pytest jarvis_v6/tests/test_voice.py jarvis_v6/tests/test_webapp.py
 ```
 
 ## Config (additional integration variables)
@@ -255,6 +343,9 @@ python jarvis_v6/tests/test_integrations.py   # 8 supplier/trends/store + e2e te
 | `JARVIS_STORE_API_KEY`    | —       | Shopify Admin access token (live).        |
 | `JARVIS_STORE_DOMAIN`     | —       | `your-shop.myshopify.com` (live).         |
 | `JARVIS_STORE_CONFIRM_LIVE`| `0`    | `1` = second gate; required to publish.   |
+| `JARVIS_BROWSER_HEADLESS`  | `1`     | `0` to show the browser window.           |
+| `JARVIS_BRIEFING_TOPICS`   | —       | Comma-separated news topics for the briefing. |
+| `JARVIS_BRIEFING_CONFIG`   | —       | Path to a briefing topics JSON file.      |
 
 ## Dashboard panel (GUI)
 

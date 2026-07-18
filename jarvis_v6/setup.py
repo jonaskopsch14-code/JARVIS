@@ -52,6 +52,9 @@ EXTRAS = {
     "mail": ["imap-tools>=1.0"],
     # Supplier crawling / market-trend collection.
     "crawl": ["httpx>=0.27", "beautifulsoup4>=4.12"],
+    # Browser task execution (generic Playwright toolset). After installing,
+    # run once: playwright install chromium
+    "browser": ["playwright>=1.40"],
     # Fashion Aura store backend (Shopify Admin API is the common case; swap the
     # client in store_optimizer for WooCommerce/etc.).
     "store": ["ShopifyAPI>=12.0"],

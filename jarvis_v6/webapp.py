@@ -50,7 +50,7 @@ EDITABLE_KEYS = [
     "JARVIS_IMAP_PORT", "JARVIS_IMAP_INBOX", "JARVIS_IMAP_TRASH",
     "JARVIS_SUPPLIER_SOURCES", "JARVIS_TRENDS_FEED", "JARVIS_WINNERS_TOP_N",
     "JARVIS_STORE_PRODUCTS", "JARVIS_STORE_DOMAIN", "JARVIS_STORE_API_KEY",
-    "JARVIS_STORE_CONFIRM_LIVE",
+    "JARVIS_STORE_CONFIRM_LIVE", "JARVIS_BRIEFING_TOPICS",
 ]
 SECRET_KEYS = {"JARVIS_IMAP_PASSWORD", "JARVIS_STORE_API_KEY"}
 
@@ -107,8 +107,20 @@ class WebApp:
         self.running = False
         self.supervisor = NightShiftSupervisor(self.config, on_state=self._on_state)
         # The conversation brain ("Telefon-Modus"). Wired to this app's live
-        # providers; no API key, pure standard library.
-        self.brain = brain_for_app(self)
+        # providers; no API key, pure standard library. The briefing provider is
+        # the on-demand multi-source (news + inbox) briefing.
+        self.brain = brain_for_app(self, briefing_fn=self._live_briefing)
+
+    def _live_briefing(self) -> str:
+        """On-demand spoken briefing from news + inbox (pure read action).
+
+        Lazy-imports the briefing module so the stdlib boot path stays free of
+        it; returns "" on any error so the brain falls back gracefully."""
+        try:
+            from integrations.briefing import briefing_compile
+            return briefing_compile(["news", "inbox"])
+        except Exception:  # noqa: BLE001 - a source failure must not break voice
+            return ""
 
     def _on_state(self, state: SystemState, info: dict) -> None:
         with self._lock:
@@ -382,6 +394,8 @@ INDEX_HTML = r"""<!DOCTYPE html>
       <input id="JARVIS_IMAP_HOST" placeholder="imap.gmail.com">
       <input id="JARVIS_IMAP_USER" placeholder="du@example.com" autocapitalize="off">
       <input id="JARVIS_IMAP_PASSWORD" type="password" placeholder="App-Passwort">
+      <label>Briefing-Themen (Komma-getrennt)</label>
+      <input id="JARVIS_BRIEFING_TOPICS" placeholder="Wirtschaft, Technologie, Wittenberg">
       <label>Trends-Feed / Produktkatalog (Pfade)</label>
       <input id="JARVIS_TRENDS_FEED" placeholder="/pfad/trends.json">
       <input id="JARVIS_STORE_PRODUCTS" placeholder="/pfad/products.json">
@@ -399,8 +413,8 @@ INDEX_HTML = r"""<!DOCTYPE html>
 <script>
 const $ = id => document.getElementById(id);
 const CFG_KEYS = ["JARVIS_DRY_RUN","JARVIS_WAKE_HOUR","JARVIS_WAKE_MINUTE","JARVIS_IMAP_HOST",
-  "JARVIS_IMAP_USER","JARVIS_IMAP_PASSWORD","JARVIS_TRENDS_FEED","JARVIS_STORE_PRODUCTS",
-  "JARVIS_STORE_DOMAIN","JARVIS_STORE_API_KEY","JARVIS_STORE_CONFIRM_LIVE"];
+  "JARVIS_IMAP_USER","JARVIS_IMAP_PASSWORD","JARVIS_BRIEFING_TOPICS","JARVIS_TRENDS_FEED",
+  "JARVIS_STORE_PRODUCTS","JARVIS_STORE_DOMAIN","JARVIS_STORE_API_KEY","JARVIS_STORE_CONFIRM_LIVE"];
 const TOKEN = new URLSearchParams(location.search).get("token") || "";
 const H = TOKEN ? {"X-JARVIS-Token":TOKEN,"Content-Type":"application/json"} : {"Content-Type":"application/json"};
 let spoken = "", lastState = "";
