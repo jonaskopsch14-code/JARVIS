@@ -116,6 +116,9 @@ class VoiceBrain:
     start_fn: Optional[Callable[[], bool]] = None
     preflight_fn: Optional[Callable[[], dict]] = None
     llm_fn: Optional[Callable[[str], str]] = None
+    # Optional live multi-source briefing (news + inbox). When wired, a request
+    # for "ein Briefing" is answered from it; otherwise the night-shift summary.
+    briefing_fn: Optional[Callable[[], str]] = None
     name: str = "JARVIS"
     user: str = "Jonas"
     _now: Callable[[], _dt.datetime] = field(default=_dt.datetime.now, repr=False)
@@ -186,11 +189,12 @@ class VoiceBrain:
         if _has(text, "danke", "vielen dank", "super", "perfekt", "klasse"):
             return VoiceReply("Gern geschehen. Sonst noch etwas?", intent="thanks")
 
+        # Bare address without a concrete task — reply with a bit of character
+        # instead of waiting neutrally, then actively ask for something to do.
         if _has(text, "hallo", "hi", "hey", "guten tag", "guten morgen",
-                "guten abend", "moin", "jarvis"):
-            return VoiceReply(f"Hallo {self.user}. Ich bin bereit. Frag mich nach "
-                              f"Status, Briefing oder den Zahlen, oder sag "
-                              f"'starte die Nachtschicht'.", intent="greeting")
+                "guten abend", "moin", "jarvis", "bist du da", "bist du wach",
+                "schlaefst du", "langweilig", "langeweile"):
+            return self._do_idle_persona()
 
         # No built-in intent matched.
         if self.llm_fn is not None:
@@ -253,6 +257,15 @@ class VoiceBrain:
             intent="counts")
 
     def _do_briefing(self) -> VoiceReply:
+        # Prefer the live multi-source briefing (news + inbox) when it's wired.
+        # It is a pure read action, so no confirmation is needed.
+        if self.briefing_fn is not None:
+            try:
+                live = (self.briefing_fn() or "").strip()
+                if live:
+                    return VoiceReply(live, intent="briefing")
+            except Exception:  # noqa: BLE001 - never let a source crash the call
+                pass
         briefing = (self._status().get("briefing") or "").strip()
         if briefing:
             return VoiceReply(briefing, intent="briefing")
@@ -260,6 +273,23 @@ class VoiceBrain:
             "Es liegt noch kein Briefing vor. Sobald die Nachtschicht durch ist "
             "und die Weckzeit erreicht wurde, fasse ich alles für dich zusammen.",
             intent="briefing_empty")
+
+    def _do_idle_persona(self) -> VoiceReply:
+        """Bare address with no concrete task: answer with personality, then
+        actively ask for work. Stays on the established address ("Jonas"/"Sir"),
+        never adopts "Master" or foreign wording."""
+        state = self._status().get("state", "idle")
+        if state in ("idle", "stopped", ""):
+            note = ("Alles bestens — ehrlich gesagt ist es gerade angenehm ruhig, "
+                    "fast schon langweilig.")
+        elif state == "night_shift":
+            note = "Ich bin mitten in der Nachtschicht und arbeite die Queue ab."
+        elif state == "sleeping":
+            note = "Die Arbeit ist erledigt, ich warte nur noch auf die Weckzeit."
+        else:
+            note = _STATE_DE.get(state, "Ich bin einsatzbereit.")
+        return VoiceReply(f"Zu Diensten, {self.user}. {note} Womit darf ich loslegen?",
+                          intent="greeting")
 
     def _do_start(self) -> VoiceReply:
         if self.start_fn is None:

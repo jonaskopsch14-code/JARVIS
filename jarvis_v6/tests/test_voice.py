@@ -113,6 +113,34 @@ def test_briefing_present_and_empty():
     assert empty.reply("Briefing bitte").intent == "briefing_empty"
 
 
+def test_live_briefing_fn_is_preferred_when_wired():
+    # Acceptance criterion 3: a briefing request is answered from the live
+    # multi-source briefing (news + inbox), with no confirmation.
+    brain, _ = make_brain(briefing="Alter Nachtschicht-Text.")
+    brain.briefing_fn = lambda: "Guten Morgen, Jonas. Hier Ihr Briefing."
+    r = brain.reply("Gib mir ein Briefing")
+    assert r.intent == "briefing"
+    assert r.text.startswith("Guten Morgen, Jonas.")
+
+
+def test_live_briefing_fn_falls_back_on_empty():
+    brain, _ = make_brain(briefing="Nachtschicht-Zusammenfassung.")
+    brain.briefing_fn = lambda: ""   # source produced nothing
+    r = brain.reply("Briefing bitte")
+    assert r.text == "Nachtschicht-Zusammenfassung."
+
+
+def test_idle_address_answers_with_personality():
+    # Acceptance criterion 4: bare address with no task => character, not a
+    # neutral wait, and it stays on "Jonas" (never "Master").
+    brain, _ = make_brain(state="idle")
+    r = brain.reply("Hallo JARVIS")
+    assert r.intent == "greeting"
+    assert "Jonas" in r.text
+    assert "Master" not in r.text
+    assert "loslegen" in r.text.lower()  # actively asks for a task
+
+
 def test_wake_time_uses_config():
     brain, _ = make_brain()
     r = brain.reply("Wann ist die Weckzeit?")
