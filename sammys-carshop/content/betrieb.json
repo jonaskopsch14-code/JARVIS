@@ -33,14 +33,14 @@
   "_steuernummerHinweis": "Die alte statische Seite (scs-wb.de/imprint.html) nennt die Steuernummer 115 240 061 48. Die Steuernummer gehört NICHT ins Impressum (nur die USt-IdNr. ist Pflichtangabe nach § 5 DDG) — beim Relaunch bewusst weglassen.",
 
   "oeffnungszeiten": {
-    "status": "UNBESTAETIGT",
-    "_statusHinweis": "Die Quellen widersprechen sich: eigene Website Mo–Fr 8–17 / Sa+So geschlossen; Cylex + Gelbe Seiten (Stand 29.06.2025) Mo–Fr 8–18 / Sa 8–12. Übernommen sind unten die Zeiten der EIGENEN Website (vom Inhaber kontrolliert). VOR GO-LIVE beim Inhaber bestätigen, dann hier auf \"BESTAETIGT\" setzen und in allen Verzeichnissen + im Google-Unternehmensprofil identisch hinterlegen. check-site.mjs warnt, solange der Status UNBESTAETIGT ist.",
-    "mo": ["08:00", "17:00"],
-    "di": ["08:00", "17:00"],
-    "mi": ["08:00", "17:00"],
-    "do": ["08:00", "17:00"],
-    "fr": ["08:00", "17:00"],
-    "sa": null,
+    "status": "BESTAETIGT",
+    "_statusHinweis": "ENTSCHIEDEN: Es gelten die Zeiten aus den Online-Verzeichnissen (Cylex + Gelbe Seiten, Stand 29.06.2025) — Mo–Fr 8–18, Sa 8–12, So geschlossen. Die abweichende Angabe der alten Wix-Website (Mo–Fr 8–17, Sa geschlossen) ist damit überholt und gilt nicht mehr. WICHTIG: Diese Zeiten müssen jetzt auch im Google-Unternehmensprofil stehen — dort werden sie von den meisten Kunden gelesen, noch vor der Website.",
+    "mo": ["08:00", "18:00"],
+    "di": ["08:00", "18:00"],
+    "mi": ["08:00", "18:00"],
+    "do": ["08:00", "18:00"],
+    "fr": ["08:00", "18:00"],
+    "sa": ["08:00", "12:00"],
     "so": null
   },
 

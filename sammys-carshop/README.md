@@ -95,9 +95,15 @@ kann**:
 | 2 | `impressum.html` | Erklärung zur Verbraucherstreitbeilegung (§ 36 VSBG). Vorformuliert für den Fall der Nichtteilnahme. |
 | 3 | `datenschutz.html` | Name und Anschrift des Hosting-Anbieters, Speicherdauer der Server-Logfiles, Datum des Go-live. |
 | 4 | `kontakt.html` | Formular-Endpunkt (siehe unten). Bis dahin verhindert `site.js` das Absenden und zeigt den E-Mail-Fallback — es geht also keine Anfrage verloren. |
-| 5 | `content/betrieb.json` | **Öffnungszeiten bestätigen.** Eingetragen sind die der eigenen Website (Mo–Fr 8–17, Sa+So geschlossen). Cylex und Gelbe Seiten sagen Mo–Fr 8–18 und Sa 8–12, Stand 29.06.2025. Eine der beiden Angaben ist falsch. |
-| 6 | `content/betrieb.json` | Google-Bewertung am Live-Profil verifizieren (Quellen widersprechen sich: ~4,8★/13 gegen ~4,6★/75–79). Danach eintragen und den vorbereiteten `aggregateRating`-Block in `index.html` aktivieren. |
-| 7 | `fahrzeuge.html` | Nur relevant, wenn Fahrzeughandel betrieben wird — siehe „Stufe 3". |
+| 5 | `content/betrieb.json` | Google-Bewertung am Live-Profil verifizieren (Quellen widersprechen sich: ~4,8★/13 gegen ~4,6★/75–79). Danach eintragen und den vorbereiteten `aggregateRating`-Block in `index.html` aktivieren. |
+| 6 | `fahrzeuge.html` | Nur relevant, wenn Fahrzeughandel betrieben wird — siehe „Stufe 3". |
+
+**Entschieden und umgesetzt:** Es gelten die Öffnungszeiten aus den
+Online-Verzeichnissen — **Mo–Fr 8–18, Sa 8–12, So geschlossen.** Die
+abweichende Angabe der alten Wix-Seite (Mo–Fr 8–17, Sa geschlossen) ist damit
+überholt. Offen bleibt nur der Schritt außerhalb des Codes: **dieselben Zeiten
+gehören ins Google-Unternehmensprofil**, weil die meisten Kunden sie dort lesen
+und nicht auf der Website.
 
 Zusätzlich stehen im Quelltext **`PRÜFEN`-Kommentare** an Stellen, die
 inhaltlich abgestimmt werden sollten (Autogas-Details, Gehaltsrahmen in der
@@ -161,9 +167,11 @@ die alten URLs auf Fehler prüfen.
 Ein Teil der Analyse betrifft Konten und Einträge außerhalb dieses
 Verzeichnisses. Ohne diese Schritte bleibt die halbe Wirkung liegen:
 
-1. **Google-Unternehmensprofil** — Öffnungszeiten, Leistungen und Fotos
-   pflegen, sobald Punkt 5 der Tabelle geklärt ist. Das Profil ist für eine
-   lokale Werkstatt der wichtigste Kanal, wichtiger als die Website selbst.
+1. **Google-Unternehmensprofil** — dort **Mo–Fr 8–18 und Sa 8–12** eintragen,
+   dazu Leistungen und Fotos pflegen. Das Profil ist für eine lokale Werkstatt
+   der wichtigste Kanal, wichtiger als die Website selbst: Wer „Werkstatt
+   Wittenberg" sucht, sieht die Öffnungszeiten dort, bevor er die Seite
+   überhaupt aufruft.
 2. **Verzeichnisse bereinigen** — Cylex, Gelbe Seiten (zwei Einträge!), 11880,
    golocal, Yelp und die übrigen. Überall dieselbe Schreibweise
    „Sammy's Car-Shop", dieselben Öffnungszeiten, dieselbe Telefonnummer. Der
@@ -193,7 +201,7 @@ Verzeichnisses. Ohne diese Schritte bleibt die halbe Wirkung liegen:
 | Cookie-Consent rechtskonform | ✅ Anders gelöst, siehe „Abweichungen" — die Seite lädt beim Aufruf nichts von Dritten; die Karte ist einwilligungsgesteuert mit gleichwertigen Schaltflächen |
 | Impressum vervollständigen | ⚠️ Struktur samt Kammer-, Berufs- und VSBG-Abschnitt steht; drei Angaben muss der Inhaber liefern |
 | Datenschutzerklärung aktualisieren | ✅ Neu geschrieben, beschreibt genau das, was die Seite tut. Universal Analytics (zum 01.07.2023 eingestellt) und YouTube sind ersatzlos entfallen, weil beides nicht mehr eingesetzt wird |
-| Öffnungszeiten vereinheitlichen | ⚠️ Eine Quelle im Code, maschinell erzwungen — der inhaltliche Widerspruch braucht die Bestätigung des Inhabers |
+| Öffnungszeiten vereinheitlichen | ✅ Widerspruch aufgelöst: es gelten Mo–Fr 8–18 und Sa 8–12 (die Zeiten aus den Verzeichnissen). Eine Quelle im Code, maschinell erzwungen. Bleibt zu tun: identisch ins Google-Profil eintragen |
 | `imprint.html` per 301 weiterleiten | ✅ In `.htaccess` |
 
 **Stufe 2 — Relaunch-Kern**
