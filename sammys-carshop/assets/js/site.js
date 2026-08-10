@@ -218,19 +218,34 @@
     function validate() {
       var ok = true;
       var first = null;
-      Array.prototype.forEach.call(form.querySelectorAll("[required]"), function (input) {
+
+      // Zu prüfen sind alle Pflichtfelder — plus jedes E-Mail-Feld, das etwas
+      // enthält, auch wenn es freiwillig ist. Das Formular trägt novalidate,
+      // also übernimmt der Browser hier nichts: eine Tippfehler-Adresse würde
+      // sonst unbemerkt durchgehen und die Antwort landet nirgends.
+      var fields = [];
+      var add = function (input) {
+        if (fields.indexOf(input) === -1) fields.push(input);
+      };
+      Array.prototype.forEach.call(form.querySelectorAll("[required]"), add);
+      Array.prototype.forEach.call(form.querySelectorAll('input[type="email"]'), add);
+
+      fields.forEach(function (input) {
         clearError(input);
-        var empty = input.type === "checkbox" ? !input.checked : !input.value.trim();
-        if (empty) {
+        var value = input.type === "checkbox" ? "" : input.value.trim();
+        var empty = input.type === "checkbox" ? !input.checked : !value;
+        var required = input.hasAttribute("required");
+
+        if (required && empty) {
           showError(input, input.type === "checkbox" ? "Bitte bestätigen, um fortzufahren." : "Bitte ausfüllen.");
           ok = false;
-          if (!first) first = input;
-        } else if (input.type === "email" && !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(input.value.trim())) {
+        } else if (input.type === "email" && value && !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(value)) {
           showError(input, "Bitte eine gültige E-Mail-Adresse angeben.");
           ok = false;
-          if (!first) first = input;
         }
+        if (!ok && !first) first = input;
       });
+
       if (first) first.focus();
       return ok;
     }
