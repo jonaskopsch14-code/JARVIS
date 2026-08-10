@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Sitemap für Sammy's Car-Shop.
+  Nicht enthalten (bewusst): fahrzeuge.html (noch nicht freigegeben),
+  impressum.html und datenschutz.html (noindex, Pflichtseiten ohne SEO-Wert),
+  404.html.
+  Nach jeder inhaltlichen Änderung <lastmod> aktualisieren.
+-->
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>https://www.scs-wb.de/</loc>
+    <lastmod>2026-08-10</lastmod>
+    <priority>1.0</priority>
+  </url>
+  <url>
+    <loc>https://www.scs-wb.de/leistungen.html</loc>
+    <lastmod>2026-08-10</lastmod>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://www.scs-wb.de/autogas.html</loc>
+    <lastmod>2026-08-10</lastmod>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.scs-wb.de/kontakt.html</loc>
+    <lastmod>2026-08-10</lastmod>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.scs-wb.de/ueber-uns.html</loc>
+    <lastmod>2026-08-10</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://www.scs-wb.de/karriere.html</loc>
+    <lastmod>2026-08-10</lastmod>
+    <priority>0.6</priority>
+  </url>
+</urlset>

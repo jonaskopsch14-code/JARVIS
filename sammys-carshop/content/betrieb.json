@@ -1,0 +1,77 @@
+{
+  "_hinweis": "EINZIGE QUELLE DER WAHRHEIT für alle Betriebsdaten. Wird von tools/check-site.mjs gegen jede HTML-Seite geprüft. Änderungen hier zuerst, dann in den Seiten nachziehen und `node tools/check-site.mjs` laufen lassen.",
+
+  "name": "Sammy's Car-Shop",
+  "nameVarianten": [
+    "Sammy´s Car-Shop",
+    "SAMMY'S CAR-SHOP",
+    "Sammy´s Carshop",
+    "Kopsch Samuel Selbsthilfewerkstatt"
+  ],
+  "_nameHinweis": "Für Local SEO muss EINE Schreibweise überall verwendet werden. Empfehlung: \"Sammy's Car-Shop\" (mit geradem Apostroph, so wie auf Google eingetragen). Die Varianten oben existieren derzeit in Verzeichnissen und sollten dort korrigiert werden — insbesondere \"Selbsthilfewerkstatt\" (Gelbe Seiten, golocal) ist veraltet und verwässert das Profil.",
+
+  "rechtsform": "Einzelunternehmen",
+  "inhaber": "Samuel Kopsch",
+  "gegruendet": 2004,
+  "handelsregister": null,
+
+  "adresse": {
+    "strasse": "Am Alten Bahnhof 31A",
+    "plz": "06886",
+    "ort": "Lutherstadt Wittenberg",
+    "region": "Sachsen-Anhalt",
+    "land": "DE"
+  },
+
+  "telefon": "03491 437666",
+  "telefonE164": "+493491437666",
+  "fax": "03491 437667",
+  "email": "kontakt@scs-wb.de",
+  "domain": "www.scs-wb.de",
+
+  "ustIdNr": "DE238647149",
+  "_steuernummerHinweis": "Die alte statische Seite (scs-wb.de/imprint.html) nennt die Steuernummer 115 240 061 48. Die Steuernummer gehört NICHT ins Impressum (nur die USt-IdNr. ist Pflichtangabe nach § 5 DDG) — beim Relaunch bewusst weglassen.",
+
+  "oeffnungszeiten": {
+    "status": "UNBESTAETIGT",
+    "_statusHinweis": "Die Quellen widersprechen sich: eigene Website Mo–Fr 8–17 / Sa+So geschlossen; Cylex + Gelbe Seiten (Stand 29.06.2025) Mo–Fr 8–18 / Sa 8–12. Übernommen sind unten die Zeiten der EIGENEN Website (vom Inhaber kontrolliert). VOR GO-LIVE beim Inhaber bestätigen, dann hier auf \"BESTAETIGT\" setzen und in allen Verzeichnissen + im Google-Unternehmensprofil identisch hinterlegen. check-site.mjs warnt, solange der Status UNBESTAETIGT ist.",
+    "mo": ["08:00", "17:00"],
+    "di": ["08:00", "17:00"],
+    "mi": ["08:00", "17:00"],
+    "do": ["08:00", "17:00"],
+    "fr": ["08:00", "17:00"],
+    "sa": null,
+    "so": null
+  },
+
+  "google": {
+    "profilUrl": "https://maps.google.com/?cid=13267215695958769109",
+    "bewertung": null,
+    "anzahlBewertungen": null,
+    "_bewertungHinweis": "BEWUSST leer. Die Angaben widersprechen sich (Gelbe Seiten: ~4,8★/13 Rezensionen; Trustami/ProvenExpert: ~4,6★/75–79 — kumuliert und laut Trustami selbst ungeprüft). Ein aggregateRating im Markup muss der real sichtbaren Bewertung entsprechen, sonst ist es irreführend und ein Verstoß gegen die Google-Richtlinien für strukturierte Daten. Erst am Live-Profil verifizieren, dann hier eintragen und den vorbereiteten JSON-LD-Block in index.html aktivieren."
+  },
+
+  "socialMedia": {
+    "facebook": null,
+    "instagram": null,
+    "_hinweis": "Es existiert nur ein automatisch generierter Facebook-\"pages\"-Eintrag (facebook.com/pages/Sammys-Carshop/690267054353576), der nicht vom Inhaber gepflegt wird. Absichtlich NICHT als sameAs verlinkt — ein Link würde eine ungepflegte Seite als offiziellen Kanal legitimieren. Entweder übernehmen und pflegen oder bei Facebook Löschung/Zusammenführung beantragen."
+  },
+
+  "leistungen": [
+    { "slug": "unfallreparatur", "titel": "Unfallreparatur & Karosserie", "kurz": "Instandsetzung nach Unfallschäden — Werkstattersatzwagen vorhanden." },
+    { "slug": "dellen", "titel": "Lackfreie Dellenreparatur", "kurz": "Dellen ausdrücken, ohne den Lack anzutasten." },
+    { "slug": "inspektion", "titel": "Wartung & Inspektion", "kurz": "Nach Herstellervorgabe — für alle Marken." },
+    { "slug": "diagnose", "titel": "Fahrzeugdiagnose", "kurz": "Fehlerspeicher auslesen, moderne Fahrzeugelektronik." },
+    { "slug": "bremsen", "titel": "Bremsenservice", "kurz": "Beläge, Scheiben, Bremsflüssigkeit." },
+    { "slug": "klimaservice", "titel": "Klimaservice", "kurz": "Prüfen, Warten, Befüllen der Klimaanlage." },
+    { "slug": "reifen", "titel": "Reifen & Räder", "kurz": "Reifenwechsel, Räder wuchten." },
+    { "slug": "scheiben", "titel": "Scheiben & Scheibentönung", "kurz": "Scheibenwechsel und Tönung." },
+    { "slug": "dpf", "titel": "Rußpartikelfilter-Regeneration", "kurz": "DPF reinigen statt tauschen." },
+    { "slug": "autogas", "titel": "Autogas / LPG", "kurz": "Wartung und Reparatur von Autogasanlagen.", "bestaetigen": true }
+  ],
+
+  "fahrzeughandel": {
+    "status": "UNBESTAETIGT",
+    "_hinweis": "An-/Verkauf ist in Verzeichnissen (Gelbe Seiten, Kompass) und in den Keywords der alten Website als Leistung gelistet, es gibt aber keinen online abrufbaren Bestand (keine Händlerseite bei mobile.de/AutoScout24). fahrzeuge.html ist vorbereitet, aber NICHT in der Hauptnavigation verlinkt, solange der Status UNBESTAETIGT ist. Vor Aktivierung mit dem Inhaber klären."
+  }
+}

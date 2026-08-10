@@ -1,0 +1,11 @@
+# robots.txt — Sammy's Car-Shop
+# Alles indexierbar, ausgenommen die noch nicht freigegebene Fahrzeugseite.
+# (Die Seite trägt zusätzlich ein noindex-Meta — das ist die verbindliche
+# Anweisung. Eine Disallow-Regel allein verhindert keine Indexierung, sie
+# verhindert nur das Crawlen.)
+
+User-agent: *
+Disallow: /fahrzeuge.html
+Allow: /
+
+Sitemap: https://www.scs-wb.de/sitemap.xml
