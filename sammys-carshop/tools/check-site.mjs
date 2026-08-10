@@ -47,7 +47,11 @@ function hoursCell(key) {
 }
 
 /* ------------------------------------------------------------- Seitenauswahl */
-const pages = readdirSync(ROOT).filter((f) => f.endsWith(".html")).sort();
+/** Erzeugte Dateien, die keine ausgelieferten Seiten sind (siehe .gitignore). */
+const GENERIERT = new Set(["vorschau.html"]);
+const pages = readdirSync(ROOT)
+  .filter((f) => f.endsWith(".html") && !GENERIERT.has(f))
+  .sort();
 if (pages.length === 0) {
   console.error("Keine HTML-Seiten im Projektverzeichnis gefunden.");
   process.exit(1);

@@ -1,0 +1,5 @@
+# Von tools/build-preview.mjs erzeugtes Vorschau-Bündel.
+# Bewusst nicht versioniert und NIE hochladen: die Datei bündelt alle Seiten in
+# eine, hat also keine eigenen URLs, Titel und canonical-Tags. Live gehen die
+# zehn einzelnen HTML-Dateien. Neu bauen mit `node tools/build-preview.mjs`.
+vorschau.html

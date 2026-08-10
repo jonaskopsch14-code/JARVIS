@@ -55,8 +55,24 @@ sammys-carshop/
 ├── assets/js/site.js     Navigation, Öffnungszeiten-Status, Consent, Formular
 ├── assets/img/README.md  Shot-Liste für echte Fotos (Ordner absichtlich leer)
 ├── content/betrieb.json  EINZIGE QUELLE DER WAHRHEIT für alle Betriebsdaten
-└── tools/check-site.mjs  Prüft jede Seite gegen betrieb.json
+├── tools/check-site.mjs  Prüft jede Seite gegen betrieb.json
+└── tools/build-preview.mjs  Bündelt alles in eine Datei zum Herzeigen
 ```
+
+### Vorschau zum Abnehmen
+
+```bash
+node tools/build-preview.mjs      # schreibt vorschau.html
+```
+
+Packt alle zehn Seiten samt CSS und JS in **eine** Datei mit kleinem
+Seitenumschalter — zum Doppelklicken, Verschicken oder Hochladen als
+Vorschau-Link, ohne Webserver und ohne Hosting. Gedacht dafür, dass der
+Inhaber die Seite abnimmt, bevor etwas live geht.
+
+**Diese Datei nie auf den Webspace laden.** Sie hat keine eigenen URLs, Titel
+oder canonical-Tags und wäre für Suchmaschinen eine einzige Seite. Live gehen
+die zehn Einzeldateien. Deshalb steht `vorschau.html` in der `.gitignore`.
 
 ### Warum `content/betrieb.json` + `tools/check-site.mjs`
 
