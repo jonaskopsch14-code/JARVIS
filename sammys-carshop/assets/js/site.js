@@ -1,5 +1,5 @@
 /* ==========================================================================
-   Sammy's Car-Shop — site.js
+   SAMMY'S CAR-SHOP — site.js
    Kein Framework, keine externen Requests, keine Tracker.
    Module:
      1. Navigation (Mobile-Toggle)
@@ -15,12 +15,12 @@
      tools/check-site.mjs prüft das bei jedem Lauf.
      --------------------------------------------------------------------- */
   var HOURS = {
-    1: ["08:00", "18:00"], // Mo
-    2: ["08:00", "18:00"], // Di
-    3: ["08:00", "18:00"], // Mi
-    4: ["08:00", "18:00"], // Do
-    5: ["08:00", "18:00"], // Fr
-    6: ["08:00", "12:00"], // Sa
+    1: ["08:00", "17:00"], // Mo
+    2: ["08:00", "17:00"], // Di
+    3: ["08:00", "17:00"], // Mi
+    4: ["08:00", "17:00"], // Do
+    5: ["08:00", "17:00"], // Fr
+    6: null, // Sa — nur auf Anfrage, keine festen Zeiten
     0: null // So
   };
 

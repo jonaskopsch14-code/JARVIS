@@ -8,7 +8,7 @@
  * irgendetwas live geht.
  *
  * WICHTIG: Das ist eine Vorschau, NICHT das Auslieferungsformat. Live gehen
- * die zehn einzelnen HTML-Dateien — die sind einzeln indexierbar, haben
+ * die einzelnen HTML-Dateien — die sind einzeln indexierbar, haben
  * eigene URLs, eigene Titel und eigene canonical-Tags. Diese Bündeldatei hat
  * das alles nicht und darf nie hochgeladen werden.
  *
@@ -25,7 +25,6 @@ const OUT = process.argv[2] || join(ROOT, "vorschau.html");
 const PAGES = [
   ["index.html", "Start"],
   ["leistungen.html", "Leistungen"],
-  ["autogas.html", "Autogas / LPG"],
   ["ueber-uns.html", "Über uns"],
   ["karriere.html", "Karriere"],
   ["kontakt.html", "Kontakt"],
@@ -210,7 +209,9 @@ const routerJs = `
 })();
 `;
 
-const html = `<div class="pv-bar">
+const html = `<title>SAMMY'S CAR-SHOP &mdash; Vorschau des neuen Auftritts</title>
+
+<div class="pv-bar">
   <b>Vorschau &middot; Entwurf</b>
   <span class="pv-sep"></span>
   <label for="pv-picker">Seite:</label>

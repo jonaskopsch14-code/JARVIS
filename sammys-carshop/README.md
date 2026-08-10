@@ -1,6 +1,6 @@
-# Sammy's Car-Shop — Relaunch
+# SAMMY'S CAR-SHOP — Relaunch
 
-Neubau der Website von **Sammy's Car-Shop**, Am Alten Bahnhof 31A, 06886
+Neubau der Website von **SAMMY'S CAR-SHOP**, Am Alten Bahnhof 31A, 06886
 Lutherstadt Wittenberg (Inhaber: Samuel Kopsch), als Ersatz für die veraltete
 Wix-Seite unter [www.scs-wb.de](https://www.scs-wb.de).
 
@@ -41,7 +41,6 @@ node tools/check-site.mjs --strict
 sammys-carshop/
 ├── index.html            Startseite
 ├── leistungen.html       Alle Leistungen mit Ankern (#klimaservice, #bremsen …)
-├── autogas.html          Autogas/LPG — das bisher ungenutzte Alleinstellungsmerkmal
 ├── ueber-uns.html        Betrieb, Ablauf einer Reparatur
 ├── karriere.html         Stellenanzeige Kfz-Mechatroniker
 ├── kontakt.html          Formular, Kontaktdaten, Anfahrt, Karte (nach Einwilligung)
@@ -65,14 +64,14 @@ sammys-carshop/
 node tools/build-preview.mjs      # schreibt vorschau.html
 ```
 
-Packt alle zehn Seiten samt CSS und JS in **eine** Datei mit kleinem
+Packt alle neun Seiten samt CSS und JS in **eine** Datei mit kleinem
 Seitenumschalter — zum Doppelklicken, Verschicken oder Hochladen als
 Vorschau-Link, ohne Webserver und ohne Hosting. Gedacht dafür, dass der
 Inhaber die Seite abnimmt, bevor etwas live geht.
 
 **Diese Datei nie auf den Webspace laden.** Sie hat keine eigenen URLs, Titel
 oder canonical-Tags und wäre für Suchmaschinen eine einzige Seite. Live gehen
-die zehn Einzeldateien. Deshalb steht `vorschau.html` in der `.gitignore`.
+die neun Einzeldateien. Deshalb steht `vorschau.html` in der `.gitignore`.
 
 ### Warum `content/betrieb.json` + `tools/check-site.mjs`
 
@@ -114,15 +113,18 @@ kann**:
 | 5 | `content/betrieb.json` | Google-Bewertung am Live-Profil verifizieren (Quellen widersprechen sich: ~4,8★/13 gegen ~4,6★/75–79). Danach eintragen und den vorbereiteten `aggregateRating`-Block in `index.html` aktivieren. |
 | 6 | `fahrzeuge.html` | Nur relevant, wenn Fahrzeughandel betrieben wird — siehe „Stufe 3". |
 
-**Entschieden und umgesetzt:** Es gelten die Öffnungszeiten aus den
-Online-Verzeichnissen — **Mo–Fr 8–18, Sa 8–12, So geschlossen.** Die
-abweichende Angabe der alten Wix-Seite (Mo–Fr 8–17, Sa geschlossen) ist damit
-überholt. Offen bleibt nur der Schritt außerhalb des Codes: **dieselben Zeiten
-gehören ins Google-Unternehmensprofil**, weil die meisten Kunden sie dort lesen
-und nicht auf der Website.
+**Öffnungszeiten — vom Inhaber festgelegt:** **Mo–Fr 8–17 Uhr, Samstag nur auf Anfrage, Sonntag
+geschlossen.** Damit sind sowohl die alte Wix-Angabe (Sa+So pauschal zu) als
+auch die Verzeichnisangaben (Mo–Fr 8–18, Sa 8–12) überholt.
+
+Daraus folgt eine Aufgabe außerhalb des Codes, und zwar eine dringende:
+**Verzeichnisse und Google-Unternehmensprofil stehen jetzt auf falschen
+Zeiten.** Cylex und Gelbe Seiten behaupten Samstag 8–12 als feste
+Öffnungszeit. Wer samstags um 9 Uhr vor verschlossener Tür steht, ruft nicht
+wieder an — das ist der schädlichste der offenen Punkte.
 
 Zusätzlich stehen im Quelltext **`PRÜFEN`-Kommentare** an Stellen, die
-inhaltlich abgestimmt werden sollten (Autogas-Details, Gehaltsrahmen in der
+inhaltlich abgestimmt werden sollten (Gehaltsrahmen in der
 Stellenanzeige, HU/AU-Vermittlung, Team-Vorstellung). `check-site.mjs` listet
 sie unter „Redaktionelle Prüfpunkte" auf.
 
@@ -183,14 +185,15 @@ die alten URLs auf Fehler prüfen.
 Ein Teil der Analyse betrifft Konten und Einträge außerhalb dieses
 Verzeichnisses. Ohne diese Schritte bleibt die halbe Wirkung liegen:
 
-1. **Google-Unternehmensprofil** — dort **Mo–Fr 8–18 und Sa 8–12** eintragen,
-   dazu Leistungen und Fotos pflegen. Das Profil ist für eine lokale Werkstatt
+1. **Google-Unternehmensprofil** — dort **Mo–Fr 8–17** eintragen, Samstag
+   nicht als feste Öffnungszeit (sondern über „Termin nach Absprache"), dazu
+   Leistungen und Fotos pflegen. Das Profil ist für eine lokale Werkstatt
    der wichtigste Kanal, wichtiger als die Website selbst: Wer „Werkstatt
    Wittenberg" sucht, sieht die Öffnungszeiten dort, bevor er die Seite
    überhaupt aufruft.
 2. **Verzeichnisse bereinigen** — Cylex, Gelbe Seiten (zwei Einträge!), 11880,
    golocal, Yelp und die übrigen. Überall dieselbe Schreibweise
-   „Sammy's Car-Shop", dieselben Öffnungszeiten, dieselbe Telefonnummer. Der
+   „SAMMY'S CAR-SHOP", dieselben Öffnungszeiten, dieselbe Telefonnummer. Der
    veraltete Eintrag „Kopsch Samuel Selbsthilfewerkstatt" beschreibt den
    heutigen Betrieb nicht mehr und verwässert das Profil.
 3. **Bewertungen aktiv einholen** — 13 Google-Rezensionen sind gegenüber
@@ -217,7 +220,7 @@ Verzeichnisses. Ohne diese Schritte bleibt die halbe Wirkung liegen:
 | Cookie-Consent rechtskonform | ✅ Anders gelöst, siehe „Abweichungen" — die Seite lädt beim Aufruf nichts von Dritten; die Karte ist einwilligungsgesteuert mit gleichwertigen Schaltflächen |
 | Impressum vervollständigen | ⚠️ Struktur samt Kammer-, Berufs- und VSBG-Abschnitt steht; drei Angaben muss der Inhaber liefern |
 | Datenschutzerklärung aktualisieren | ✅ Neu geschrieben, beschreibt genau das, was die Seite tut. Universal Analytics (zum 01.07.2023 eingestellt) und YouTube sind ersatzlos entfallen, weil beides nicht mehr eingesetzt wird |
-| Öffnungszeiten vereinheitlichen | ✅ Widerspruch aufgelöst: es gelten Mo–Fr 8–18 und Sa 8–12 (die Zeiten aus den Verzeichnissen). Eine Quelle im Code, maschinell erzwungen. Bleibt zu tun: identisch ins Google-Profil eintragen |
+| Öffnungszeiten vereinheitlichen | ✅ Vom Inhaber festgelegt: Mo–Fr 8–17, Samstag nur auf Anfrage. Eine Quelle im Code, maschinell erzwungen. Bleibt zu tun: Verzeichnisse und Google-Profil korrigieren, die stehen noch falsch |
 | `imprint.html` per 301 weiterleiten | ✅ In `.htaccess` |
 
 **Stufe 2 — Relaunch-Kern**
@@ -226,7 +229,7 @@ Verzeichnisses. Ohne diese Schritte bleibt die halbe Wirkung liegen:
 |---|---|
 | Modernes, responsives Design ohne Stockfotos | ✅ Kopfzeile bei 390–1600px geprüft, kein horizontaler Überlauf, Dunkelmodus unterstützt |
 | Leistungsseiten je Service | ✅ Neun Leistungen mit eigenen Ankern |
-| Autogas/LPG als Alleinstellungsmerkmal | ✅ Eigene Seite plus Navigationspunkt |
+| Autogas/LPG als Alleinstellungsmerkmal | ❌ Verworfen. Die Bestandsaufnahme hatte das aus Kundenrezensionen abgeleitet; der Inhaber bietet es nicht an. Seite und alle Verweise wieder entfernt — ein Beispiel dafür, dass aus Rezensionen erschlossene Leistungen immer gegenzuprüfen sind |
 | HU/AU ergänzen | ⚠️ Als `PRÜFEN`-Kommentar hinterlegt — unklar, ob angeboten |
 | Klick-to-Call, Formular, Terminanfrage, Karte, Bewertungen | ✅ Alles vorhanden; Telefonnummer als Button in jeder Kopfzeile |
 | Tonalität vereinheitlichen, Karriere trennen | ✅ Kundenseiten durchgehend „Sie", Recruiting auf `karriere.html` im „Du". Die alte Meta-Description sprach auf der Startseite Bewerber statt Kunden an — `check-site.mjs` verhindert diesen Rückfall |

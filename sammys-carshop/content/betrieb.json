@@ -1,14 +1,15 @@
 {
   "_hinweis": "EINZIGE QUELLE DER WAHRHEIT für alle Betriebsdaten. Wird von tools/check-site.mjs gegen jede HTML-Seite geprüft. Änderungen hier zuerst, dann in den Seiten nachziehen und `node tools/check-site.mjs` laufen lassen.",
 
-  "name": "Sammy's Car-Shop",
+  "name": "SAMMY'S CAR-SHOP",
   "nameVarianten": [
+    "Sammy's Car-Shop",
     "Sammy´s Car-Shop",
-    "SAMMY'S CAR-SHOP",
     "Sammy´s Carshop",
+    "Sammys Carshop",
     "Kopsch Samuel Selbsthilfewerkstatt"
   ],
-  "_nameHinweis": "Für Local SEO muss EINE Schreibweise überall verwendet werden. Empfehlung: \"Sammy's Car-Shop\" (mit geradem Apostroph, so wie auf Google eingetragen). Die Varianten oben existieren derzeit in Verzeichnissen und sollten dort korrigiert werden — insbesondere \"Selbsthilfewerkstatt\" (Gelbe Seiten, golocal) ist veraltet und verwässert das Profil.",
+  "_nameHinweis": "FESTGELEGT: durchgehende Großschreibung \"SAMMY'S CAR-SHOP\" mit geradem Apostroph. Die Varianten oben existieren derzeit in Verzeichnissen und sollten dort korrigiert werden — insbesondere \"Selbsthilfewerkstatt\" (Gelbe Seiten, golocal) ist veraltet und verwässert das Profil. check-site.mjs meldet jede abweichende Schreibweise auf den Seiten.",
 
   "rechtsform": "Einzelunternehmen",
   "inhaber": "Samuel Kopsch",
@@ -34,13 +35,14 @@
 
   "oeffnungszeiten": {
     "status": "BESTAETIGT",
-    "_statusHinweis": "ENTSCHIEDEN: Es gelten die Zeiten aus den Online-Verzeichnissen (Cylex + Gelbe Seiten, Stand 29.06.2025) — Mo–Fr 8–18, Sa 8–12, So geschlossen. Die abweichende Angabe der alten Wix-Website (Mo–Fr 8–17, Sa geschlossen) ist damit überholt und gilt nicht mehr. WICHTIG: Diese Zeiten müssen jetzt auch im Google-Unternehmensprofil stehen — dort werden sie von den meisten Kunden gelesen, noch vor der Website.",
-    "mo": ["08:00", "18:00"],
-    "di": ["08:00", "18:00"],
-    "mi": ["08:00", "18:00"],
-    "do": ["08:00", "18:00"],
-    "fr": ["08:00", "18:00"],
-    "sa": ["08:00", "12:00"],
+    "_statusHinweis": "VOM INHABER BESTÄTIGT: Mo–Fr 8–17 Uhr, Samstag nur auf Anfrage, Sonntag geschlossen. Damit sind sowohl die alte Wix-Angabe (Sa+So pauschal geschlossen) als auch die Verzeichnisangaben (Mo–Fr 8–18, Sa 8–12 — Cylex/Gelbe Seiten, Stand 29.06.2025) überholt. WICHTIG: Die Verzeichnisse und das Google-Unternehmensprofil stehen damit auf FALSCHEN Zeiten und müssen korrigiert werden — dort lesen die meisten Kunden die Zeiten, noch vor der Website. Ein Kunde, der samstags um 9 Uhr vor verschlossener Tür steht, weil Cylex 8–12 behauptet, ruft nicht wieder an.",
+    "_samstagHinweis": "\"AUF_ANFRAGE\" bedeutet: keine festen Öffnungszeiten, aber nach Absprache möglich. Erscheint in den Tabellen als \"nur auf Anfrage\", zählt für den \"Jetzt geöffnet\"-Status als geschlossen (in site.js daher null) und wird bewusst NICHT als openingHoursSpecification ins JSON-LD geschrieben — Google würde daraus feste Zeiten machen.",
+    "mo": ["08:00", "17:00"],
+    "di": ["08:00", "17:00"],
+    "mi": ["08:00", "17:00"],
+    "do": ["08:00", "17:00"],
+    "fr": ["08:00", "17:00"],
+    "sa": "AUF_ANFRAGE",
     "so": null
   },
 
@@ -66,9 +68,9 @@
     { "slug": "klimaservice", "titel": "Klimaservice", "kurz": "Prüfen, Warten, Befüllen der Klimaanlage." },
     { "slug": "reifen", "titel": "Reifen & Räder", "kurz": "Reifenwechsel, Räder wuchten." },
     { "slug": "scheiben", "titel": "Scheiben & Scheibentönung", "kurz": "Scheibenwechsel und Tönung." },
-    { "slug": "dpf", "titel": "Rußpartikelfilter-Regeneration", "kurz": "DPF reinigen statt tauschen." },
-    { "slug": "autogas", "titel": "Autogas / LPG", "kurz": "Wartung und Reparatur von Autogasanlagen.", "bestaetigen": true }
+    { "slug": "dpf", "titel": "Rußpartikelfilter-Regeneration", "kurz": "DPF reinigen statt tauschen." }
   ],
+  "_leistungenHinweis": "Autogas/LPG war in einer früheren Fassung als eigene Leistung und eigene Seite angelegt (die Bestandsaufnahme hatte es aus Kundenrezensionen als Alleinstellungsmerkmal abgeleitet). Auf Ansage des Inhabers wieder vollständig entfernt — der Betrieb bietet es nicht an. Nicht erneut aufnehmen, ohne das mit ihm zu klären.",
 
   "fahrzeughandel": {
     "status": "UNBESTAETIGT",

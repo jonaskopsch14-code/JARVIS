@@ -43,7 +43,8 @@ const DAYS = { 1: "mo", 2: "di", 3: "mi", 4: "do", 5: "fr", 6: "sa", 0: "so" };
 /** Erwarteter Zellinhalt in den Öffnungszeiten-Tabellen. */
 function hoursCell(key) {
   const v = b.oeffnungszeiten[key];
-  return v ? `${v[0]}–${v[1]}` : "geschlossen";
+  if (v === "AUF_ANFRAGE") return "nur auf Anfrage";
+  return Array.isArray(v) ? `${v[0]}–${v[1]}` : "geschlossen";
 }
 
 /* ------------------------------------------------------------- Seitenauswahl */
@@ -214,7 +215,9 @@ if (!existsSync(jsPath)) {
   } else {
     for (const [day, key] of Object.entries(DAYS)) {
       const v = b.oeffnungszeiten[key];
-      const expected = v ? `["${v[0]}", "${v[1]}"]` : "null";
+      // "AUF_ANFRAGE" hat keine festen Zeiten und muss in site.js null sein,
+      // damit der "Jetzt geöffnet"-Status den Tag als geschlossen behandelt.
+      const expected = Array.isArray(v) ? `["${v[0]}", "${v[1]}"]` : "null";
       const found = block[1].match(new RegExp(`\\b${day}:\\s*(\\[[^\\]]*\\]|null)`));
       if (!found) {
         errors.push(`assets/js/site.js: HOURS enthält keinen Eintrag für Tag ${day}.`);
@@ -281,7 +284,7 @@ if (b.google.bewertung === null) {
 
 /* ------------------------------------------------------------------ Ausgabe */
 const line = "─".repeat(72);
-console.log(`\n${line}\nPrüfung: Sammy's Car-Shop — ${pages.length} Seiten\n${line}`);
+console.log(`\n${line}\nPrüfung: ${b.name} — ${pages.length} Seiten\n${line}`);
 
 const section = (label, items, symbol) => {
   if (items.length === 0) return;
