@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fahrzeuge &amp; Ankauf | SAMMY'S CAR-SHOP Lutherstadt Wittenberg</title>
+<meta name="description" content="Gebrauchtwagen und Fahrzeugankauf bei SAMMY'S CAR-SHOP in Lutherstadt Wittenberg.">
+<link rel="canonical" href="https://www.scs-wb.de/fahrzeuge.html">
+<!-- NOCH NICHT FREIGEGEBEN: Diese Seite ist auf noindex gesetzt und absichtlich
+     nicht in der Hauptnavigation und nicht in der sitemap.xml verlinkt.
+     Hintergrund: An-/Verkauf ist in Verzeichnissen als Leistung gelistet, es gibt
+     aber keinen online abrufbaren Fahrzeugbestand. Erst nach Klärung mit dem
+     Inhaber aktivieren — die Schritte dazu stehen unten und im README
+     (Abschnitt "Stufe 3"). -->
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#14181c">
+<link rel="stylesheet" href="assets/css/site.css">
+<script src="assets/js/site.js" defer></script>
+</head>
+<body>
+
+<a class="skip" href="#main">Zum Inhalt springen</a>
+
+<header class="site-header">
+  <div class="wrap site-header__inner">
+    <a class="brand" href="index.html">
+      <span class="brand__mark" aria-hidden="true">SCS</span>
+      <span>SAMMY'S CAR-SHOP<small>Kfz-Werkstatt · Wittenberg</small></span>
+    </a>
+    <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="nav">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+      Menü
+    </button>
+    <nav class="nav" id="nav" aria-label="Hauptnavigation">
+      <ul>
+        <li><a href="index.html">Start</a></li>
+        <li><a href="leistungen.html">Leistungen</a></li>
+        <li><a href="ueber-uns.html">Über uns</a></li>
+        <li><a href="karriere.html">Karriere</a></li>
+        <li><a href="kontakt.html">Kontakt</a></li>
+        <li class="nav__cta"><a class="btn btn--primary" href="tel:+493491437666">03491 437666 anrufen</a></li>
+      </ul>
+    </nav>
+    <a class="btn btn--primary header-call" href="tel:+493491437666">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 1.9.7 2.8a2 2 0 0 1-.5 2.1L8.1 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.8.7a2 2 0 0 1 1.7 2Z"/></svg>
+      03491 437666
+    </a>
+  </div>
+</header>
+
+<main id="main">
+
+  <section class="hero">
+    <div class="wrap">
+      <div class="hero__inner">
+        <h1>Fahrzeuge &amp; Ankauf</h1>
+        <p class="hero__lead">
+          {{TODO: Einleitung final formulieren, sobald geklärt ist, ob und in
+          welchem Umfang Fahrzeughandel betrieben wird.}}
+        </p>
+        <div class="btn-row">
+          <a class="btn btn--primary" href="tel:+493491437666">03491 437666</a>
+          <a class="btn btn--on-dark" href="kontakt.html">Anfrage senden</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="wrap">
+      <div class="section__head">
+        <span class="eyebrow">Unser Bestand</span>
+        <h2>Aktuell verfügbare Fahrzeuge</h2>
+        <p>
+          Unseren gesamten Bestand mit Fotos, Ausstattung und Preisen finden Sie
+          hier — die Liste aktualisiert sich automatisch.
+        </p>
+      </div>
+
+      <!-- EINBINDUNG DES FAHRZEUGBESTANDS
+           Zwei Wege, beide setzen einen Händleraccount voraus:
+
+           a) iframe/Widget des Portals (mobile.de "Homepage-Integration" bzw.
+              AutoScout24 "Website-Integration"). Am schnellsten umgesetzt,
+              wirtschaftlich sinnvoll bis etwa 20 Fahrzeuge. Da dabei Daten an
+              das Portal übertragen werden, MUSS die Einbindung genau wie die
+              Karte über data-consent-gate laufen — das Grundgerüst dafür steht
+              unten schon bereit.
+
+           b) API/Plugin mit eigener Darstellung (mobile.de Seller-API bzw.
+              AutoScout24-Schnittstelle). Aufwändiger, dafür eigenes Design,
+              eigene Filter und SEO-fähige Einzelseiten pro Fahrzeug. Ab etwa
+              20 Fahrzeugen im Bestand die bessere Wahl.
+
+           Beim Wechsel auf (b): pro Fahrzeug strukturierte Daten vom Typ
+           Vehicle/Car mit offers.priceCurrency und offers.price ergänzen. -->
+      <div class="consent-gate"
+           data-consent-gate="fahrzeugboerse"
+           data-embed-title="Fahrzeugbestand von SAMMY'S CAR-SHOP">
+        <h3 class="mb-0">Fahrzeugbörse</h3>
+        <p>
+          {{TODO: data-embed-src mit der Widget-URL des Händleraccounts belegen
+          (mobile.de oder AutoScout24). Ohne data-embed-src bleibt dieser
+          Platzhalter stehen und lädt nichts.}}
+        </p>
+        <p>
+          Wenn Sie die Fahrzeugliste laden, wird eine Verbindung zum
+          Fahrzeugportal hergestellt und dabei Ihre IP-Adresse übertragen.
+        </p>
+        <div class="btn-row">
+          <button class="btn btn--primary" type="button" data-consent-once>Einmalig laden</button>
+          <button class="btn btn--ghost" type="button" data-consent-always>Immer laden</button>
+        </div>
+      </div>
+
+      <div class="note" style="margin-top: 1.5rem;">
+        <h3>Preisangaben</h3>
+        <p>
+          Alle Preise sind Endpreise in Euro und enthalten die gesetzliche
+          Umsatzsteuer.
+        </p>
+        <p class="mb-0">
+          {{TODO: Differenzbesteuerung klären. Werden Fahrzeuge nach § 25a UStG
+          differenzbesteuert verkauft, muss klar und eindeutig darauf
+          hingewiesen werden, dass die Umsatzsteuer nicht ausgewiesen wird —
+          etwa: „Differenzbesteuert nach § 25a UStG, die Umsatzsteuer wird nicht
+          ausgewiesen." Der Zusatz „inkl. MwSt." allein genügt dafür nicht
+          (OLG Hamburg, Urt. v. 19.12.2019 – 15 U 44/19). Umgekehrt darf der
+          Hinweis auf die enthaltene gesetzliche Umsatzsteuer nach § 1 Abs. 2
+          Nr. 1 PAngV nicht fehlen. Beide Sätze final anwaltlich prüfen
+          lassen, bevor die Seite live geht.}}
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section section--soft">
+    <div class="wrap">
+      <div class="grid grid--split">
+        <div>
+          <span class="eyebrow">Ankauf</span>
+          <h2>Wir kaufen Ihr Fahrzeug</h2>
+          <p>
+            {{TODO: Bestätigen, ob Ankauf angeboten wird — und wenn ja, mit
+            welchem Schwerpunkt (Pkw jeden Zustands, Unfallfahrzeuge, hohe
+            Laufleistung). Davon hängt ab, wie diese Seite
+            beworben wird; „Autoankauf Wittenberg" ist ein stark nachgefragter
+            und bisher völlig unbespielter Suchbegriff.}}
+          </p>
+          <p class="mb-0">
+            Rufen Sie an oder schreiben Sie uns mit Fahrzeugdaten, Laufleistung
+            und Zustand — wir melden uns mit einer Einschätzung zurück.
+          </p>
+        </div>
+        <div class="card">
+          <h3>Das brauchen wir für eine Einschätzung</h3>
+          <ul style="padding-left: 1.15rem; color: var(--ink-soft);">
+            <li>Marke, Modell, Erstzulassung</li>
+            <li>Laufleistung und Kraftstoff</li>
+            <li>Nächste Hauptuntersuchung</li>
+            <li>Bekannte Mängel und Unfallschäden</li>
+            <li>Fotos, falls vorhanden</li>
+          </ul>
+          <div class="btn-row" style="margin-top: 1rem;">
+            <a class="btn btn--primary" href="kontakt.html">Fahrzeug anbieten</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="wrap">
+      <div class="note">
+        <h3>Checkliste zur Aktivierung dieser Seite</h3>
+        <ol style="margin: 0; padding-left: 1.25rem;">
+          <li>Mit dem Inhaber klären, ob Fahrzeughandel Teil des Geschäftsmodells bleibt. Wenn nein: diese Datei löschen und die Verzeichniseinträge (Gelbe Seiten, Kompass) bereinigen, damit keine Leistung beworben wird, die es nicht gibt.</li>
+          <li>Händleraccount bei mobile.de und/oder AutoScout24 einrichten.</li>
+          <li><code>data-embed-src</code> der Fahrzeugbörse setzen und alle TODO-Marken dieser Seite ersetzen.</li>
+          <li>Preisangaben (PAngV, § 25a UStG) anwaltlich prüfen lassen.</li>
+          <li>Widerrufsbelehrung und ggf. AGB ergänzen, sobald Fahrzeuge online verkauft oder verbindlich reserviert werden können.</li>
+          <li><code>robots</code>-Meta auf <code>index, follow</code> ändern, Seite in <code>sitemap.xml</code> und in die Hauptnavigation aller Seiten aufnehmen.</li>
+          <li><code>fahrzeughandel.status</code> in <code>content/betrieb.json</code> auf <code>BESTAETIGT</code> setzen und <code>node tools/check-site.mjs</code> laufen lassen.</li>
+        </ol>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="site-footer__cols">
+      <div>
+        <h2>SAMMY'S CAR-SHOP</h2>
+        <address>
+          Am Alten Bahnhof 31A<br>
+          06886 Lutherstadt Wittenberg<br>
+          Telefon <a href="tel:+493491437666">03491 437666</a><br>
+          Fax 03491 437667<br>
+          <a href="mailto:kontakt@scs-wb.de">kontakt@scs-wb.de</a>
+        </address>
+      </div>
+      <div>
+        <h3>Öffnungszeiten</h3>
+        <p><span class="status" data-hours-status>Öffnungszeiten werden geladen</span></p>
+        <table class="hours">
+          <caption class="visually-hidden">Öffnungszeiten</caption>
+          <tbody>
+            <tr data-day="1"><th scope="row">Mo</th><td>08:00–17:00</td></tr>
+            <tr data-day="2"><th scope="row">Di</th><td>08:00–17:00</td></tr>
+            <tr data-day="3"><th scope="row">Mi</th><td>08:00–17:00</td></tr>
+            <tr data-day="4"><th scope="row">Do</th><td>08:00–17:00</td></tr>
+            <tr data-day="5"><th scope="row">Fr</th><td>08:00–17:00</td></tr>
+            <tr data-day="6"><th scope="row">Sa</th><td>nur auf Anfrage</td></tr>
+            <tr data-day="0"><th scope="row">So</th><td>geschlossen</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div>
+        <h3>Werkstatt</h3>
+        <ul>
+          <li><a href="leistungen.html">Leistungen</a></li>
+          <li><a href="ueber-uns.html">Über uns</a></li>
+          <li><a href="karriere.html">Karriere</a></li>
+          <li><a href="kontakt.html">Kontakt &amp; Anfahrt</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© SAMMY'S CAR-SHOP · Inhaber Samuel Kopsch</span>
+      <nav aria-label="Rechtliches">
+        <a href="impressum.html">Impressum</a>
+        <a href="datenschutz.html">Datenschutz</a>
+        <button type="button" data-consent-revoke>Datenschutz-Einstellungen</button>
+      </nav>
+      <p id="consent-revoked" role="status" hidden></p>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

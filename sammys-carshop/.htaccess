@@ -1,0 +1,116 @@
+# ============================================================================
+# Sammy's Car-Shop — Apache-Konfiguration
+#
+# Gilt für klassisches Shared Hosting mit Apache (der Regelfall bei deutschen
+# Hostern). Läuft die Seite später auf nginx, Netlify, Cloudflare Pages o. ä.,
+# müssen die Weiterleitungen dort nachgebaut werden — die Entsprechungen stehen
+# im README, Abschnitt "Weiterleitungen".
+#
+# WICHTIG: Die 301-Weiterleitungen unten sind der Grund, warum die alte Seite
+# ihre Suchmaschinen-Rankings nicht verliert. Ohne sie laufen alle bestehenden
+# Links aus Branchenverzeichnissen und Google-Treffern ins Leere.
+# ============================================================================
+
+# --- 1. Zeichensatz ---------------------------------------------------------
+AddDefaultCharset UTF-8
+AddType text/html; charset=UTF-8 .html
+
+# --- 2. Fehlerseite ---------------------------------------------------------
+ErrorDocument 404 /404.html
+
+# --- 3. Verzeichnislisten aus ----------------------------------------------
+Options -Indexes
+
+<IfModule mod_rewrite.c>
+RewriteEngine On
+
+# --- 4. Auf HTTPS und www vereinheitlichen -------------------------------
+# Eine einzige kanonische Variante, damit Suchmaschinen die Seite nicht
+# mehrfach sehen. Die canonical-Tags der Seiten zeigen auf www + https.
+RewriteCond %{HTTPS} !=on
+RewriteRule ^(.*)$ https://www.scs-wb.de/$1 [R=301,L]
+
+RewriteCond %{HTTP_HOST} !^www\. [NC]
+RewriteRule ^(.*)$ https://www.scs-wb.de/$1 [R=301,L]
+
+# --- 5. Weiterleitungen der ALTEN Wix-Seite -------------------------------
+# Die alte Seite hatte Pfade ohne .html-Endung. Reihenfolge beachten:
+# spezifische Regeln vor allgemeinen.
+RewriteRule ^impressum/?$            /impressum.html   [R=301,L]
+RewriteRule ^datenschutz/?$          /datenschutz.html [R=301,L]
+RewriteRule ^kontakt/?$              /kontakt.html     [R=301,L]
+RewriteRule ^karriere/?$             /karriere.html    [R=301,L]
+RewriteRule ^leistungen/?$           /leistungen.html  [R=301,L]
+
+# "Über uns" — der alte Pfad enthält ein Umlaut-Zeichen und kommt sowohl
+# UTF-8-kodiert (%C3%BCber-uns) als auch dekodiert an. Beide Fälle abdecken:
+RewriteRule ^über-uns/?$             /ueber-uns.html   [R=301,L]
+RewriteRule ^%C3%BCber-uns/?$        /ueber-uns.html   [R=301,L]
+RewriteRule ^ueber-uns/?$            /ueber-uns.html   [R=301,L]
+RewriteCond %{THE_REQUEST} \s/+%C3%BCber-uns [NC]
+RewriteRule ^ /ueber-uns.html [R=301,L]
+
+# Die alte Bewertungsseite hat keine eigene Entsprechung mehr — die
+# Kundenstimmen stehen jetzt auf der Startseite.
+RewriteRule ^kundenbewertungen/?$    /#bewertungen     [R=301,L]
+
+# --- 6. Weiterleitung der noch älteren statischen Seite -------------------
+# scs-wb.de/imprint.html ist ein Relikt der Vorgänger-Website, das parallel
+# erreichbar und indexiert war (Alt-Content mit veralteter Steuernummer).
+RewriteRule ^imprint\.html$          /impressum.html   [R=301,L]
+RewriteRule ^index\.htm$             /                 [R=301,L]
+RewriteRule ^home\.html?$            /                 [R=301,L]
+
+# --- 7. index.html aus der URL entfernen ---------------------------------
+RewriteCond %{THE_REQUEST} \s/+index\.html[\s?] [NC]
+RewriteRule ^ / [R=301,L]
+</IfModule>
+
+# --- 8. Sicherheits-Header -------------------------------------------------
+<IfModule mod_headers.c>
+  # Kein Einbetten der Seite in fremde Frames (Clickjacking).
+  Header always set X-Frame-Options "SAMEORIGIN"
+  # Browser soll den Content-Type nicht raten.
+  Header always set X-Content-Type-Options "nosniff"
+  # Referrer nur innerhalb der eigenen Domain vollständig senden.
+  Header always set Referrer-Policy "strict-origin-when-cross-origin"
+  # Keine Berechtigungen, die die Seite nicht braucht.
+  Header always set Permissions-Policy "geolocation=(), microphone=(), camera=()"
+
+  # Content-Security-Policy: erlaubt eigene Assets und — nur wenn der Nutzer
+  # zugestimmt hat — das Google-Maps-iframe. Externe Skripte sind damit
+  # ausgeschlossen. Beim Einbinden einer Fahrzeugbörse muss deren Domain in
+  # frame-src ergänzt werden, sonst bleibt das Widget leer.
+  Header always set Content-Security-Policy "default-src 'self'; img-src 'self' data:; style-src 'self'; script-src 'self'; frame-src https://www.google.com https://maps.google.com; form-action 'self'; base-uri 'self'; object-src 'none'"
+
+  # HSTS erst aktivieren, wenn HTTPS dauerhaft und für alle Subdomains steht.
+  # Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains"
+</IfModule>
+
+# --- 9. Komprimierung ------------------------------------------------------
+<IfModule mod_deflate.c>
+  AddOutputFilterByType DEFLATE text/html text/css text/plain text/xml application/javascript application/json image/svg+xml
+</IfModule>
+
+# --- 10. Caching -----------------------------------------------------------
+# HTML kurz, damit Änderungen schnell sichtbar sind; Assets lang.
+# Beim Ausrollen geänderter CSS/JS die Datei umbenennen oder einen
+# ?v=-Parameter anhängen, sonst sehen wiederkehrende Besucher die alte Version.
+<IfModule mod_expires.c>
+  ExpiresActive On
+  ExpiresByType text/html                 "access plus 1 hour"
+  ExpiresByType text/css                  "access plus 1 year"
+  ExpiresByType application/javascript    "access plus 1 year"
+  ExpiresByType image/svg+xml             "access plus 1 year"
+  ExpiresByType image/webp                "access plus 1 year"
+  ExpiresByType image/jpeg                "access plus 1 year"
+  ExpiresByType image/png                 "access plus 1 year"
+  ExpiresByType image/avif                "access plus 1 year"
+</IfModule>
+
+# --- 11. Zugriff auf Projektdateien sperren -------------------------------
+# content/, tools/ und Markdown-Dateien sind Arbeitsdateien und gehören nicht
+# ins Web. Am besten gar nicht mit hochladen — falls doch, hier gesperrt.
+<FilesMatch "\.(json|md|mjs)$">
+  Require all denied
+</FilesMatch>

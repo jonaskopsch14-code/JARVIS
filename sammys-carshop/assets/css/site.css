@@ -1,0 +1,582 @@
+/* ==========================================================================
+   SAMMY'S CAR-SHOP — Stylesheet
+   Ein einziges CSS-File, keine externen Requests (keine Webfonts, kein CDN).
+   Das ist Absicht: ohne Drittanbieter-Requests werden beim Seitenaufruf keine
+   personenbezogenen Daten an Dritte übertragen und es sind keine nicht
+   notwendigen Cookies gesetzt -> kein Consent-Banner beim Laden nötig.
+   ========================================================================== */
+
+/* --- Tokens ------------------------------------------------------------- */
+:root {
+  --ink: #14171a;
+  --ink-soft: #4a525a;
+  --ink-mute: #6d767f;
+  --line: #e2e6ea;
+  --line-strong: #cbd2d9;
+  --bg: #ffffff;
+  --bg-soft: #f6f8f9;
+  --bg-dark: #14181c;
+  --bg-dark-soft: #1e242a;
+  --accent: #e8590c;
+  --accent-hover: #c94a06;
+  --accent-ink: #ffffff;
+  --accent-soft: #fdf1ea;
+  --ok: #1a7f47;
+  --warn: #a8570b;
+
+  --radius: 10px;
+  --radius-lg: 16px;
+  --shadow: 0 1px 2px rgb(20 23 26 / 6%), 0 6px 20px -8px rgb(20 23 26 / 14%);
+  --shadow-lg: 0 2px 4px rgb(20 23 26 / 6%), 0 18px 40px -14px rgb(20 23 26 / 22%);
+
+  --wrap: 1140px;
+  --step: clamp(1rem, 0.6rem + 1.4vw, 1.6rem);
+
+  --font: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial,
+    sans-serif;
+}
+
+*,
+*::before,
+*::after { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  font-family: var(--font);
+  font-size: clamp(1rem, 0.97rem + 0.15vw, 1.0625rem);
+  line-height: 1.65;
+  color: var(--ink);
+  background: var(--bg);
+  -webkit-font-smoothing: antialiased;
+}
+
+img, svg, iframe { max-width: 100%; }
+img { height: auto; display: block; }
+
+a { color: var(--accent-hover); text-decoration-thickness: 1px; text-underline-offset: 2px; }
+a:hover { color: var(--accent); }
+
+h1, h2, h3, h4 {
+  line-height: 1.18;
+  letter-spacing: -0.015em;
+  margin: 0 0 0.6em;
+  font-weight: 700;
+  text-wrap: balance;
+}
+h1 { font-size: clamp(2rem, 1.35rem + 2.6vw, 3.1rem); }
+h2 { font-size: clamp(1.5rem, 1.2rem + 1.3vw, 2.1rem); }
+h3 { font-size: clamp(1.15rem, 1.05rem + 0.45vw, 1.35rem); }
+p { margin: 0 0 1em; max-width: 68ch; text-wrap: pretty; }
+
+:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* --- Layout ------------------------------------------------------------- */
+.wrap {
+  width: 100%;
+  max-width: var(--wrap);
+  margin-inline: auto;
+  padding-inline: clamp(1rem, 4vw, 2rem);
+}
+
+.section { padding-block: clamp(2.75rem, 1.5rem + 5vw, 5rem); }
+.section--soft { background: var(--bg-soft); border-block: 1px solid var(--line); }
+.section__head { max-width: 60ch; margin-bottom: clamp(1.5rem, 3vw, 2.5rem); }
+.section__head p { color: var(--ink-soft); font-size: 1.075em; margin-bottom: 0; }
+.eyebrow {
+  display: block;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--accent-hover);
+  margin-bottom: 0.5rem;
+}
+
+.grid { display: grid; gap: clamp(1rem, 2.2vw, 1.6rem); }
+@media (min-width: 620px) { .grid--2 { grid-template-columns: repeat(2, 1fr); } }
+@media (min-width: 900px) { .grid--3 { grid-template-columns: repeat(3, 1fr); } }
+@media (min-width: 900px) { .grid--split { grid-template-columns: 1.15fr 0.85fr; align-items: start; gap: clamp(2rem, 4vw, 3.5rem); } }
+
+.skip {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  z-index: 100;
+  background: var(--bg);
+  color: var(--ink);
+  padding: 0.75rem 1.15rem;
+  border-radius: 0 0 var(--radius) 0;
+  font-weight: 600;
+}
+.skip:focus { left: 0; }
+
+/* --- Buttons ------------------------------------------------------------ */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.55em;
+  padding: 0.8em 1.35em;
+  border: 1px solid transparent;
+  border-radius: var(--radius);
+  font: inherit;
+  font-weight: 650;
+  line-height: 1.2;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease, transform 0.1s ease;
+}
+.btn:active { transform: translateY(1px); }
+.btn svg { width: 1.15em; height: 1.15em; flex: none; }
+
+.btn--primary { background: var(--accent); color: var(--accent-ink); }
+.btn--primary:hover { background: var(--accent-hover); color: var(--accent-ink); }
+
+.btn--ghost { background: transparent; color: var(--ink); border-color: var(--line-strong); }
+.btn--ghost:hover { background: var(--bg-soft); border-color: var(--ink-mute); color: var(--ink); }
+
+.btn--on-dark { background: rgb(255 255 255 / 10%); color: #fff; border-color: rgb(255 255 255 / 28%); }
+.btn--on-dark:hover { background: rgb(255 255 255 / 18%); color: #fff; }
+
+.btn-row { display: flex; flex-wrap: wrap; gap: 0.75rem; }
+
+/* Die Telefonnummer in der Kopfzeile darf nicht umbrechen. */
+.header-call { white-space: nowrap; }
+
+/* --- Header ------------------------------------------------------------- */
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background: rgb(255 255 255 / 92%);
+  backdrop-filter: saturate(140%) blur(8px);
+  border-bottom: 1px solid var(--line);
+}
+.site-header__inner {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  min-height: 68px;
+}
+
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-weight: 800;
+  font-size: 1.0625rem;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+  text-decoration: none;
+  margin-right: auto;
+}
+.brand:hover { color: var(--ink); }
+.brand__mark {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  background: var(--bg-dark);
+  color: var(--accent);
+  font-size: 0.95rem;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  flex: none;
+}
+.brand small {
+  display: block;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ink-mute);
+  white-space: nowrap;
+}
+/* Zwischen 1024 und 1199px wird die Kopfzeile eng — dann nur noch der Name. */
+@media (min-width: 1024px) and (max-width: 1199px) {
+  .brand small { display: none; }
+}
+
+.nav-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: transparent;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius);
+  padding: 0.55rem 0.8rem;
+  font: inherit;
+  font-weight: 600;
+  color: var(--ink);
+  cursor: pointer;
+}
+.nav-toggle svg { width: 1.1rem; height: 1.1rem; }
+
+.nav a {
+  color: var(--ink-soft);
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 0.9375rem;
+  padding: 0.45rem 0;
+  border-bottom: 2px solid transparent;
+}
+/* Menüpunkte nie umbrechen — sonst wird die Kopfzeile zweizeilig. */
+@media (min-width: 1024px) {
+  .nav a { white-space: nowrap; }
+}
+.nav a:hover { color: var(--ink); }
+.nav a[aria-current="page"] { color: var(--ink); border-bottom-color: var(--accent); }
+
+@media (max-width: 1023px) {
+  .nav {
+    display: none;
+    position: absolute;
+    inset-inline: 0;
+    top: 100%;
+    background: var(--bg);
+    border-bottom: 1px solid var(--line);
+    box-shadow: var(--shadow);
+    padding: 0.5rem clamp(1rem, 4vw, 2rem) 1.25rem;
+  }
+  .nav[data-open="true"] { display: block; }
+  .nav ul { list-style: none; margin: 0; padding: 0; }
+  .nav li + li { border-top: 1px solid var(--line); }
+  .nav a { display: block; padding: 0.85rem 0; border-bottom: none; }
+  .nav a[aria-current="page"] { color: var(--accent-hover); }
+  .nav .nav__cta { margin-top: 0.9rem; }
+  .nav .nav__cta .btn { width: 100%; }
+  .header-call { display: none; }
+}
+
+@media (min-width: 1024px) {
+  .nav-toggle { display: none; }
+  .nav ul {
+    display: flex;
+    align-items: center;
+    gap: clamp(0.9rem, 1.8vw, 1.6rem);
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  .nav .nav__cta { display: none; }
+}
+
+/* --- Hero --------------------------------------------------------------- */
+.hero {
+  position: relative;
+  background: var(--bg-dark);
+  color: #fff;
+  overflow: hidden;
+}
+/* Kein Stockfoto: der "Hintergrund" ist reine CSS-Geometrie (Werkstatt-Raster
+   + warmer Lichtkegel). Sobald echte Betriebsfotos vorliegen, kann hier ein
+   Bild ergaenzt werden — siehe assets/img/README.md. */
+.hero::before,
+.hero::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.hero::before {
+  background-image:
+    linear-gradient(rgb(255 255 255 / 4%) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(255 255 255 / 4%) 1px, transparent 1px);
+  background-size: 46px 46px, 46px 46px;
+  mask-image: radial-gradient(120% 90% at 78% 15%, #000 15%, transparent 72%);
+}
+.hero::after {
+  background:
+    radial-gradient(70% 95% at 88% 0%, rgb(232 89 12 / 30%), transparent 62%),
+    radial-gradient(50% 70% at 10% 100%, rgb(232 89 12 / 10%), transparent 70%);
+}
+.hero > .wrap { position: relative; z-index: 1; }
+.hero__inner { padding-block: clamp(3rem, 2rem + 7vw, 6.5rem); max-width: 46rem; }
+.hero h1 { color: #fff; }
+.hero__lead {
+  font-size: clamp(1.075rem, 1rem + 0.5vw, 1.3rem);
+  color: rgb(255 255 255 / 82%);
+  margin-bottom: 1.75rem;
+}
+.hero .btn-row { margin-bottom: 2rem; }
+.hero__facts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1.5rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  font-size: 0.9375rem;
+  color: rgb(255 255 255 / 78%);
+}
+.hero__facts li { display: flex; align-items: center; gap: 0.5rem; }
+.hero__facts svg { width: 1.05em; height: 1.05em; color: var(--accent); flex: none; }
+
+/* --- Cards -------------------------------------------------------------- */
+.card {
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  padding: clamp(1.15rem, 2.2vw, 1.6rem);
+  box-shadow: var(--shadow);
+}
+.card h3 { margin-bottom: 0.35rem; }
+.card p { color: var(--ink-soft); margin-bottom: 0; font-size: 0.9688em; }
+.card__icon {
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 10px;
+  background: var(--accent-soft);
+  color: var(--accent-hover);
+  margin-bottom: 0.9rem;
+}
+.card__icon svg { width: 22px; height: 22px; }
+
+a.card { text-decoration: none; color: inherit; display: block; transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease; }
+a.card:hover { border-color: var(--line-strong); box-shadow: var(--shadow-lg); transform: translateY(-2px); color: inherit; }
+a.card h3::after { content: " →"; color: var(--accent); }
+
+/* --- Service-Detail ----------------------------------------------------- */
+.svc { border-top: 1px solid var(--line); padding-block: clamp(1.75rem, 3vw, 2.5rem); scroll-margin-top: 90px; }
+.svc:first-of-type { border-top: none; padding-top: 0; }
+.svc__grid { display: grid; gap: 0.5rem 2.5rem; }
+@media (min-width: 800px) { .svc__grid { grid-template-columns: 15rem 1fr; } }
+.svc h3 { margin-bottom: 0.25rem; }
+.svc ul { margin: 0.5rem 0 0; padding-left: 1.15rem; color: var(--ink-soft); }
+.svc li { margin-bottom: 0.3rem; }
+
+/* --- Bewertungen -------------------------------------------------------- */
+.quote {
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--accent);
+  border-radius: var(--radius);
+  padding: clamp(1.1rem, 2vw, 1.5rem);
+  margin: 0;
+  box-shadow: var(--shadow);
+}
+.quote blockquote { margin: 0 0 0.9rem; font-size: 1.05em; }
+.quote blockquote p:last-child { margin-bottom: 0; }
+.quote figcaption { font-size: 0.875rem; color: var(--ink-mute); }
+.quote figcaption strong { color: var(--ink); font-weight: 650; }
+
+/* --- Öffnungszeiten ----------------------------------------------------- */
+.hours { width: 100%; border-collapse: collapse; font-size: 0.9375rem; }
+.hours th, .hours td { text-align: left; padding: 0.55rem 0; border-bottom: 1px solid var(--line); font-weight: 500; }
+.hours th { font-weight: 600; width: 9rem; }
+.hours td { color: var(--ink-soft); font-variant-numeric: tabular-nums; }
+.hours tr[data-today="true"] th, .hours tr[data-today="true"] td { color: var(--ink); font-weight: 700; }
+
+.status {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 650;
+  padding: 0.3rem 0.7rem;
+  border-radius: 999px;
+  background: var(--bg-soft);
+  border: 1px solid var(--line);
+  color: var(--ink-soft);
+}
+.status::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: currentcolor; flex: none; }
+.status[data-open="true"] { color: var(--ok); background: #eef8f2; border-color: #c6e6d4; }
+.status[data-open="false"] { color: var(--ink-mute); }
+
+/* --- Kontakt / Formular ------------------------------------------------- */
+.contact-list { list-style: none; margin: 0; padding: 0; }
+.contact-list li { display: flex; gap: 0.85rem; padding-block: 0.7rem; border-bottom: 1px solid var(--line); }
+.contact-list li:last-child { border-bottom: none; }
+.contact-list svg { width: 1.25rem; height: 1.25rem; color: var(--accent-hover); flex: none; margin-top: 0.2rem; }
+.contact-list dt, .contact-list b { display: block; font-size: 0.8125rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--ink-mute); font-weight: 650; }
+.contact-list a { font-weight: 600; }
+
+.form { display: grid; gap: 1.1rem; }
+.field { display: grid; gap: 0.35rem; }
+.field label { font-weight: 650; font-size: 0.9375rem; }
+.field .hint { font-size: 0.8125rem; color: var(--ink-mute); }
+.field input, .field textarea, .field select {
+  font: inherit;
+  color: var(--ink);
+  background: var(--bg);
+  padding: 0.7rem 0.85rem;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius);
+  width: 100%;
+}
+.field input:focus, .field textarea:focus, .field select:focus { border-color: var(--accent); }
+.field textarea { min-height: 8.5rem; resize: vertical; }
+.field--check { grid-template-columns: auto 1fr; align-items: start; gap: 0.6rem; }
+.field--check input { width: 1.15rem; height: 1.15rem; margin-top: 0.28rem; accent-color: var(--accent); }
+.field--check label { font-weight: 500; font-size: 0.9375rem; }
+.req { color: var(--accent-hover); }
+.field[data-invalid="true"] input, .field[data-invalid="true"] textarea { border-color: #c0392b; }
+.field__error { font-size: 0.8438rem; font-weight: 600; color: #c0392b; }
+/* align-items: start, damit ein Feld mit Hinweistext das Nachbarfeld nicht
+   in die Höhe zieht. */
+@media (min-width: 620px) {
+  .form__row { display: grid; grid-template-columns: 1fr 1fr; gap: 1.1rem; align-items: start; }
+}
+.field { align-content: start; }
+
+/* --- Consent / Karte ---------------------------------------------------- */
+.consent-gate {
+  display: grid;
+  place-content: center;
+  gap: 0.9rem;
+  text-align: center;
+  min-height: 20rem;
+  padding: clamp(1.25rem, 3vw, 2rem);
+  background: var(--bg-soft);
+  border: 1px dashed var(--line-strong);
+  border-radius: var(--radius-lg);
+}
+.consent-gate p { margin: 0 auto; color: var(--ink-soft); font-size: 0.9375rem; max-width: 46ch; }
+.consent-gate .btn-row { justify-content: center; }
+.map-frame { width: 100%; height: 22rem; border: 1px solid var(--line); border-radius: var(--radius-lg); display: block; }
+
+/* --- Callout / Notiz ---------------------------------------------------- */
+.note {
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--accent);
+  background: var(--accent-soft);
+  border-radius: var(--radius);
+  padding: 1rem 1.15rem;
+}
+.note :last-child { margin-bottom: 0; }
+.note h3 { font-size: 1.05rem; }
+
+.band {
+  background: var(--bg-dark);
+  color: #fff;
+  border-radius: var(--radius-lg);
+  padding: clamp(1.5rem, 3.5vw, 2.75rem);
+}
+.band h2 { color: #fff; }
+.band p { color: rgb(255 255 255 / 80%); }
+
+/* --- Rechtstexte -------------------------------------------------------- */
+.legal { max-width: 74ch; }
+.legal h2 { font-size: clamp(1.25rem, 1.1rem + 0.7vw, 1.5rem); margin-top: 2.25rem; }
+.legal h3 { font-size: 1.075rem; margin-top: 1.5rem; }
+.legal address { font-style: normal; }
+.legal dl { margin: 0 0 1.25rem; }
+.legal dt { font-weight: 650; margin-top: 0.75rem; }
+.legal dd { margin: 0; color: var(--ink-soft); }
+.legal ul { color: var(--ink-soft); padding-left: 1.25rem; }
+.legal li { margin-bottom: 0.4rem; }
+.toc { background: var(--bg-soft); border: 1px solid var(--line); border-radius: var(--radius); padding: 1rem 1.25rem; }
+.toc ul { list-style: none; padding: 0; margin: 0; columns: 2; column-gap: 2rem; }
+@media (max-width: 620px) { .toc ul { columns: 1; } }
+.toc li { margin-bottom: 0.35rem; }
+
+/* --- Footer ------------------------------------------------------------- */
+.site-footer {
+  background: var(--bg-dark);
+  color: rgb(255 255 255 / 74%);
+  padding-block: clamp(2.5rem, 5vw, 4rem) 1.5rem;
+  font-size: 0.9375rem;
+}
+.site-footer h2, .site-footer h3 {
+  color: #fff;
+  font-size: 0.8125rem;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  margin-bottom: 0.9rem;
+}
+.site-footer a { color: rgb(255 255 255 / 80%); text-decoration: none; }
+.site-footer a:hover { color: #fff; text-decoration: underline; }
+.site-footer__cols { display: grid; gap: clamp(1.75rem, 4vw, 2.5rem); }
+@media (min-width: 700px) { .site-footer__cols { grid-template-columns: 1.3fr 1fr 1fr; } }
+.site-footer ul { list-style: none; margin: 0; padding: 0; }
+.site-footer li { margin-bottom: 0.5rem; }
+.site-footer address { font-style: normal; line-height: 1.75; }
+.site-footer .hours { font-size: 0.875rem; }
+.site-footer .hours th, .site-footer .hours td { border-bottom-color: rgb(255 255 255 / 12%); color: rgb(255 255 255 / 74%); padding-block: 0.4rem; }
+.site-footer .hours tr[data-today="true"] th, .site-footer .hours tr[data-today="true"] td { color: #fff; }
+.site-footer .status { background: rgb(255 255 255 / 8%); border-color: rgb(255 255 255 / 18%); color: rgb(255 255 255 / 80%); }
+.site-footer .status[data-open="true"] { color: #7ee2a8; background: rgb(126 226 168 / 12%); border-color: rgb(126 226 168 / 30%); }
+.footer-bottom {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1.5rem;
+  align-items: center;
+  margin-top: clamp(2rem, 4vw, 3rem);
+  padding-top: 1.25rem;
+  border-top: 1px solid rgb(255 255 255 / 12%);
+  font-size: 0.875rem;
+  color: rgb(255 255 255 / 60%);
+}
+.footer-bottom nav { display: flex; flex-wrap: wrap; gap: 0.5rem 1.25rem; margin-left: auto; }
+.footer-bottom button {
+  background: none;
+  border: none;
+  padding: 0;
+  font: inherit;
+  color: rgb(255 255 255 / 80%);
+  text-decoration: underline;
+  cursor: pointer;
+}
+.footer-bottom button:hover { color: #fff; }
+
+/* --- Utilities ---------------------------------------------------------- */
+.visually-hidden {
+  position: absolute !important;
+  width: 1px; height: 1px;
+  margin: -1px; padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+.text-center { text-align: center; }
+.mb-0 { margin-bottom: 0; }
+.lead { font-size: 1.075em; color: var(--ink-soft); }
+
+/* --- Dark Mode ---------------------------------------------------------- */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --ink: #eef1f3;
+    --ink-soft: #b3bcc4;
+    --ink-mute: #8e989f;
+    --line: #2a3138;
+    --line-strong: #3c454e;
+    --bg: #12161a;
+    --bg-soft: #171c21;
+    --bg-dark: #0d1114;
+    --accent: #ff7a2f;
+    --accent-hover: #ff8f4d;
+    --accent-soft: #241912;
+    --ok: #63d69a;
+    --shadow: 0 1px 2px rgb(0 0 0 / 40%), 0 6px 20px -8px rgb(0 0 0 / 60%);
+    --shadow-lg: 0 2px 4px rgb(0 0 0 / 40%), 0 18px 40px -14px rgb(0 0 0 / 70%);
+  }
+  .site-header { background: rgb(18 22 26 / 92%); }
+  /* Im Dunkelmodus geht das dunkle Logo-Feld in der Kopfzeile unter. */
+  .brand__mark { background: rgb(255 255 255 / 9%); }
+  .status[data-open="true"] { background: rgb(99 214 154 / 12%); border-color: rgb(99 214 154 / 30%); }
+  .btn--primary { color: #1a1005; }
+  .btn--primary:hover { color: #1a1005; }
+}
+
+/* --- Motion / Print ----------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+}
+
+@media print {
+  .site-header, .site-footer__cols, .consent-gate, .btn { display: none; }
+  body { color: #000; background: #fff; font-size: 11pt; }
+  .hero { background: none; color: #000; }
+  .hero h1 { color: #000; }
+  a[href^="http"]::after { content: " (" attr(href) ")"; font-size: 9pt; }
+}
