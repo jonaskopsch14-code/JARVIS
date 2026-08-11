@@ -1,0 +1,32 @@
+{%- comment -%}
+  PromptWerk — Umfangs-Zeile (wiederkehrendes Markenelement)
+
+  Zeigt in einer Zeile: Menge · Format · Verfügbarkeit
+  Beispiel:  48 Prompts · PDF + Notion-Vorlage · Sofort-Download
+
+  Gepflegt wird der Text einmal pro Produkt im Metafeld `custom.umfang_zeile`.
+  Dadurch ist die Zeile auf Produktseite, Produktkachel und Kollektion identisch.
+
+  Verwendung:
+      {% render 'pw-umfang', produkt: product %}
+      {% render 'pw-umfang', produkt: card_product, kompakt: true %}
+
+  Metafeld anlegen (einmalig, Admin → Einstellungen → Benutzerdefinierte Daten → Produkte):
+      Name       Umfangs-Zeile
+      Namespace  custom
+      Schlüssel  umfang_zeile
+      Typ        Einzeiliger Text
+{%- endcomment -%}
+
+{%- liquid
+  assign umfang = produkt.metafields.custom.umfang_zeile.value
+  unless umfang
+    assign umfang = produkt.metafields.custom.umfang_zeile
+  endunless
+-%}
+
+{%- if umfang != blank -%}
+  <p class="pw-umfang{% if kompakt %} pw-umfang--kompakt{% endif %}">
+    {{ umfang }}
+  </p>
+{%- endif -%}
