@@ -1,0 +1,283 @@
+/* ==========================================================================
+   PromptWerk — Theme-Ergänzungen für Horizon
+   --------------------------------------------------------------------------
+   Einbinden: Datei als assets/promptwerk.css in die THEME-KOPIE hochladen und
+   in layout/theme.liquid im <head> nach dem Theme-CSS einhängen:
+
+       {{ 'promptwerk.css' | asset_url | stylesheet_tag }}
+
+   Ergänzt Horizon, ersetzt es nicht. Tokens: promptwerk/brand/design-tokens.md
+   ========================================================================== */
+
+:root {
+  --pw-ink: #16202b;
+  --pw-ink-soft: #28323e;
+  --pw-paper: #f7f4ef;
+  --pw-paper-raised: #ffffff;
+  --pw-amber: #c97b1e;
+  --pw-amber-ink: #8f5510;
+  --pw-amber-light: #e0a458;
+  --pw-muted: #5e6874;
+  --pw-line: #e2dcd2;
+  --pw-verified: #2f6b4f;
+
+  --pw-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas,
+    "Liberation Mono", monospace;
+
+  --pw-measure: 68ch;
+  --pw-radius: 6px;
+  --pw-radius-lg: 10px;
+}
+
+/* --------------------------------------------------------------------------
+   1. Umfangs-Zeile — das wiederkehrende Markenelement
+   -------------------------------------------------------------------------- */
+
+.pw-umfang {
+  font-family: var(--pw-mono);
+  font-size: clamp(0.84rem, 0.8rem + 0.2vw, 0.875rem);
+  line-height: 1.45;
+  letter-spacing: 0.01em;
+  color: var(--pw-muted);
+  margin: 0.5rem 0 1.25rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--pw-line);
+}
+
+.pw-umfang--kompakt {
+  margin: 0.25rem 0 0;
+  padding-bottom: 0;
+  border-bottom: 0;
+  font-size: 0.8rem;
+}
+
+/* --------------------------------------------------------------------------
+   2. Prompt-Block
+   Gilt für das Snippet UND für <pre><code> aus der Produktbeschreibung,
+   damit beide Wege identisch aussehen.
+   -------------------------------------------------------------------------- */
+
+.pw-prompt {
+  margin: 1.75rem 0;
+  border-radius: var(--pw-radius-lg);
+  overflow: hidden;
+  background: var(--pw-ink);
+}
+
+.pw-prompt__kopf {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.625rem 1rem;
+  background: var(--pw-ink-soft);
+  color: #cfd6de;
+  font-size: 0.8rem;
+  letter-spacing: 0.02em;
+}
+
+.pw-prompt__kopieren {
+  font: inherit;
+  color: var(--pw-amber-light);
+  background: transparent;
+  border: 1px solid rgba(224, 164, 88, 0.4);
+  border-radius: 4px;
+  padding: 0.25rem 0.7rem;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.pw-prompt__kopieren:hover,
+.pw-prompt__kopieren:focus-visible {
+  background: rgba(224, 164, 88, 0.12);
+}
+
+.pw-prompt__kopieren.is-fertig {
+  color: #9ed6b6;
+  border-color: rgba(158, 214, 182, 0.5);
+}
+
+.pw-prompt__code,
+.product-description pre,
+.rte pre {
+  margin: 0;
+  padding: 1.25rem 1rem;
+  background: var(--pw-ink);
+  color: #e8e4dc;
+  font-family: var(--pw-mono);
+  font-size: clamp(0.82rem, 0.78rem + 0.2vw, 0.9rem);
+  line-height: 1.6;
+  overflow-x: auto;          /* langer Prompt scrollt im Block, nicht die Seite */
+  -webkit-overflow-scrolling: touch;
+  tab-size: 2;
+}
+
+.rte pre,
+.product-description pre {
+  border-radius: var(--pw-radius-lg);
+  margin: 1.75rem 0;
+}
+
+.pw-prompt__code code,
+.rte pre code {
+  font: inherit;
+  color: inherit;
+  background: none;
+  padding: 0;
+  white-space: pre;          /* kein Umbruch — Prompt-Struktur bleibt lesbar */
+}
+
+/* Platzhalter [IN KLAMMERN] im Fließtext hervorheben */
+.rte code,
+.product-description code {
+  font-family: var(--pw-mono);
+  font-size: 0.9em;
+  color: var(--pw-amber-ink);
+  background: rgba(201, 123, 30, 0.09);
+  padding: 0.1em 0.35em;
+  border-radius: 3px;
+}
+
+/* --------------------------------------------------------------------------
+   3. Produkttext-Bausteine
+   -------------------------------------------------------------------------- */
+
+.pw-lead {
+  font-size: clamp(1.05rem, 1rem + 0.35vw, 1.2rem);
+  line-height: 1.55;
+  color: var(--pw-ink);
+  max-width: var(--pw-measure);
+  margin-bottom: 0.75rem;
+}
+
+.pw-hinweis {
+  font-size: 0.9rem;
+  line-height: 1.6;
+  color: var(--pw-muted);
+  border-left: 2px solid var(--pw-line);
+  padding-left: 0.9rem;
+  margin: 1.25rem 0;
+}
+
+.pw-ersparnis {
+  display: inline-block;
+  font-size: 0.95rem;
+  color: var(--pw-ink);
+  background: rgba(201, 123, 30, 0.1);
+  border: 1px solid rgba(201, 123, 30, 0.28);
+  border-radius: var(--pw-radius);
+  padding: 0.6rem 0.9rem;
+  margin: 1.25rem 0;
+}
+
+.pw-preis-alt {
+  color: var(--pw-muted);
+  font-size: 0.9em;
+  white-space: nowrap;
+}
+
+/* Platzhalter-Markierung auf den Rechtsseiten — bewusst auffällig,
+   damit ein unfertiger Text nicht versehentlich live geht. */
+.pw-platzhalter {
+  background: #fff6e5;
+  border: 1px solid var(--pw-amber);
+  border-left-width: 4px;
+  border-radius: var(--pw-radius);
+  padding: 0.9rem 1rem;
+  margin: 1.25rem 0;
+  font-size: 0.92rem;
+  line-height: 1.6;
+  color: #4a3a22;
+}
+
+/* --------------------------------------------------------------------------
+   4. Widerrufsverzicht-Checkbox im Warenkorb
+   -------------------------------------------------------------------------- */
+
+.pw-verzicht {
+  margin: 1.25rem 0;
+  padding: 1rem;
+  background: var(--pw-paper-raised);
+  border: 1px solid var(--pw-line);
+  border-radius: var(--pw-radius);
+}
+
+.pw-verzicht__label {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.7rem;
+  cursor: pointer;
+}
+
+.pw-verzicht__box {
+  flex: 0 0 auto;
+  width: 1.15rem;
+  height: 1.15rem;
+  margin-top: 0.15rem;
+  accent-color: var(--pw-amber);
+  cursor: pointer;
+}
+
+.pw-verzicht__text {
+  font-size: 0.9rem;
+  line-height: 1.55;
+  color: var(--pw-ink);
+}
+
+.pw-verzicht__text a {
+  color: var(--pw-amber-ink);
+  text-underline-offset: 2px;
+}
+
+.pw-verzicht__fehler {
+  margin: 0.7rem 0 0;
+  padding-left: 1.85rem;
+  font-size: 0.875rem;
+  color: #a4302a;
+}
+
+/* Gesperrter Checkout-Button, solange nicht zugestimmt wurde */
+[name="checkout"]:disabled,
+[data-pw-checkout]:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+/* --------------------------------------------------------------------------
+   5. Vertrauenselemente
+   -------------------------------------------------------------------------- */
+
+.pw-vertrauen {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1.5rem;
+  padding: 0;
+  margin: 1.25rem 0;
+  list-style: none;
+  font-size: 0.9rem;
+  color: var(--pw-muted);
+}
+
+.pw-vertrauen li::before {
+  content: "✓";
+  color: var(--pw-verified);
+  font-weight: 700;
+  margin-right: 0.4rem;
+}
+
+/* --------------------------------------------------------------------------
+   6. Zugänglichkeit
+   -------------------------------------------------------------------------- */
+
+.pw-prompt__kopieren:focus-visible,
+.pw-verzicht__box:focus-visible {
+  outline: 2px solid var(--pw-amber);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

@@ -1,0 +1,89 @@
+{%- comment -%}
+  PromptWerk — Pflicht-Checkbox „Widerrufsverzicht bei digitalen Inhalten"
+
+  Einbinden in der Warenkorb-Sektion DIREKT oberhalb des Checkout-Buttons:
+      {% render 'pw-widerrufsverzicht' %}
+
+  Rechtlicher Hintergrund und Prüfliste: promptwerk/checkout/widerrufsverzicht.md
+
+  Wichtig:
+  – Die Checkbox ist bewusst NICHT vorangehakt (§ 356 Abs. 5 BGB).
+  – Der Checkout-Button startet im HTML als `disabled`, nicht erst durch JavaScript.
+    Ohne JS bleibt er gesperrt — es gibt keinen Weg ohne Zustimmung.
+  – Die Zustimmung wird als Cart-Attribut gespeichert und landet dadurch in der
+    Bestellung (Admin → Bestellung → Zusätzliche Details).
+{%- endcomment -%}
+
+<div class="pw-verzicht" data-pw-verzicht>
+  <label class="pw-verzicht__label" for="pw-verzicht-check">
+    <input
+      type="checkbox"
+      id="pw-verzicht-check"
+      class="pw-verzicht__box"
+      name="attributes[Widerrufsverzicht]"
+      value="Ausstehend"
+      data-pw-verzicht-box
+      required
+    >
+    <span class="pw-verzicht__text">
+      Ich verlange ausdrücklich, dass mit der Bereitstellung der digitalen Inhalte
+      <strong>vor Ablauf der Widerrufsfrist</strong> begonnen wird. Mir ist bekannt,
+      dass ich mit dem Beginn der Bereitstellung <strong>mein Widerrufsrecht
+      verliere</strong>.
+      <a href="/pages/widerrufsbelehrung" target="_blank" rel="noopener">Widerrufsbelehrung</a>
+      ·
+      <a href="/pages/agb" target="_blank" rel="noopener">AGB</a>
+    </span>
+  </label>
+
+  <p class="pw-verzicht__fehler" data-pw-verzicht-fehler hidden>
+    Bitte bestätige den Hinweis, um fortzufahren.
+  </p>
+</div>
+
+<script>
+  (function () {
+    var wurzel = document.querySelector('[data-pw-verzicht]');
+    if (!wurzel) return;
+
+    var box = wurzel.querySelector('[data-pw-verzicht-box]');
+    var fehler = wurzel.querySelector('[data-pw-verzicht-fehler]');
+    var formular = box.closest('form');
+    if (!formular) return;
+
+    // Alle Checkout-Auslöser im Warenkorb-Formular (Horizon nutzt name="checkout").
+    var knoepfe = formular.querySelectorAll('[name="checkout"], [data-pw-checkout]');
+
+    function sperren(gesperrt) {
+      Array.prototype.forEach.call(knoepfe, function (knopf) {
+        knopf.disabled = gesperrt;
+        knopf.setAttribute('aria-disabled', String(gesperrt));
+      });
+    }
+
+    // Startzustand: gesperrt. Bei einem neu geladenen Warenkorb ist die Box nie
+    // vorausgewählt; nach einem Zurück-Navigieren kann der Browser sie aber
+    // wiederherstellen — deshalb den tatsächlichen Zustand auslesen.
+    sperren(!box.checked);
+
+    box.addEventListener('change', function () {
+      sperren(!box.checked);
+      if (box.checked) {
+        fehler.hidden = true;
+        // Zeitstempel als Nachweis. Wert wird beim Absenden als Cart-Attribut
+        // übernommen und wandert in die Bestellung.
+        box.value = 'Zugestimmt am ' + new Date().toISOString();
+      } else {
+        box.value = 'Ausstehend';
+      }
+    });
+
+    formular.addEventListener('submit', function (ereignis) {
+      if (!box.checked) {
+        ereignis.preventDefault();
+        fehler.hidden = false;
+        box.focus();
+      }
+    });
+  })();
+</script>

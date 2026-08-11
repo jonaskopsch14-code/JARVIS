@@ -1,0 +1,245 @@
+[
+  {
+    "input": {
+      "title": "KI-Prompt-Bibliothek: Marketing & Content",
+      "handle": "ki-prompt-bibliothek-marketing-content",
+      "status": "DRAFT",
+      "vendor": "PromptWerk",
+      "productType": "Digitales Produkt",
+      "tags": [
+        "Prompts",
+        "Marketing",
+        "Content",
+        "Digital",
+        "ChatGPT",
+        "Claude"
+      ],
+      "descriptionHtml": "<p class=\"pw-lead\">Schluss mit generischen ChatGPT-Antworten für dein Marketing: 48 durchgetestete Prompts, sortiert nach Anwendungsfall. Du suchst den Fall, kopierst den Prompt, füllst zwei Klammern aus.</p>\n\n<p class=\"pw-umfang\">48 Prompts · PDF + Notion-Vorlage · Sofort-Download</p>\n\n<h3>Was enthalten ist</h3>\n<ul>\n  <li><strong>Social-Media-Content-Planung</strong> — Themenfindung aus dem eigenen Arbeitsalltag, Redaktionsplan für vier Wochen, Post-Varianten je Kanal</li>\n  <li><strong>Newsletter</strong> — Betreffzeilen, Aufbau vom Aufhänger bis zum Schluss, Zweitverwertung vorhandener Inhalte</li>\n  <li><strong>Produktbeschreibungen</strong> — Nutzen statt Merkmalsliste, typische Einwände vorwegnehmen, Varianten für unterschiedliche Preislagen</li>\n  <li><strong>Werbetexte</strong> — Anzeigenvarianten zum Gegeneinandertesten, Ansprache je Zielgruppensegment</li>\n  <li><strong>Content-Kalender</strong> — Themencluster über Monate verteilen, Lücken erkennen, Wiederholungen einplanen</li>\n</ul>\n\n<p>Sortiert ist die Bibliothek <strong>nach Anwendungsfall, nicht nach Plattform</strong>. Du suchst also „Ich brauche einen Newsletter“ — und nicht erst das passende Werkzeug.</p>\n\n<h3>So sieht ein Prompt aus</h3>\n<p>Kein Ausschnitt und kein Beispiel „ähnlich wie im Produkt“. Das ist ein vollständiger Prompt aus dem Paket:</p>\n\n<pre><code>Du bist Marketing-Texter:in für kleine Dienstleistungsunternehmen\nim deutschsprachigen Raum.\n\nKONTEXT\nUnternehmen: [WAS DU MACHST, EIN SATZ]\nZielgruppe:  [WER KAUFT, MÖGLICHST KONKRET]\nKanal:       [INSTAGRAM / LINKEDIN / NEWSLETTER]\nTonalität:   sachlich, keine Superlative, kein Hype\n\nAUFGABE\nEntwickle 5 Post-Ideen zum Thema [THEMA]. Pro Idee:\n  1. Aufhänger, maximal 12 Wörter\n  2. Kernaussage in einem Satz\n  3. Konkretes Beispiel aus dem Alltag der Zielgruppe\n  4. Abschluss ohne Werbe-Handlungsaufforderung\n\nREGELN\n- Keine Emojis, keine rhetorische Frage als Einstieg\n- Keine Behauptung, die ich nicht belegen kann\n- Fehlt dir Kontext, frage nach, statt zu erfinden</code></pre>\n\n<p>Alles in <code>[ECKIGEN KLAMMERN]</code> ist ein Eingabefeld. Der Rest funktioniert unverändert.</p>\n\n<h3>Format und Lieferung</h3>\n<ul>\n  <li><strong>Sofort-Download nach Kauf</strong> — Downloadlink per E-Mail, kein Warten, kein Versand</li>\n  <li><strong>PDF</strong> mit allen 48 Prompts, verlinktes Inhaltsverzeichnis, druckbar</li>\n  <li><strong>Notion-Vorlage</strong> zum Duplizieren — editierbar, erweiterbar, mit eigenen Prompts ergänzbar</li>\n  <li>Funktioniert mit <strong>ChatGPT und Claude</strong> gleichermaßen, auch in den kostenlosen Varianten</li>\n  <li>Einmal kaufen, dauerhaft nutzen. Kein Abo, keine Folgekosten.</li>\n</ul>\n\n<h3>Für wen das gedacht ist</h3>\n<p>Für Selbstständige, Coaches und kleine Teams, die ChatGPT oder Claude bereits geöffnet haben und trotzdem regelmäßig vor einer leeren Prompt-Box sitzen. Kein Grundlagenkurs — es wird vorausgesetzt, dass du weißt, wie man ein Chatfenster bedient.</p>\n\n<p>Die passende Ergänzung für die Kundenkommunikation ist die <a href=\"/products/ki-prompt-bibliothek-kundenservice-verwaltung\">Prompt-Bibliothek „Kundenservice &amp; Verwaltung“</a>. Beide zusammen plus die Vorlagen gibt es günstiger im <a href=\"/products/promptwerk-komplettpaket\">Komplettpaket</a>.</p>",
+      "seo": {
+        "title": "KI-Prompt-Bibliothek Marketing & Content – 48 Prompts | PromptWerk",
+        "description": "48 getestete Prompts für Social Media, Newsletter, Produkttexte und Werbung. Für Selbstständige und kleine Teams. PDF + Notion-Vorlage, Sofort-Download."
+      },
+      "collections": [
+        "gid://shopify/Collection/710415090009"
+      ],
+      "metafields": [
+        {
+          "namespace": "custom",
+          "key": "umfang_zeile",
+          "type": "single_line_text_field",
+          "value": "48 Prompts · PDF + Notion-Vorlage · Sofort-Download"
+        }
+      ],
+      "productOptions": [
+        {
+          "name": "Title",
+          "values": [
+            {
+              "name": "Default Title"
+            }
+          ]
+        }
+      ],
+      "variants": [
+        {
+          "optionValues": [
+            {
+              "optionName": "Title",
+              "name": "Default Title"
+            }
+          ],
+          "price": "19.00",
+          "sku": "PW-PROMPT-MKT",
+          "taxable": false,
+          "inventoryPolicy": "CONTINUE",
+          "inventoryItem": {
+            "tracked": false,
+            "requiresShipping": false
+          }
+        }
+      ]
+    }
+  },
+  {
+    "input": {
+      "title": "KI-Prompt-Bibliothek: Kundenservice & Verwaltung",
+      "handle": "ki-prompt-bibliothek-kundenservice-verwaltung",
+      "status": "DRAFT",
+      "vendor": "PromptWerk",
+      "productType": "Digitales Produkt",
+      "tags": [
+        "Prompts",
+        "Kundenservice",
+        "Verwaltung",
+        "Digital",
+        "ChatGPT",
+        "Claude"
+      ],
+      "descriptionHtml": "<p class=\"pw-lead\">Kundenanfragen, Angebote, Beschwerden: 44 Prompts für die Kommunikation, die jeden Tag anfällt und trotzdem jedes Mal Zeit kostet.</p>\n\n<p class=\"pw-umfang\">44 Prompts · PDF + Notion-Vorlage · Sofort-Download</p>\n\n<h3>Was enthalten ist</h3>\n<ul>\n  <li><strong>Kundenanfragen beantworten</strong> — Standardfälle, gezielte Rückfragen bei unklaren Anliegen, freundliche Absagen ohne Rechtfertigung</li>\n  <li><strong>Angebots- und Rechnungstexte</strong> — Leistungsbeschreibungen, die verständlich bleiben, Zahlungsbedingungen ohne Floskeln, Zahlungserinnerungen in drei Eskalationsstufen</li>\n  <li><strong>Beschwerdemanagement</strong> — deeskalieren, ein konkretes Angebot machen, bei unberechtigten Forderungen höflich eine Grenze ziehen</li>\n  <li><strong>FAQ-Erstellung</strong> — aus echten Kundenfragen eine sortierte FAQ-Seite bauen, statt sich Fragen auszudenken</li>\n  <li><strong>Termin-Kommunikation</strong> — Bestätigung, Verschiebung, Absage, Erinnerung, Nachfassen nach einem Erstgespräch</li>\n</ul>\n\n<h3>So sieht ein Prompt aus</h3>\n<p>Vollständiger Prompt aus dem Paket, unverändert:</p>\n\n<pre><code>Du arbeitest im Kundenservice eines kleinen Dienstleistungs-\nunternehmens. Du antwortest sachlich, freundlich und ohne\nUnterwürfigkeit.\n\nSITUATION\nAnliegen der Kundin/des Kunden im Originaltext:\n\"\"\"\n[BESCHWERDE HIER EINFÜGEN]\n\"\"\"\nWas tatsächlich passiert ist: [DEINE SICHT, STICHPUNKTE]\nWas du anbieten kannst:       [NACHBESSERUNG / TEILERSTATTUNG\n                               / NICHTS]\n\nAUFGABE\nSchreibe eine Antwort-E-Mail in vier Schritten:\n  1. Anliegen in eigenen Worten zusammenfassen\n  2. Sachstand nennen, ohne Schuldzuweisung\n  3. Konkretes Angebot mit Frist\n  4. Abschluss, der die Tür offen lässt\n\nREGELN\n- Keine Entschuldigung für etwas, das nicht mein Fehler war\n- Keine Rechtfertigungsschleifen, maximal 200 Wörter\n- Ist die Beschwerde unberechtigt: sag es höflich und klar\n- Fehlt dir Kontext, frage nach, statt zu erfinden</code></pre>\n\n<p>Alles in <code>[ECKIGEN KLAMMERN]</code> ist ein Eingabefeld. Der Rest funktioniert unverändert.</p>\n\n<h3>Format und Lieferung</h3>\n<ul>\n  <li><strong>Sofort-Download nach Kauf</strong> — Downloadlink per E-Mail, kein Warten, kein Versand</li>\n  <li><strong>PDF</strong> mit allen 44 Prompts, verlinktes Inhaltsverzeichnis, druckbar</li>\n  <li><strong>Notion-Vorlage</strong> zum Duplizieren — editierbar, um eigene Standardfälle erweiterbar</li>\n  <li>Funktioniert mit <strong>ChatGPT und Claude</strong> gleichermaßen</li>\n  <li>Einmal kaufen, dauerhaft nutzen. Kein Abo, keine Folgekosten.</li>\n</ul>\n\n<h3>Für wen das gedacht ist</h3>\n<p>Für Selbstständige, Coaches und kleine Teams, bei denen die Kundenkommunikation nebenher läuft — und deshalb entweder zu lange dauert oder zu knapp ausfällt. Besonders nützlich, wenn mehrere Personen antworten und die Tonalität einheitlich bleiben soll.</p>\n\n<p>Für Marketing und Content gibt es die <a href=\"/products/ki-prompt-bibliothek-marketing-content\">Prompt-Bibliothek „Marketing &amp; Content“</a>, für Kalkulation und Rechnungen das <a href=\"/products/business-vorlagen-paket-kleinunternehmer\">Business-Vorlagen-Paket</a>. Alles zusammen günstiger im <a href=\"/products/promptwerk-komplettpaket\">Komplettpaket</a>.</p>",
+      "seo": {
+        "title": "KI-Prompts für Kundenservice & Verwaltung – 44 Stück | PromptWerk",
+        "description": "44 getestete Prompts für Kundenanfragen, Angebote, Beschwerden, FAQ und Termine. Für Selbstständige und kleine Teams. PDF + Notion, Sofort-Download."
+      },
+      "collections": [
+        "gid://shopify/Collection/710415090009"
+      ],
+      "metafields": [
+        {
+          "namespace": "custom",
+          "key": "umfang_zeile",
+          "type": "single_line_text_field",
+          "value": "44 Prompts · PDF + Notion-Vorlage · Sofort-Download"
+        }
+      ],
+      "productOptions": [
+        {
+          "name": "Title",
+          "values": [
+            {
+              "name": "Default Title"
+            }
+          ]
+        }
+      ],
+      "variants": [
+        {
+          "optionValues": [
+            {
+              "optionName": "Title",
+              "name": "Default Title"
+            }
+          ],
+          "price": "19.00",
+          "sku": "PW-PROMPT-SERVICE",
+          "taxable": false,
+          "inventoryPolicy": "CONTINUE",
+          "inventoryItem": {
+            "tracked": false,
+            "requiresShipping": false
+          }
+        }
+      ]
+    }
+  },
+  {
+    "input": {
+      "title": "Business-Vorlagen-Paket für Kleinunternehmer",
+      "handle": "business-vorlagen-paket-kleinunternehmer",
+      "status": "DRAFT",
+      "vendor": "PromptWerk",
+      "productType": "Digitales Produkt",
+      "tags": [
+        "Vorlagen",
+        "Kalkulation",
+        "Rechnung",
+        "Digital",
+        "Kleinunternehmer"
+      ],
+      "descriptionHtml": "<p class=\"pw-lead\">Vier Vorlagen für die Zahlen und die Übersicht, die du als Kleinunternehmer wirklich brauchst — fertig eingerichtet und durchgerechnet, nicht als leeres Raster.</p>\n\n<p class=\"pw-umfang\">4 Vorlagen · Google Sheets + Notion · Sofort-Download</p>\n\n<h3>Was enthalten ist</h3>\n<ul>\n  <li><strong>Preiskalkulator</strong> — rechnet vom Wunscheinkommen rückwärts zum Mindest-Stundensatz: Fixkosten, Steuerrücklage, Urlaub und nicht fakturierbare Zeit sind bereits eingeplant</li>\n  <li><strong>Rechnungsvorlage</strong> — mit fest hinterlegtem Hinweis „Gemäß § 19 UStG wird keine Umsatzsteuer berechnet“, fortlaufender Rechnungsnummer und allen Pflichtangaben als ausfüllbare Felder</li>\n  <li><strong>Content-Kalender</strong> — Redaktionsplanung über mehrere Kanäle, mit Status-Spalte von Idee bis veröffentlicht</li>\n  <li><strong>Kundenübersicht</strong> — Kontakte, laufende Aufträge und offene Posten auf einem Blatt, mit Summenzeile</li>\n</ul>\n\n<p>Alle Formeln sind hinterlegt und kommentiert. Du trägst deine Zahlen ein, der Rest rechnet sich.</p>\n\n<h3>So sieht das im Preiskalkulator aus</h3>\n<p>Ausschnitt aus dem Blatt „Stundensatz“ mit Beispielwerten:</p>\n\n<pre><code>PREISKALKULATOR — Blatt \"Stundensatz\"\n\nWunsch-Jahresgewinn (netto)             [ 42.000 € ]\n+ Betriebskosten pro Jahr               [  6.400 € ]\n+ Rücklage Steuern & Vorsorge (25 %)      12.100 €\n────────────────────────────────────────────────────\n= Zu erwirtschaften                       60.500 €\n\nArbeitstage pro Jahr                           260\n− Urlaub und Krankheit                        − 34\n− Nicht fakturierbar (Akquise, Buchhaltung)   − 79\n────────────────────────────────────────────────────\n= Fakturierbare Tage                           147\n  Fakturierbare Stunden (5,5 h pro Tag)        809\n\n→ Mindest-Stundensatz                       74,79 €\n→ Empfohlener Tagessatz                        411 €\n\nAlle Felder in [ ] sind Eingaben. Der Rest rechnet sich.</code></pre>\n\n<p>Der häufigste Fehler bei der Preisfindung ist, mit 220 Arbeitstagen zu rechnen und die nicht fakturierbare Zeit zu vergessen. Genau diese Zeile ist hier fest eingebaut.</p>\n\n<h3>Format und Lieferung</h3>\n<ul>\n  <li><strong>Sofort-Download nach Kauf</strong> — Zugangslink per E-Mail, kein Warten, kein Versand</li>\n  <li><strong>Google Sheets</strong> zum Kopieren in dein eigenes Drive — funktioniert auch in Excel und LibreOffice</li>\n  <li><strong>Notion-Vorlage</strong> zum Duplizieren für Content-Kalender und Kundenübersicht</li>\n  <li>Frei anpassbar: Spalten, Steuersatz, Kategorien und Formeln sind nicht gesperrt</li>\n  <li>Einmal kaufen, dauerhaft nutzen. Kein Abo, keine Folgekosten.</li>\n</ul>\n\n<h3>Für wen das gedacht ist</h3>\n<p>Für Selbstständige und kleine Teams in der Kleinunternehmerregelung, die ihre Preise bisher nach Gefühl gesetzt haben und ohne Buchhaltungssoftware auskommen wollen.</p>\n\n<p class=\"pw-hinweis\">Hinweis: Die Vorlagen sind Arbeitsmittel, keine Steuerberatung. Ob die Kleinunternehmerregelung für dich gilt und welche Angaben deine Rechnungen konkret brauchen, klärst du mit deinem Steuerbüro.</p>\n\n<p>Die passenden Textbausteine zu Angeboten und Zahlungserinnerungen stecken in der <a href=\"/products/ki-prompt-bibliothek-kundenservice-verwaltung\">Prompt-Bibliothek „Kundenservice &amp; Verwaltung“</a>. Alles zusammen günstiger im <a href=\"/products/promptwerk-komplettpaket\">Komplettpaket</a>.</p>",
+      "seo": {
+        "title": "Business-Vorlagen für Kleinunternehmer – 4 Vorlagen | PromptWerk",
+        "description": "Preiskalkulator, Rechnungsvorlage mit § 19 UStG-Hinweis, Content-Kalender und Kundenübersicht. Google Sheets + Notion, Formeln hinterlegt, Sofort-Download."
+      },
+      "collections": [
+        "gid://shopify/Collection/710415090009"
+      ],
+      "metafields": [
+        {
+          "namespace": "custom",
+          "key": "umfang_zeile",
+          "type": "single_line_text_field",
+          "value": "4 Vorlagen · Google Sheets + Notion · Sofort-Download"
+        }
+      ],
+      "productOptions": [
+        {
+          "name": "Title",
+          "values": [
+            {
+              "name": "Default Title"
+            }
+          ]
+        }
+      ],
+      "variants": [
+        {
+          "optionValues": [
+            {
+              "optionName": "Title",
+              "name": "Default Title"
+            }
+          ],
+          "price": "29.00",
+          "sku": "PW-VORLAGEN",
+          "taxable": false,
+          "inventoryPolicy": "CONTINUE",
+          "inventoryItem": {
+            "tracked": false,
+            "requiresShipping": false
+          }
+        }
+      ]
+    }
+  },
+  {
+    "input": {
+      "title": "PromptWerk Komplettpaket",
+      "handle": "promptwerk-komplettpaket",
+      "status": "DRAFT",
+      "vendor": "PromptWerk",
+      "productType": "Digitales Produkt",
+      "tags": [
+        "Bundle",
+        "Prompts",
+        "Vorlagen",
+        "Digital",
+        "Sparpaket"
+      ],
+      "descriptionHtml": "<p class=\"pw-lead\">Beide Prompt-Bibliotheken, das Vorlagen-Paket und die Kurzanleitung, die erklärt, wie du das Ganze im Alltag tatsächlich benutzt — 49 € statt 67 € im Einzelkauf.</p>\n\n<p class=\"pw-umfang\">92 Prompts + 4 Vorlagen + Bonus-PDF · Sofort-Download</p>\n\n<h3>Was enthalten ist</h3>\n<ul>\n  <li><strong><a href=\"/products/ki-prompt-bibliothek-marketing-content\">KI-Prompt-Bibliothek „Marketing &amp; Content“</a></strong> — 48 Prompts für Social Media, Newsletter, Produkttexte, Werbung und Redaktionsplanung <span class=\"pw-preis-alt\">(einzeln 19 €)</span></li>\n  <li><strong><a href=\"/products/ki-prompt-bibliothek-kundenservice-verwaltung\">KI-Prompt-Bibliothek „Kundenservice &amp; Verwaltung“</a></strong> — 44 Prompts für Kundenanfragen, Angebote, Beschwerden, FAQ und Termine <span class=\"pw-preis-alt\">(einzeln 19 €)</span></li>\n  <li><strong><a href=\"/products/business-vorlagen-paket-kleinunternehmer\">Business-Vorlagen-Paket</a></strong> — Preiskalkulator, Rechnungsvorlage mit § 19 UStG-Hinweis, Content-Kalender, Kundenübersicht <span class=\"pw-preis-alt\">(einzeln 29 €)</span></li>\n  <li><strong>Bonus-PDF „KI im Alltag richtig einsetzen — Kurzanleitung“</strong> — nur im Komplettpaket erhältlich</li>\n</ul>\n\n<p class=\"pw-ersparnis\">Einzeln gekauft: 67 €. Im Komplettpaket: <strong>49 €</strong>. Du sparst 18 €.</p>\n\n<h3>Woraus die Bonus-Kurzanleitung besteht</h3>\n<p>Sie erklärt nicht, was KI ist. Sie erklärt, warum manche Prompts funktionieren und andere nicht — damit du die 92 Prompts auf deine eigenen Fälle umbauen kannst:</p>\n\n<pre><code>DIE DREI-BLOCK-REGEL\n\nBlock 1  ROLLE + KONTEXT\n   Wer soll antworten, für wen, in welcher Situation?\n   Fehlt dieser Block, bekommst du Durchschnitt.\n\nBlock 2  AUFGABE ALS NUMMERIERTE LISTE\n   Teilschritte statt eines Fließtext-Wunsches.\n   Eine Liste wird abgearbeitet, ein Wunsch verläuft.\n\nBlock 3  REGELN + ABBRUCHBEDINGUNG\n   Was NICHT passieren soll, und was gilt, wenn\n   Angaben fehlen:\n   \"Fehlt dir Kontext, frage nach, statt zu erfinden.\"\n\nJeder Prompt in dieser Bibliothek folgt diesen drei\nBlöcken. Deshalb kannst du jeden davon umbauen, statt\nbei null anzufangen.</code></pre>\n\n<h3>Format und Lieferung</h3>\n<ul>\n  <li><strong>Sofort-Download nach Kauf</strong> — alle Dateien per E-Mail, kein Warten, kein Versand</li>\n  <li><strong>3 PDFs</strong> (zwei Bibliotheken plus Bonus) und <strong>alle Vorlagen</strong> für Google Sheets und Notion</li>\n  <li>Funktioniert mit <strong>ChatGPT und Claude</strong> gleichermaßen</li>\n  <li>Einmal kaufen, dauerhaft nutzen. Kein Abo, keine Folgekosten.</li>\n</ul>\n\n<h3>Für wen das gedacht ist</h3>\n<p>Für alle, die ohnehin mehr als eines der Pakete nehmen würden — und für alle, die nicht nur fertige Prompts wollen, sondern verstehen möchten, wie man sie selbst baut. Wenn du nur einen der Bereiche brauchst, sind die Einzelpakete die günstigere Wahl.</p>",
+      "seo": {
+        "title": "PromptWerk Komplettpaket – 92 Prompts + 4 Vorlagen für 49 € | PromptWerk",
+        "description": "Beide Prompt-Bibliotheken, das Vorlagen-Paket und die Bonus-Kurzanleitung. 49 € statt 67 € im Einzelkauf. Sofort-Download, kein Abo."
+      },
+      "collections": [
+        "gid://shopify/Collection/710415090009"
+      ],
+      "metafields": [
+        {
+          "namespace": "custom",
+          "key": "umfang_zeile",
+          "type": "single_line_text_field",
+          "value": "92 Prompts + 4 Vorlagen + Bonus-PDF · Sofort-Download"
+        }
+      ],
+      "productOptions": [
+        {
+          "name": "Title",
+          "values": [
+            {
+              "name": "Default Title"
+            }
+          ]
+        }
+      ],
+      "variants": [
+        {
+          "optionValues": [
+            {
+              "optionName": "Title",
+              "name": "Default Title"
+            }
+          ],
+          "price": "49.00",
+          "sku": "PW-KOMPLETT",
+          "taxable": false,
+          "inventoryPolicy": "CONTINUE",
+          "inventoryItem": {
+            "tracked": false,
+            "requiresShipping": false
+          },
+          "compareAtPrice": "67.00"
+        }
+      ]
+    }
+  }
+]

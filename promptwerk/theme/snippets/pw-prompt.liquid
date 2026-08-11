@@ -1,0 +1,53 @@
+{%- comment -%}
+  PromptWerk — Prompt-Block mit Kopieren-Funktion
+
+  Stellt einen vollständigen Beispiel-Prompt als Code-Block dar. Zentrales
+  Vertrauenselement: Das Produkt wird sichtbar, statt nur beschrieben zu werden.
+
+  Verwendung in einer Sektion oder Vorlage:
+      {% capture beispiel %}Du bist Marketing-Texter:in ...{% endcapture %}
+      {% render 'pw-prompt', inhalt: beispiel, titel: 'Beispiel-Prompt aus dem Paket' %}
+
+  Auf Produktseiten wird der Prompt bereits im Beschreibungs-HTML als <pre><code>
+  ausgeliefert — dieses Snippet ist für Sektionen gedacht, in denen der Prompt aus
+  einer Theme-Einstellung kommt (z. B. Startseite, Sektion „So sieht ein Prompt aus").
+{%- endcomment -%}
+
+{%- assign block_id = 'pw-prompt-' | append: section.id | append: block.id -%}
+
+<figure class="pw-prompt">
+  <figcaption class="pw-prompt__kopf">
+    <span class="pw-prompt__titel">{{ titel | default: 'Beispiel-Prompt aus dem Paket' }}</span>
+    <button
+      type="button"
+      class="pw-prompt__kopieren"
+      data-pw-kopieren="{{ block_id }}"
+      data-pw-label="In Zwischenablage kopieren"
+      data-pw-label-fertig="Kopiert"
+    >
+      Kopieren
+    </button>
+  </figcaption>
+
+  <pre class="pw-prompt__code" id="{{ block_id }}"><code>{{ inhalt | strip }}</code></pre>
+</figure>
+
+<script>
+  (function () {
+    var knopf = document.querySelector('[data-pw-kopieren="{{ block_id }}"]');
+    var quelle = document.getElementById('{{ block_id }}');
+    if (!knopf || !quelle || !navigator.clipboard) return;
+
+    knopf.addEventListener('click', function () {
+      navigator.clipboard.writeText(quelle.innerText).then(function () {
+        var ursprung = knopf.textContent;
+        knopf.textContent = knopf.dataset.pwLabelFertig;
+        knopf.classList.add('is-fertig');
+        setTimeout(function () {
+          knopf.textContent = ursprung;
+          knopf.classList.remove('is-fertig');
+        }, 2000);
+      });
+    });
+  })();
+</script>
