@@ -28,6 +28,10 @@ jarvis-v6-headless          # scheduler only, e.g. on a server
 jarvis-v6-preflight         # check live-readiness without running the night
 ```
 
+**Windows, no install:** double-click `START_JARVIS.bat` in the repo root. It
+finds Python, starts the web interface and opens http://127.0.0.1:8765 in your
+browser. Keep that console window open while JARVIS is running.
+
 ## Mobile web interface (control it from your phone)
 
 `webapp.py` serves a responsive, phone-first control panel using the Python
